@@ -1,0 +1,5739 @@
+{
+ "meta": {
+  "captured_at": "2026-08-04T07:24:13.026024+00:00",
+  "endpoint": "opc.tcp://127.0.0.1:48050",
+  "ModelName": "DEMO_SAS",
+  "ModelVersion": "654"
+ },
+ "nodes": [
+  {
+   "nodeid": "ns=2;s=SAS.Tagging",
+   "name": "Tagging",
+   "class": "Variable",
+   "path": "/SAS/Tagging",
+   "depth": 0,
+   "value": 0,
+   "vtype": "9",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.457759+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=SAS_110KV",
+   "name": "110kV",
+   "class": "Object",
+   "path": "/SAS/110kV",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=E01",
+   "name": "E01",
+   "class": "Object",
+   "path": "/SAS/110kV/E01",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=E01.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/BAY/Name",
+   "depth": 3,
+   "value": "Lai Uyen",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.458761+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/BCU/Name",
+   "depth": 3,
+   "value": "171_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.460760+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.F67",
+   "name": "F67",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/F67",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.F67.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/F67/Name",
+   "depth": 3,
+   "value": "171_SEL351_F67",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.462758+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.F87L",
+   "name": "F87L",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/F87L",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.F87L.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/F87L/Name",
+   "depth": 3,
+   "value": "171_SEL311L_F87L",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.463796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.374756+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XCBR1/Name",
+   "depth": 3,
+   "value": "171",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-04-15T11:10:48.701996+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI1/Name",
+   "depth": 3,
+   "value": "171-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI11/Name",
+   "depth": 3,
+   "value": "171-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI2/Name",
+   "depth": 3,
+   "value": "171-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI7",
+   "name": "XSWI7",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI7",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI7.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI7/Name",
+   "depth": 3,
+   "value": "171-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI7.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI7/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI7.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI7/SName",
+   "depth": 3,
+   "value": "-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI71",
+   "name": "XSWI71",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI71",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI71.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI71/Name",
+   "depth": 3,
+   "value": "171-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2019-10-23T04:39:16.651056+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI71.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI71/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI71.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI71/SName",
+   "depth": 3,
+   "value": "-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI72",
+   "name": "XSWI72",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI72",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI72.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI72/Name",
+   "depth": 3,
+   "value": "171-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI72.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI72/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI72.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI72/SName",
+   "depth": 3,
+   "value": "-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/110kV/E01/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI9/Name",
+   "depth": 3,
+   "value": "171-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02",
+   "name": "E02",
+   "class": "Object",
+   "path": "/SAS/110kV/E02",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=E02.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/BAY/Name",
+   "depth": 3,
+   "value": "Lai Uyen",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.466796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/BCU/Name",
+   "depth": 3,
+   "value": "172_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.468795+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.F67",
+   "name": "F67",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/F67",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.F67.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/F67/Name",
+   "depth": 3,
+   "value": "172_SEL351_F67",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.469796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.F87L",
+   "name": "F87L",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/F87L",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.F87L.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/F87L/Name",
+   "depth": 3,
+   "value": "172_SEL311L_F87L",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.471795+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.380401+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XCBR1/Name",
+   "depth": 3,
+   "value": "172",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XCBR1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI1/Name",
+   "depth": 3,
+   "value": "172-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI11/Name",
+   "depth": 3,
+   "value": "172-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI2/Name",
+   "depth": 3,
+   "value": "172-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI7",
+   "name": "XSWI7",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI7",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI7.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI7/Name",
+   "depth": 3,
+   "value": "172-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI7.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI7/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI7.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI7/SName",
+   "depth": 3,
+   "value": "-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI71",
+   "name": "XSWI71",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI71",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI71.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI71/Name",
+   "depth": 3,
+   "value": "172-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI71.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI71/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI71.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI71/SName",
+   "depth": 3,
+   "value": "-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI72",
+   "name": "XSWI72",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI72",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI72.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI72/Name",
+   "depth": 3,
+   "value": "172-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI72.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI72/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI72.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI72/SName",
+   "depth": 3,
+   "value": "-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/110kV/E02/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI9/Name",
+   "depth": 3,
+   "value": "172-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI9/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04",
+   "name": "E04",
+   "class": "Object",
+   "path": "/SAS/110kV/E04",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=E04.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/BAY/Name",
+   "depth": 3,
+   "value": "Bus Tranfer",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.474823+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/BCU/Name",
+   "depth": 3,
+   "value": "100_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.476828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.F21",
+   "name": "F21",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/F21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.F21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/F21/Name",
+   "depth": 3,
+   "value": "100_SEL421_F21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.478828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.F67",
+   "name": "F67",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/F67",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.F67.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/F67/Name",
+   "depth": 3,
+   "value": "100_SEL351_F67",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.479828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.373784+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XCBR1/Name",
+   "depth": 3,
+   "value": "100",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI1/Name",
+   "depth": 3,
+   "value": "100-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI11/Name",
+   "depth": 3,
+   "value": "100-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI2/Name",
+   "depth": 3,
+   "value": "100-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI2/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI9/Name",
+   "depth": 3,
+   "value": "100-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI9/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI91",
+   "name": "XSWI91",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI91",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI91.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI91/Name",
+   "depth": 3,
+   "value": "100-95",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI91.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI91/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI91.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI91/SName",
+   "depth": 3,
+   "value": "-95",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI92",
+   "name": "XSWI92",
+   "class": "Object",
+   "path": "/SAS/110kV/E04/XSWI92",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI92.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI92/Name",
+   "depth": 3,
+   "value": "100-94",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI92.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI92/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.XSWI92.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/XSWI92/SName",
+   "depth": 3,
+   "value": "-94",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05",
+   "name": "E05",
+   "class": "Object",
+   "path": "/SAS/110kV/E05",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=E05.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/BAY/Name",
+   "depth": 3,
+   "value": "Bus Coupler",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.482828+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/BCU/Name",
+   "depth": 3,
+   "value": "112_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.484336+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.F21",
+   "name": "F21",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/F21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.F21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/F21/Name",
+   "depth": 3,
+   "value": "112_SEL421_F21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.486341+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.380401+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XCBR1/Name",
+   "depth": 3,
+   "value": "112",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI1/Name",
+   "depth": 3,
+   "value": "112-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI11/Name",
+   "depth": 3,
+   "value": "112-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI12",
+   "name": "XSWI12",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI12",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI12.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI12/Name",
+   "depth": 3,
+   "value": "112-14",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI12.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI12/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI12.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI12/SName",
+   "depth": 3,
+   "value": "-14",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI2/Name",
+   "depth": 3,
+   "value": "112-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI2/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI21",
+   "name": "XSWI21",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI21/Name",
+   "depth": 3,
+   "value": "112-25",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI21.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI21/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI21.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI21/SName",
+   "depth": 3,
+   "value": "-25",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI22",
+   "name": "XSWI22",
+   "class": "Object",
+   "path": "/SAS/110kV/E05/XSWI22",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI22.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI22/Name",
+   "depth": 3,
+   "value": "112-24",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI22.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI22/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.XSWI22.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/XSWI22/SName",
+   "depth": 3,
+   "value": "-24",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07",
+   "name": "E07",
+   "class": "Object",
+   "path": "/SAS/110kV/E07",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=E07.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/BAY/Name",
+   "depth": 3,
+   "value": "AT1 Incoming",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:33:02.697610+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/BCU/Name",
+   "depth": 3,
+   "value": "131_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.490340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.F67",
+   "name": "F67",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/F67",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.F67.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/F67/Name",
+   "depth": 3,
+   "value": "131_SEL351_F67",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.491340+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.373784+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XCBR1/Name",
+   "depth": 3,
+   "value": "131",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI1/Name",
+   "depth": 3,
+   "value": "131-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI11/Name",
+   "depth": 3,
+   "value": "131-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI2/Name",
+   "depth": 3,
+   "value": "131-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI3",
+   "name": "XSWI3",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI3/Name",
+   "depth": 3,
+   "value": "131-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI3.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI3/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI3.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI3/SName",
+   "depth": 3,
+   "value": "-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI31",
+   "name": "XSWI31",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI31",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI31.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI31/Name",
+   "depth": 3,
+   "value": "131-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI31.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI31/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI31.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI31/SName",
+   "depth": 3,
+   "value": "-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI32",
+   "name": "XSWI32",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI32",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI32.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI32/Name",
+   "depth": 3,
+   "value": "131-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI32.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI32/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI32.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI32/SName",
+   "depth": 3,
+   "value": "-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/110kV/E07/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI9/Name",
+   "depth": 3,
+   "value": "131-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=EBB",
+   "name": "EBB",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=EBB.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/EBB/BAY/Name",
+   "depth": 3,
+   "value": "EBB",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.496851+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F50BF",
+   "name": "F50BF",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/F50BF",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B1",
+   "name": "F87B1",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/F87B1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/EBB/F87B1/Name",
+   "depth": 3,
+   "value": "EBB_SEL487B_87B1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.497852+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B2",
+   "name": "F87B2",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/F87B2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/EBB/F87B2/Name",
+   "depth": 3,
+   "value": "EBB_SEL487B_87B2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.499852+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B3",
+   "name": "F87B3",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/F87B3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.F87B3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/110kV/EBB/F87B3/Name",
+   "depth": 3,
+   "value": "EBB_SEL487B_87B3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.501852+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=EBB.PosSt",
+   "name": "PosSt",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/PosSt",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=EBB.RT",
+   "name": "RT",
+   "class": "Object",
+   "path": "/SAS/110kV/EBB/RT",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=SAS_220kV",
+   "name": "220kV",
+   "class": "Object",
+   "path": "/SAS/220kV",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=D01",
+   "name": "D01",
+   "class": "Object",
+   "path": "/SAS/220kV/D01",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D01.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/BAY/Name",
+   "depth": 3,
+   "value": "AT1 Incoming",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:34.863615+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/BCU/Name",
+   "depth": 3,
+   "value": "231_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-06T05:07:02.778052+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.F67",
+   "name": "F67",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/F67",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.F67.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/F67/Name",
+   "depth": 3,
+   "value": "231_SEL451_F67",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-06T05:06:56.214587+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.375754+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XCBR1/Name",
+   "depth": 3,
+   "value": "231",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:01.286411+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI1/Name",
+   "depth": 3,
+   "value": "231-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:11.910993+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI11/Name",
+   "depth": 3,
+   "value": "231-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:08.746459+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI2/Name",
+   "depth": 3,
+   "value": "231-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:05.062323+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI3",
+   "name": "XSWI3",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI3/Name",
+   "depth": 3,
+   "value": "231-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:15.550265+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI3.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI3/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI3.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI3/SName",
+   "depth": 3,
+   "value": "-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI31",
+   "name": "XSWI31",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI31",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI31.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI31/Name",
+   "depth": 3,
+   "value": "231-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:20.324490+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI31.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI31/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI31.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI31/SName",
+   "depth": 3,
+   "value": "-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI32",
+   "name": "XSWI32",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI32",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI32.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI32/Name",
+   "depth": 3,
+   "value": "231-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:23.456114+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI32.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI32/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI32.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI32/SName",
+   "depth": 3,
+   "value": "-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/220kV/D01/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI9/Name",
+   "depth": 3,
+   "value": "231-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-02-05T07:31:27.000635+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03",
+   "name": "D03",
+   "class": "Object",
+   "path": "/SAS/220kV/D03",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D03.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/BAY/Name",
+   "depth": 3,
+   "value": "Ben Cat",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-04-03T10:48:08.278892+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/BCU/Name",
+   "depth": 3,
+   "value": "271_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.512881+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.F21",
+   "name": "F21",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/F21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.F21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/F21/Name",
+   "depth": 3,
+   "value": "271_SEL421_F21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.514386+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.F87L",
+   "name": "F87L",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/F87L",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.F87L.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/F87L/Name",
+   "depth": 3,
+   "value": "271_SEL311L_F87L",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.517389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:37.196222+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XCBR1/Name",
+   "depth": 3,
+   "value": "271",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-04-30T06:41:25.818621+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI1/Name",
+   "depth": 3,
+   "value": "271-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI11/Name",
+   "depth": 3,
+   "value": "271-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI2/Name",
+   "depth": 3,
+   "value": "271-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI7",
+   "name": "XSWI7",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI7",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI7.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI7/Name",
+   "depth": 3,
+   "value": "271-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI7.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI7/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI7.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI7/SName",
+   "depth": 3,
+   "value": "-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI71",
+   "name": "XSWI71",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI71",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI71.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI71/Name",
+   "depth": 3,
+   "value": "271-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI71.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI71/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI71.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI71/SName",
+   "depth": 3,
+   "value": "-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI72",
+   "name": "XSWI72",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI72",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI72.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI72/Name",
+   "depth": 3,
+   "value": "271-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI72.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI72/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI72.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI72/SName",
+   "depth": 3,
+   "value": "-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/220kV/D03/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI9/Name",
+   "depth": 3,
+   "value": "271-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04",
+   "name": "D04",
+   "class": "Object",
+   "path": "/SAS/220kV/D04",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D04.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/BAY/Name",
+   "depth": 3,
+   "value": "Hoc Mon",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2020-04-03T10:48:12.117605+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/BCU/Name",
+   "depth": 3,
+   "value": "272_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.523895+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.F21",
+   "name": "F21",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/F21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.F21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/F21/Name",
+   "depth": 3,
+   "value": "272_SEL421_F21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.525899+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.F87L",
+   "name": "F87L",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/F87L",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.F87L.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/F87L/Name",
+   "depth": 3,
+   "value": "272_SEL311L_F87L",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.526898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:37.220746+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XCBR1/Name",
+   "depth": 3,
+   "value": "272",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI1/Name",
+   "depth": 3,
+   "value": "272-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI11/Name",
+   "depth": 3,
+   "value": "272-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI2/Name",
+   "depth": 3,
+   "value": "272-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI2/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI7",
+   "name": "XSWI7",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI7",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI7.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI7/Name",
+   "depth": 3,
+   "value": "272-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI7.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI7/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI7.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI7/SName",
+   "depth": 3,
+   "value": "-7",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI71",
+   "name": "XSWI71",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI71",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI71.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI71/Name",
+   "depth": 3,
+   "value": "272-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI71.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI71/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI71.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI71/SName",
+   "depth": 3,
+   "value": "-75",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI72",
+   "name": "XSWI72",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI72",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI72.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI72/Name",
+   "depth": 3,
+   "value": "272-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI72.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI72/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI72.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI72/SName",
+   "depth": 3,
+   "value": "-76",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/220kV/D04/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI9/Name",
+   "depth": 3,
+   "value": "272-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12",
+   "name": "D12",
+   "class": "Object",
+   "path": "/SAS/220kV/D12",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D12.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/BAY/Name",
+   "depth": 3,
+   "value": "Bus Tranfer",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.529899+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/BCU/Name",
+   "depth": 3,
+   "value": "200_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.531898+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.F211",
+   "name": "F211",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/F211",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.F211.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/F211/Name",
+   "depth": 3,
+   "value": "200_SEL421_F21_1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.536407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.F212",
+   "name": "F212",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/F212",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.F212.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/F212/Name",
+   "depth": 3,
+   "value": "200_SEL421_F21_2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.538407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/IsLive",
+   "depth": 2,
+   "value": "<err BadWaitingForInitialData>"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XCBR1/Name",
+   "depth": 3,
+   "value": "200",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XCBR1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI1/Name",
+   "depth": 3,
+   "value": "200-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI1/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI11/Name",
+   "depth": 3,
+   "value": "200-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI2/Name",
+   "depth": 3,
+   "value": "200-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI2/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI9",
+   "name": "XSWI9",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI9",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI9.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI9/Name",
+   "depth": 3,
+   "value": "200-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI9.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI9/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI9.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI9/SName",
+   "depth": 3,
+   "value": "-9",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI91",
+   "name": "XSWI91",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI91",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI91.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI91/Name",
+   "depth": 3,
+   "value": "200-95",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI91.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI91/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI91.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI91/SName",
+   "depth": 3,
+   "value": "-95",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI92",
+   "name": "XSWI92",
+   "class": "Object",
+   "path": "/SAS/220kV/D12/XSWI92",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI92.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI92/Name",
+   "depth": 3,
+   "value": "200-94",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI92.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI92/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.XSWI92.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/XSWI92/SName",
+   "depth": 3,
+   "value": "-94",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17",
+   "name": "D17",
+   "class": "Object",
+   "path": "/SAS/220kV/D17",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D17.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/BAY/Name",
+   "depth": 3,
+   "value": "Bus Coupler",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/BCU/Name",
+   "depth": 3,
+   "value": "212_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.542909+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.F21",
+   "name": "F21",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/F21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.F21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/F21/Name",
+   "depth": 3,
+   "value": "212_SEL421_F21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.545915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:37.215745+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XCBR1/Name",
+   "depth": 3,
+   "value": "212",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI1",
+   "name": "XSWI1",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI1/Name",
+   "depth": 3,
+   "value": "212-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI1.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI1/SName",
+   "depth": 3,
+   "value": "-1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI11",
+   "name": "XSWI11",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI11",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI11/Name",
+   "depth": 3,
+   "value": "212-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI11.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI11/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI11.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI11/SName",
+   "depth": 3,
+   "value": "-15",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI12",
+   "name": "XSWI12",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI12",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI12.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI12/Name",
+   "depth": 3,
+   "value": "212-14",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI12.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI12/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI12.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI12/SName",
+   "depth": 3,
+   "value": "-14",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI2",
+   "name": "XSWI2",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI2/Name",
+   "depth": 3,
+   "value": "212-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI2.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI2/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI2.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI2/SName",
+   "depth": 3,
+   "value": "-2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI21",
+   "name": "XSWI21",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI21",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI21/Name",
+   "depth": 3,
+   "value": "212-25",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI21.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI21/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI21.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI21/SName",
+   "depth": 3,
+   "value": "-25",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI22",
+   "name": "XSWI22",
+   "class": "Object",
+   "path": "/SAS/220kV/D17/XSWI22",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI22.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI22/Name",
+   "depth": 3,
+   "value": "212-24",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI22.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI22/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.XSWI22.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/XSWI22/SName",
+   "depth": 3,
+   "value": "-24",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DBB",
+   "name": "DBB",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=DBB.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/DBB/BAY/Name",
+   "depth": 3,
+   "value": "",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.548915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F50BF",
+   "name": "F50BF",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/F50BF",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B1",
+   "name": "F87B1",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/F87B1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/DBB/F87B1/Name",
+   "depth": 3,
+   "value": "DBB_SEL487B_87B1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.551915+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B2",
+   "name": "F87B2",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/F87B2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/DBB/F87B2/Name",
+   "depth": 3,
+   "value": "DBB_SEL487B_87B2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.554420+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B3",
+   "name": "F87B3",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/F87B3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.F87B3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/220kV/DBB/F87B3/Name",
+   "depth": 3,
+   "value": "DBB_SEL487B_87B3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.556423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DBB.Pos",
+   "name": "Pos",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/Pos",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DBB.RT",
+   "name": "RT",
+   "class": "Object",
+   "path": "/SAS/220kV/DBB/RT",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=SAS_22KV",
+   "name": "22kV",
+   "class": "Object",
+   "path": "/SAS/22kV",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=J01",
+   "name": "J01",
+   "class": "Object",
+   "path": "/SAS/22kV/J01",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=J01.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.BAY.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/BAY/Name",
+   "depth": 3,
+   "value": "",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.557422+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/BCU/Name",
+   "depth": 3,
+   "value": "431_SEL451_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.559423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.378194+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.MSQI1",
+   "name": "MSQI1",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/MSQI1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XCBD1",
+   "name": "XCBD1",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/XCBD1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XCBR1",
+   "name": "XCBR1",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/XCBR1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XCBR1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XCBR1/Name",
+   "depth": 3,
+   "value": "431",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.559423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XCBR1.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XCBR1/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI3",
+   "name": "XSWI3",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/XSWI3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI3/Name",
+   "depth": 3,
+   "value": "431-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI3.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI3/PosSt",
+   "depth": 3,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI3.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI3/SName",
+   "depth": 3,
+   "value": "-3",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI31",
+   "name": "XSWI31",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/XSWI31",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI31.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI31/Name",
+   "depth": 3,
+   "value": "431-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI31.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI31/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI31.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI31/SName",
+   "depth": 3,
+   "value": "-35",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI32",
+   "name": "XSWI32",
+   "class": "Object",
+   "path": "/SAS/22kV/J01/XSWI32",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI32.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI32/Name",
+   "depth": 3,
+   "value": "431-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI32.PosSt",
+   "name": "PosSt",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI32/PosSt",
+   "depth": 3,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.XSWI32.SName",
+   "name": "SName",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/XSWI32/SName",
+   "depth": 3,
+   "value": "-38",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1",
+   "name": "AT1",
+   "class": "Object",
+   "path": "/SAS/AT1",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/AT1/BAY",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/AT1/BCU",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BCU.ANN",
+   "name": "ANN",
+   "class": "Object",
+   "path": "/SAS/AT1/BCU/ANN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BCU.CTL",
+   "name": "CTL",
+   "class": "Object",
+   "path": "/SAS/AT1/BCU/CTL",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BCU.MET",
+   "name": "MET",
+   "class": "Object",
+   "path": "/SAS/AT1/BCU/MET",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/BCU/Name",
+   "depth": 2,
+   "value": "AT1_SEL2414_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.561423+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50",
+   "name": "F50",
+   "class": "Object",
+   "path": "/SAS/AT1/F50",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50.ANN",
+   "name": "ANN",
+   "class": "Object",
+   "path": "/SAS/AT1/F50/ANN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50.CTL",
+   "name": "CTL",
+   "class": "Object",
+   "path": "/SAS/AT1/F50/CTL",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50.MET",
+   "name": "MET",
+   "class": "Object",
+   "path": "/SAS/AT1/F50/MET",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/F50/Name",
+   "depth": 2,
+   "value": "AT1_SEL751_F50",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.562925+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F50.PRO",
+   "name": "PRO",
+   "class": "Object",
+   "path": "/SAS/AT1/F50/PRO",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1",
+   "name": "F87T1",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T1",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1.ANN",
+   "name": "ANN",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T1/ANN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1.CTL",
+   "name": "CTL",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T1/CTL",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1.MET",
+   "name": "MET",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T1/MET",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/F87T1/Name",
+   "depth": 2,
+   "value": "AT1_SEL487E_87T1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.564929+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T1.PRO",
+   "name": "PRO",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T1/PRO",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2",
+   "name": "F87T2",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T2",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2.ANN",
+   "name": "ANN",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T2/ANN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2.CTL",
+   "name": "CTL",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T2/CTL",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2.MET",
+   "name": "MET",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T2/MET",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/F87T2/Name",
+   "depth": 2,
+   "value": "AT1_SEL487E_F87T2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.566932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F87T2.PRO",
+   "name": "PRO",
+   "class": "Object",
+   "path": "/SAS/AT1/F87T2/PRO",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90",
+   "name": "F90",
+   "class": "Object",
+   "path": "/SAS/AT1/F90",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.AI",
+   "name": "AI",
+   "class": "Object",
+   "path": "/SAS/AT1/F90/AI",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.IN",
+   "name": "IN",
+   "class": "Object",
+   "path": "/SAS/AT1/F90/IN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.LED",
+   "name": "LED",
+   "class": "Object",
+   "path": "/SAS/AT1/F90/LED",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/F90/Name",
+   "depth": 2,
+   "value": "AT1 - REGDA",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.567932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.ST",
+   "name": "ST",
+   "class": "Object",
+   "path": "/SAS/AT1/F90/ST",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.YLTC",
+   "name": "YLTC",
+   "class": "Object",
+   "path": "/SAS/AT1/F90/YLTC",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.FAN1",
+   "name": "FAN1",
+   "class": "Object",
+   "path": "/SAS/AT1/FAN1",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.FAN1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/FAN1/Name",
+   "depth": 2,
+   "value": "AT1_FAN1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.567932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.FAN2",
+   "name": "FAN2",
+   "class": "Object",
+   "path": "/SAS/AT1/FAN2",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.FAN2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/FAN2/Name",
+   "depth": 2,
+   "value": "AT1_FAN2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.IO1",
+   "name": "IO1",
+   "class": "Object",
+   "path": "/SAS/AT1/IO1",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.IO1.ANN",
+   "name": "ANN",
+   "class": "Object",
+   "path": "/SAS/AT1/IO1/ANN",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.IO1.CTL",
+   "name": "CTL",
+   "class": "Object",
+   "path": "/SAS/AT1/IO1/CTL",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.IO1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/IO1/Name",
+   "depth": 2,
+   "value": "AT1_SEL2440_IO1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.YLTC",
+   "name": "YLTC",
+   "class": "Object",
+   "path": "/SAS/AT1/YLTC",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AT1.YLTC.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AT1/YLTC/Name",
+   "depth": 2,
+   "value": "AT1_OLTC",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.YPTR",
+   "name": "YPTR",
+   "class": "Object",
+   "path": "/SAS/AT1/YPTR",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AUX",
+   "name": "AUX",
+   "class": "Object",
+   "path": "/SAS/AUX",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=AC",
+   "name": "AC",
+   "class": "Object",
+   "path": "/SAS/AUX/AC",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=AC.AC1",
+   "name": "AC1",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/AC1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.AC2",
+   "name": "AC2",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/AC2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.AC3",
+   "name": "AC3",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/AC3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.BCU",
+   "name": "BCU",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/BCU",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.BCU.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/AC/BCU/Name",
+   "depth": 3,
+   "value": "AC_SEL2440_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.570932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AC.IO1",
+   "name": "IO1",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/IO1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.IO1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/AC/IO1/Name",
+   "depth": 3,
+   "value": "AC_SEL2440_IO1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.570932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AC.IO2",
+   "name": "IO2",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/IO2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.IO2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/AC/IO2/Name",
+   "depth": 3,
+   "value": "AC_SEL2440_IO2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.571932+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AC.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.Name1",
+   "name": "Name1",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/Name1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.Name2",
+   "name": "Name2",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/Name2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AC.PosSt",
+   "name": "PosSt",
+   "class": "Object",
+   "path": "/SAS/AUX/AC/PosSt",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC",
+   "name": "DC",
+   "class": "Object",
+   "path": "/SAS/AUX/DC",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=DC.DC1",
+   "name": "DC1",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/DC1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.DC2",
+   "name": "DC2",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/DC2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO1",
+   "name": "IO1",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/IO1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/DC/IO1/Name",
+   "depth": 3,
+   "value": "DC_SEL2440_IO1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.576439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO2",
+   "name": "IO2",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/IO2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/DC/IO2/Name",
+   "depth": 3,
+   "value": "DC_SEL2440_IO2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.577440+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO3",
+   "name": "IO3",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/IO3",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.IO3.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/DC/IO3/Name",
+   "depth": 3,
+   "value": "DC_SEL2440_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.577440+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=DC.MMXU1",
+   "name": "MMXU1",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/MMXU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.Name1",
+   "name": "Name1",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/Name1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.Name2",
+   "name": "Name2",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/Name2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=DC.PosSt",
+   "name": "PosSt",
+   "class": "Object",
+   "path": "/SAS/AUX/DC/PosSt",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO",
+   "name": "IO",
+   "class": "Object",
+   "path": "/SAS/AUX/IO",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=IO.BAY",
+   "name": "BAY",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/BAY",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.BCU1",
+   "name": "BCU1",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/BCU1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.BCU1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/IO/BCU1/Name",
+   "depth": 3,
+   "value": "_SEL2440_BCU",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.580441+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=IO.BCU2",
+   "name": "BCU2",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/BCU2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.BCU2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/AUX/IO/BCU2/Name",
+   "depth": 3,
+   "value": "_SEL2440_IO1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=IO.Name",
+   "name": "Name",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/Name",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.PosCmdOff",
+   "name": "PosCmdOff",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/PosCmdOff",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.PosCmdOn",
+   "name": "PosCmdOn",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/PosCmdOn",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.PosCtl",
+   "name": "PosCtl",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/PosCtl",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=IO.PosSt",
+   "name": "PosSt",
+   "class": "Object",
+   "path": "/SAS/AUX/IO/PosSt",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=SAS_SIM",
+   "name": "SAS_SIM",
+   "class": "Object",
+   "path": "/SAS/SAS_SIM",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=AT1L",
+   "name": "AT1L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/AT1L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C11L",
+   "name": "C11L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C11L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C12L",
+   "name": "C12L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C12L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C19L",
+   "name": "C19L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C19L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C21L",
+   "name": "C21L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C21L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.794960+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C22L",
+   "name": "C22L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C22L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.911683+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=C29L",
+   "name": "C29L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/C29L",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.105591+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=CheckLiveState",
+   "name": "CheckLiveState",
+   "class": "Method",
+   "path": "/SAS/SAS_SIM/CheckLiveState",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=D01L",
+   "name": "D01L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/D01L",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03L",
+   "name": "D03L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/D03L",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04L",
+   "name": "D04L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/D04L",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12L",
+   "name": "D12L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/D12L",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.105591+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17L",
+   "name": "D17L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/D17L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.901169+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01L",
+   "name": "E01L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/E01L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02L",
+   "name": "E02L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/E02L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.381141+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04L",
+   "name": "E04L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/E04L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.416309+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05L",
+   "name": "E05L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/E05L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.474946+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07L",
+   "name": "E07L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/E07L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.562965+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01L",
+   "name": "J01L",
+   "class": "Variable",
+   "path": "/SAS/SAS_SIM/J01L",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:39.582785+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=SendToFEP",
+   "name": "SendToFEP",
+   "class": "Method",
+   "path": "/SAS/SAS_SIM/SendToFEP",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs",
+   "name": "Subs",
+   "class": "Object",
+   "path": "/SAS/Subs",
+   "depth": 0
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB11",
+   "name": "BB11",
+   "class": "Object",
+   "path": "/SAS/Subs/BB11",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB11.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB11/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.381910+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB11.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB11/Name",
+   "depth": 2,
+   "value": "BB11",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB110_BusCoupled",
+   "name": "BB110_BusCoupled",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB110_BusCoupled",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.136120+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB12",
+   "name": "BB12",
+   "class": "Object",
+   "path": "/SAS/Subs/BB12",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB12.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB12/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.383921+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB12.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB12/Name",
+   "depth": 2,
+   "value": "BB12",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19",
+   "name": "BB19",
+   "class": "Object",
+   "path": "/SAS/Subs/BB19",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T04:53:43.382922+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19/Name",
+   "depth": 2,
+   "value": "BB19",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19_CBPosSt",
+   "name": "BB19_CBPosSt",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19_CBPosSt",
+   "depth": 1,
+   "value": 2,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19_DS9PosStEx",
+   "name": "BB19_DS9PosStEx",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19_DS9PosStEx",
+   "depth": 1,
+   "value": 1,
+   "vtype": "2",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.137120+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB21",
+   "name": "BB21",
+   "class": "Object",
+   "path": "/SAS/Subs/BB21",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB21.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB21/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:37.225747+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB21.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB21/Name",
+   "depth": 2,
+   "value": "BB21",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB22",
+   "name": "BB22",
+   "class": "Object",
+   "path": "/SAS/Subs/BB22",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB22.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB22/IsLive",
+   "depth": 2,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:37.222747+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB22.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB22/Name",
+   "depth": 2,
+   "value": "BB22",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB220_BusCoupled",
+   "name": "BB220_BusCoupled",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB220_BusCoupled",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.120103+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29",
+   "name": "BB29",
+   "class": "Object",
+   "path": "/SAS/Subs/BB29",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29.IsLive",
+   "name": "IsLive",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29/IsLive",
+   "depth": 2,
+   "value": "<err BadWaitingForInitialData>"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29/Name",
+   "depth": 2,
+   "value": "BB29",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29_CBPosSt",
+   "name": "BB29_CBPosSt",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29_CBPosSt",
+   "depth": 1,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29_DS9PosStEx",
+   "name": "BB29_DS9PosStEx",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29_DS9PosStEx",
+   "depth": 1,
+   "value": 0,
+   "vtype": "2",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:32.098079+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BeingCtl",
+   "name": "BeingCtl",
+   "class": "Variable",
+   "path": "/SAS/Subs/BeingCtl",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.Bit10",
+   "name": "Bit10",
+   "class": "Variable",
+   "path": "/SAS/Subs/Bit10",
+   "depth": 1,
+   "value": "",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.Bit8",
+   "name": "Bit8",
+   "class": "Variable",
+   "path": "/SAS/Subs/Bit8",
+   "depth": 1,
+   "value": "",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.COM",
+   "name": "COM",
+   "class": "Object",
+   "path": "/SAS/Subs/COM",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.CmdSuccess",
+   "name": "CmdSuccess",
+   "class": "Variable",
+   "path": "/SAS/Subs/CmdSuccess",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.ColorSelect",
+   "name": "ColorSelect",
+   "class": "Variable",
+   "path": "/SAS/Subs/ColorSelect",
+   "depth": 1,
+   "value": 0,
+   "vtype": "2",
+   "quality": "Good",
+   "src_ts": "2025-05-15T04:03:04.480549+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.ColorSelect1",
+   "name": "ColorSelect1",
+   "class": "Variable",
+   "path": "/SAS/Subs/ColorSelect1",
+   "depth": 1,
+   "value": 0,
+   "vtype": "2",
+   "quality": "Good",
+   "src_ts": "2020-02-17T10:52:14.187637+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.CtlLev",
+   "name": "CtlLev",
+   "class": "Variable",
+   "path": "/SAS/Subs/CtlLev",
+   "depth": 1,
+   "value": 1,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.ForceEnaSt",
+   "name": "ForceEnaSt",
+   "class": "Variable",
+   "path": "/SAS/Subs/ForceEnaSt",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP",
+   "name": "SNMP",
+   "class": "Object",
+   "path": "/SAS/Subs/SNMP",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SCAET1",
+   "name": "SCAET1",
+   "class": "Object",
+   "path": "/SAS/Subs/SNMP/SCAET1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SCAET1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/SNMP/SCAET1/Name",
+   "depth": 3,
+   "value": "SCADA ET1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SCAET2",
+   "name": "SCAET2",
+   "class": "Object",
+   "path": "/SAS/Subs/SNMP/SCAET2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SCAET2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/SNMP/SCAET2/Name",
+   "depth": 3,
+   "value": "SCADA ET1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SERET1",
+   "name": "SERET1",
+   "class": "Object",
+   "path": "/SAS/Subs/SNMP/SERET1",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SERET1.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/SNMP/SERET1/Name",
+   "depth": 3,
+   "value": "SERVER ET1",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SERET2",
+   "name": "SERET2",
+   "class": "Object",
+   "path": "/SAS/Subs/SNMP/SERET2",
+   "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=Subs.SNMP.SERET2.Name",
+   "name": "Name",
+   "class": "Variable",
+   "path": "/SAS/Subs/SNMP/SERET2/Name",
+   "depth": 3,
+   "value": "SERVER ET2",
+   "vtype": "12",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.System",
+   "name": "System",
+   "class": "Object",
+   "path": "/SAS/Subs/System",
+   "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs._false",
+   "name": "_false",
+   "class": "Variable",
+   "path": "/SAS/Subs/_false",
+   "depth": 1,
+   "value": false,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs._true",
+   "name": "_true",
+   "class": "Variable",
+   "path": "/SAS/Subs/_true",
+   "depth": 1,
+   "value": true,
+   "vtype": "1",
+   "quality": "Good",
+   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+  }
+ ]
+}

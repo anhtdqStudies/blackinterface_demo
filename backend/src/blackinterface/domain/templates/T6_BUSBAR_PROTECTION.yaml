@@ -1,0 +1,15 @@
+id: T6_BUSBAR_PROTECTION
+version: 1
+title: "Busbar protection object (DBB / EBB)"
+bay_type: BUSBAR_PROTECTION
+observed_on: [DBB, EBB]   # DEMO_SAS v654, measured 2026-08-04
+
+# NOT an electrical bay. It carries busbar differential (F87B1..3), breaker
+# failure (F50BF) and the per-bay isolator image (Pos / PosSt / Map) used by
+# the protection scheme.
+#
+# The busbars themselves are separate objects at /SAS/Subs/BB* — they have
+# IsLive, Hz and PPV*. Measured 2026-08-04; this corrects the earlier draft in
+# docs/20-domain/bay-templates.md which assumed DBB/EBB *were* the busbars.
+nodes: []
+slots: []

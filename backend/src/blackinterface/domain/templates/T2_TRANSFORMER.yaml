@@ -1,0 +1,20 @@
+id: T2_TRANSFORMER
+version: 1
+title: "Transformer incoming bay — double busbar + transfer busbar"
+bay_type: TRANSFORMER
+observed_on: [D01, E07]   # DEMO_SAS v654, measured 2026-08-04
+
+nodes:
+  - {id: n_bb,   kind: internal, label: "busbar side"}
+  - {id: n_mid,  kind: internal, label: "breaker/transformer"}
+  - {id: n_tr,   kind: external, label: "Transformer"}
+
+slots:
+  - {ln: XSWI1,  role: busbar_selector,           endpoints: [BB1, n_bb],    order: 0}
+  - {ln: XSWI2,  role: busbar_selector,           endpoints: [BB2, n_bb],    order: 0, required: false}
+  - {ln: XSWI9,  role: transfer_selector,         endpoints: [BB9, n_bb],    order: 0, required: false}
+  - {ln: XSWI11, role: earth_switch,              endpoints: [n_bb, EARTH],  order: 1, side: left, required: false}
+  - {ln: XCBR1,  role: breaker,                   endpoints: [n_bb, n_mid],  order: 2}
+  - {ln: XSWI3,  role: transformer_disconnector,  endpoints: [n_mid, n_tr],  order: 3}
+  - {ln: XSWI31, role: earth_switch,              endpoints: [n_tr, EARTH],  order: 4, side: left,  required: false}
+  - {ln: XSWI32, role: earth_switch,              endpoints: [n_tr, EARTH],  order: 4, side: right, required: false}

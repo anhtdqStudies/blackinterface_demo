@@ -1,0 +1,44 @@
+---
+description: Black Interface — quy tắc bắt buộc cho mọi thay đổi trong repo
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# Black Interface
+
+**Đọc `AGENTS.md` ở gốc repo trước khi sửa bất cứ thứ gì.** Đó là nguồn sự thật duy nhất.
+File này chỉ tóm tắt để Cursor luôn nhớ; khi lệch nhau thì `AGENTS.md` thắng.
+
+## Bối cảnh
+Lớp vận hành AI-first thay HMI tĩnh của OneATS SCADA, cài local trên server tại trạm điện.
+Đọc dữ liệu realtime từ OneATS DataServer qua OPC UA client-server.
+
+## Bảy invariants (vi phạm = sai kể cả khi chạy được)
+1. **READ-ONLY** — không tool ghi, không gọi `PosCtl` / `Force` / `Restart` / `Ack*`.
+2. **Không khẳng định trạng thái khi quality != GOOD** — luôn kèm (value, quality, age).
+3. **Evidence là typed object do tool sinh**, không phải văn bản LLM viết.
+4. **LLM không nằm trên đường đi của tính đúng đắn** — topology/layout/nhân quả là backend deterministic.
+5. **Frontend gọi thẳng Domain API**; BlackCore không phải proxy, không có quyền cao hơn.
+6. **Chỉ `integration/` được biết NodeId**; NodeId không bao giờ là primary key.
+7. **Release immutable**, pin theo catalog snapshot + `OADataModel.ModelVersion`.
+
+## Stack đã chốt — không thêm gì mới nếu chưa có ADR
+Python 3.12 · uv · FastAPI+SSE · asyncua · SQLite · Pydantic AI · Nuxt static SPA.
+Cấm: MongoDB, Postgres, Docker, Redis, Node runtime ở production.
+
+## Ranh giới lớp
+`domain/` (L4, không import lớp khác) ← `integration/` (L5, độc quyền NodeId)
+`api/` (L3) → `domain/` · `agent/` (L2) → `api/` · `diagram/` (L6) → `domain/`
+
+## Bẫy đã biết
+- Alarm **không** dùng OPC UA A&C → dùng `OAAlarm.GetActiveAlarm(NodeId[])`.
+- DataServer là client-server, **không** phải PubSub Part 14.
+- Tên 61850 bị làm phẳng: `D03.XCBR1.PosSt`, không phải `Pos.stVal` lồng nhau.
+- `PosSt` là Dbpos 4 giá trị: 0=INTERMEDIATE 1=OPEN 2=CLOSED 3=BAD.
+- Dữ liệu `document/SLD_serviceOut/` có lỗi đã xác nhận — DataServer là chân lý.
+
+## Quy trình
+- Trao đổi với người dùng bằng **tiếng Việt**; code/docstring/commit bằng **tiếng Anh**.
+- Số liệu về OneATS phải ghi kèm ngày đo + cách đo lại. Chưa đo thì ghi rõ `GIẢ ĐỊNH`.
+- Kết thúc phiên: cập nhật `docs/90-progress/status.md`.
+- Trước khi báo xong: `python tools/check.py` phải xanh.

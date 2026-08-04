@@ -1,0 +1,18 @@
+id: T4_BUS_TRANSFER
+version: 1
+title: "Bus transfer bay — ties a main busbar to the transfer busbar"
+bay_type: BUS_TRANSFER
+observed_on: [D12, E04]   # DEMO_SAS v654, measured 2026-08-04
+
+nodes:
+  - {id: n_a, kind: internal, label: "main busbar side"}
+  - {id: n_b, kind: internal, label: "transfer busbar side"}
+
+slots:
+  - {ln: XSWI1,  role: busbar_selector,   endpoints: [BB1, n_a],   order: 0}
+  - {ln: XSWI2,  role: busbar_selector,   endpoints: [BB2, n_a],   order: 0, required: false}
+  - {ln: XSWI11, role: earth_switch,      endpoints: [n_a, EARTH], order: 1, side: left, required: false}
+  - {ln: XCBR1,  role: breaker,           endpoints: [n_a, n_b],   order: 2}
+  - {ln: XSWI91, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: left,  required: false}
+  - {ln: XSWI92, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: right, required: false}
+  - {ln: XSWI9,  role: transfer_selector, endpoints: [BB9, n_b],   order: 4}

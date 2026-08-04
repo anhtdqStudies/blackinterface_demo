@@ -1,0 +1,17 @@
+id: T5_FEEDER_MV
+version: 1
+title: "MV feeder bay — single busbar, no busbar selector"
+bay_type: FEEDER_MV
+observed_on: [J01]   # DEMO_SAS v654, measured 2026-08-04
+
+# 22 kV switchgear: the breaker is the busbar selector (withdrawable truck),
+# so there is no XSWI1/XSWI2.
+nodes:
+  - {id: n_a,    kind: internal, label: "breaker/feeder"}
+  - {id: n_feed, kind: external, label: "Feeder"}
+
+slots:
+  - {ln: XCBR1,  role: breaker,                  endpoints: [BB, n_a],       order: 0}
+  - {ln: XSWI3,  role: transformer_disconnector, endpoints: [n_a, n_feed],   order: 1}
+  - {ln: XSWI31, role: earth_switch,             endpoints: [n_feed, EARTH], order: 2, side: left,  required: false}
+  - {ln: XSWI32, role: earth_switch,             endpoints: [n_feed, EARTH], order: 2, side: right, required: false}

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Interface — Station Viewer (dev)</title>
+<style>
+  :root{
+    --bg:#0d0f12; --panel:#151920; --panel2:#1c222c; --line:#2b3240;
+    --fg:#e6e9ef; --dim:#8b93a3; --accent:#5b9dff;
+    --closed:#e5484d; --open:#30a46c; --mid:#f5a524; --unk:#8b8d98;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:13px/1.5 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+         padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+  h1{font-size:14px;margin:0;font-weight:600;letter-spacing:.02em}
+  .meta{color:var(--dim);font-size:12px}
+  .meta b{color:var(--fg);font-weight:600}
+  button{background:var(--panel2);color:var(--fg);border:1px solid var(--line);
+         border-radius:6px;padding:5px 11px;cursor:pointer;font:inherit}
+  button:hover{border-color:var(--accent)}
+  button.on{background:var(--accent);border-color:var(--accent);color:#08111f;font-weight:600}
+  main{display:grid;grid-template-columns:1fr 340px;height:calc(100vh - 49px)}
+  #canvas{overflow:auto;padding:12px}
+  aside{border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:12px}
+  aside h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+           color:var(--dim);margin:16px 0 7px;font-weight:600}
+  aside h2:first-child{margin-top:0}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  td{padding:3px 0;vertical-align:top}
+  td:first-child{color:var(--dim);width:38%;padding-right:8px}
+  .bay{display:flex;justify-content:space-between;gap:8px;padding:5px 7px;
+       border:1px solid var(--line);border-radius:6px;margin-bottom:4px;cursor:pointer}
+  .bay:hover{border-color:var(--accent)}
+  .bay small{color:var(--dim)}
+  .tag{font-size:10px;padding:1px 6px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+  .issue{border-left:2px solid var(--mid);padding:4px 8px;margin-bottom:6px;
+         background:var(--panel2);border-radius:0 5px 5px 0;font-size:12px}
+  .issue.error{border-left-color:var(--closed)}
+  .issue.info{border-left-color:var(--dim)}
+  .issue code{color:var(--dim);font-size:11px}
+  svg{display:block}
+  svg text{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;fill:var(--dim)}
+  .sym{cursor:pointer}
+  .sym:hover .hit{stroke:var(--accent);stroke-width:1.5;fill:none}
+  .selected .hit{stroke:var(--accent);stroke-width:2;fill:none}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--dim);font-size:11px;padding:6px 2px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+  .err{color:var(--closed)}
+  .empty{color:var(--dim);font-style:italic}
+</style>
+</head>
+<body>
+<header>
+  <h1>BLACK INTERFACE</h1>
+  <span class="meta" id="meta">đang tải…</span>
+  <span id="tabs"></span>
+  <button id="reload">Tải lại từ nguồn</button>
+</header>
+<main>
+  <div id="canvas"></div>
+  <aside id="side"></aside>
+</main>
+
+<script>
+const STATE_COLOR = {CLOSED:'var(--closed)', OPEN:'var(--open)',
+                     INTERMEDIATE:'var(--mid)', UNDETERMINED:'var(--unk)'};
+const SVG = 'http://www.w3.org/2000/svg';
+let station = null, bays = [], view = null, level = null, selected = null;
+
+const el = (tag, attrs = {}, kids = []) => {
+  const n = document.createElementNS(SVG, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  for (const c of [].concat(kids)) n.appendChild(c);
+  return n;
+};
+const esc = s => String(s ?? '').replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+
+async function get(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(`${path} → ${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+async function boot() {
+  try {
+    station = await get('/api/station');
+    bays = await get('/api/bays');
+  } catch (e) {
+    document.getElementById('meta').innerHTML =
+      `<span class="err">Không tải được model: ${esc(e.message)}</span>`;
+    return;
+  }
+  document.getElementById('meta').innerHTML =
+    `<b>${esc(station.name)}</b> · ModelVersion <b>${esc(station.model_version ?? '?')}</b>` +
+    ` · ${station.bay_count} ngăn · ${station.device_count} thiết bị` +
+    ` · nguồn <b>${esc(station.source)}</b>` +
+    ` · dựng trong <b>${(station.load_seconds ?? 0).toFixed(2)}s</b>`;
+
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = '';
+  station.voltage_levels.forEach(v => {
+    const b = document.createElement('button');
+    b.textContent = v;
+    b.onclick = () => showLevel(v);
+    b.dataset.level = v;
+    tabs.appendChild(b);
+  });
+  showLevel(level && station.voltage_levels.includes(level)
+            ? level : station.voltage_levels[0]);
+}
+
+async function showLevel(v) {
+  level = v;
+  document.querySelectorAll('#tabs button')
+    .forEach(b => b.classList.toggle('on', b.dataset.level === v));
+  view = await get('/api/diagram/' + encodeURIComponent(v));
+  draw();
+  sidebar();
+}
+
+function draw() {
+  const svg = el('svg', {width: view.width, height: view.height,
+                         viewBox: `0 0 ${view.width} ${view.height}`});
+
+  view.rails.forEach(r => {
+    const live = r.quality !== 'GOOD' ? 'var(--unk)'
+               : r.is_live ? 'var(--closed)' : 'var(--open)';
+    svg.appendChild(el('line', {x1: r.x1, y1: r.y, x2: r.x2, y2: r.y,
+      stroke: live, 'stroke-width': 5, 'stroke-linecap': 'round',
+      'stroke-dasharray': r.quality === 'GOOD' ? '' : '6 5'}));
+    const label = el('text', {x: r.x1 - 6, y: r.y + 4, 'text-anchor': 'end',
+                              fill: live});
+    label.textContent = r.label + (r.inferred ? ' (suy ra)' : '');
+    svg.appendChild(label);
+  });
+
+  view.edges.forEach(e => svg.appendChild(el('polyline', {
+    points: e.points.map(p => `${p.x},${p.y}`).join(' '),
+    fill: 'none', stroke: 'var(--line)', 'stroke-width': 2})));
+
+  view.terminals.forEach(t => {
+    svg.appendChild(el('circle', {cx: t.x, cy: t.y, r: 3.5,
+      fill: 'var(--bg)', stroke: 'var(--dim)', 'stroke-width': 2}));
+    const label = el('text', {x: t.x, y: t.y + 17, 'text-anchor': 'middle'});
+    label.textContent = t.label;
+    svg.appendChild(label);
+  });
+
+  view.columns.forEach(c => {
+    const name = el('text', {x: c.x, y: c.bottom + 22, 'text-anchor': 'middle',
+                             fill: 'var(--fg)'});
+    name.textContent = c.label;
+    svg.appendChild(name);
+    const kind = el('text', {x: c.x, y: c.bottom + 37, 'text-anchor': 'middle'});
+    kind.textContent = c.bay_type;
+    svg.appendChild(kind);
+    if (c.error_count) {
+      const bad = el('text', {x: c.x, y: c.bottom + 52, 'text-anchor': 'middle',
+                              fill: 'var(--closed)'});
+      bad.textContent = `${c.error_count} lỗi`;
+      svg.appendChild(bad);
+    }
+  });
+
+  view.symbols.forEach(s => svg.appendChild(symbol(s)));
+
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = '';
+  canvas.appendChild(svg);
+  canvas.insertAdjacentHTML('beforeend', `<div class="legend">
+    <span><i style="background:var(--closed)"></i>ĐÓNG / có điện</span>
+    <span><i style="background:var(--open)"></i>MỞ / không điện</span>
+    <span><i style="background:var(--mid)"></i>TRUNG GIAN</span>
+    <span><i style="background:var(--unk)"></i>KHÔNG XÁC ĐỊNH (quality ≠ GOOD)</span>
+    <span>▭ máy cắt · ╱ dao cách ly · ⏚ tiếp địa</span>
+  </div>`);
+}
+
+function symbol(s) {
+  const color = STATE_COLOR[s.state] || 'var(--unk)';
+  const dashed = s.quality !== 'GOOD';
+  const g = el('g', {class: 'sym' + (selected === s.device_id ? ' selected' : '')});
+  g.appendChild(el('rect', {x: s.x - 15, y: s.y - 15, width: 30, height: 30,
+                            fill: 'var(--bg)', stroke: 'none'}));
+
+  if (s.role === 'breaker') {
+    g.appendChild(el('rect', {x: s.x - 11, y: s.y - 11, width: 22, height: 22,
+      rx: 2, fill: s.state === 'CLOSED' ? color : 'var(--bg)',
+      stroke: color, 'stroke-width': 2,
+      'stroke-dasharray': dashed ? '3 3' : ''}));
+  } else if (s.role === 'earth_switch') {
+    const open = s.state !== 'CLOSED';
+    g.appendChild(el('line', {x1: s.x, y1: s.y - 10,
+      x2: open ? s.x + 9 : s.x, y2: s.y + 4,
+      stroke: color, 'stroke-width': 2.5, 'stroke-dasharray': dashed ? '3 3' : ''}));
+    [10, 6.5, 3].forEach((w, i) => g.appendChild(el('line',
+      {x1: s.x - w, y1: s.y + 7 + i * 3.5, x2: s.x + w, y2: s.y + 7 + i * 3.5,
+       stroke: color, 'stroke-width': 1.8})));
+  } else {
+    const open = s.state !== 'CLOSED';
+    g.appendChild(el('line', {x1: s.x, y1: s.y - 12,
+      x2: open ? s.x + 11 : s.x, y2: s.y + 12,
+      stroke: color, 'stroke-width': 2.5, 'stroke-dasharray': dashed ? '3 3' : ''}));
+    g.appendChild(el('circle', {cx: s.x, cy: s.y - 12, r: 2.4, fill: color}));
+    g.appendChild(el('circle', {cx: s.x, cy: s.y + 12, r: 2.4, fill: color}));
+  }
+
+  const label = el('text', {x: s.x + 16, y: s.y + 4});
+  label.textContent = s.label;
+  g.appendChild(label);
+  g.appendChild(el('rect', {class: 'hit', x: s.x - 16, y: s.y - 16,
+    width: 32, height: 32, rx: 4, fill: 'transparent'}));
+  g.onclick = () => selectDevice(s.bay_id, s.device_id);
+  return g;
+}
+
+async function selectDevice(bayId, deviceId) {
+  selected = deviceId;
+  const bay = await get('/api/bays/' + encodeURIComponent(bayId));
+  const d = bay.devices.find(x => x.id === deviceId);
+  draw();
+  document.getElementById('side').innerHTML = `
+    <h2>Thiết bị</h2>
+    <table>
+      <tr><td>Tên EVN</td><td><b>${esc(d.name)}</b></td></tr>
+      <tr><td>Ngăn</td><td>${esc(bay.id)} — ${esc(bay.bay_type)}</td></tr>
+      <tr><td>Logical node</td><td>${esc(d.ln)}</td></tr>
+      <tr><td>Vai trò</td><td>${esc(d.role)}</td></tr>
+      <tr><td>Trạng thái</td><td><b style="color:${STATE_COLOR[d.state]}">${esc(d.state)}</b></td></tr>
+      <tr><td>Dbpos thô</td><td>${esc(d.value)}</td></tr>
+      <tr><td>Quality</td><td>${esc(d.quality)}</td></tr>
+      <tr><td>Timestamp</td><td>${esc(d.source_timestamp ?? '—')}</td></tr>
+      <tr><td>Nối tới</td><td>${d.terminals.map(esc).join('<br>')}</td></tr>
+      <tr><td>source_ref</td><td><code>${esc(d.source_ref)}</code></td></tr>
+    </table>
+    <h2>Ngăn ${esc(bay.id)} — ${bay.devices.length} thiết bị</h2>
+    ${bay.devices.map(x => `<div class="bay" onclick="selectDevice('${bay.id}','${x.id}')">
+        <span>${esc(x.name)} <small>${esc(x.ln)}</small></span>
+        <span style="color:${STATE_COLOR[x.state]}">${esc(x.state)}</span></div>`).join('')}
+    <button onclick="sidebar()">← Về tổng quan</button>`;
+}
+
+function sidebar() {
+  selected = null;
+  const issues = station.issues;
+  const here = bays.filter(b => b.voltage_level === level);
+  document.getElementById('side').innerHTML = `
+    <h2>Độ phủ</h2>
+    <table>
+      <tr><td>Thiết bị đóng cắt</td><td><b>${station.coverage.devices}</b></td></tr>
+      <tr><td>Vị trí quality GOOD</td><td><b>${station.coverage.position_good}</b>
+        / ${station.coverage.devices}</td></tr>
+      <tr><td>Xác định được</td><td><b>${station.coverage.position_determined}</b>
+        / ${station.coverage.devices}</td></tr>
+      <tr><td>Connectivity node</td><td>${station.node_count}</td></tr>
+    </table>
+    <h2>Ngăn tại ${esc(level)}</h2>
+    ${here.map(b => `<div class="bay" onclick="openBay('${b.id}')">
+      <span>${esc(b.name)} <small>${esc(b.template_id ?? 'không có template')}</small></span>
+      <span class="tag">${esc(b.bay_type)}</span></div>`).join('')}
+    <h2>Cảnh báo dựng model (${issues.length})</h2>
+    ${issues.length ? issues.map(i => `<div class="issue ${esc(i.severity)}">
+        ${esc(i.message)}<br><code>${esc(i.code)} · ${esc(i.subject ?? '')}</code></div>`).join('')
+      : '<div class="empty">Không có. Mọi ngăn khớp template.</div>'}`;
+}
+
+async function openBay(bayId) {
+  const bay = await get('/api/bays/' + encodeURIComponent(bayId));
+  if (bay.devices.length) selectDevice(bayId, bay.devices[0].id);
+}
+
+document.getElementById('reload').onclick = async () => {
+  await fetch('/api/reload', {method: 'POST'});
+  boot();
+};
+boot();
+</script>
+</body>
+</html>

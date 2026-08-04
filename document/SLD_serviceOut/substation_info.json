@@ -1,0 +1,806 @@
+{
+  "substation": {
+    "name": "Test Project",
+    "sub_id": "Test Project",
+    "area_id": "Test Project",
+    "region": "Ax",
+    "voltage_levels": [
+      {
+        "voltage": "220kV",
+        "bays": [
+          {
+            "bay_id": "C22",
+            "bay_name": "BUSBAR",
+            "bay_name_evn": "C22",
+            "bay_type": "BUSBAR",
+            "switching_devices": [],
+            "IEDs": []
+          },
+          {
+            "bay_id": "C29",
+            "bay_name": "BUSBAR",
+            "bay_name_evn": "C29",
+            "bay_type": "BUSBAR",
+            "switching_devices": [],
+            "IEDs": []
+          },
+          {
+            "bay_id": "D01",
+            "bay_name": "MBA AT1",
+            "bay_name_evn": "132",
+            "bay_type": "DTI",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "132",
+                "connections": "CB-DS3-ES35,CB-DS2-DS1-C22"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-2",
+                "connections": "DS2-DS2-DS-DS2-CB-DS1-ES-C22,DS2-CB-DS1-C22"
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-1",
+                "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-DS2-CB-C22,DS1-ES"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "DS9-2xGRZ200-VT-DS3-ES38-VT-C22,DS9-C29"
+              },
+              {
+                "device_name": "DS3",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-3",
+                "connections": "DS3-2xGRZ200-VT-DS9-ES38-VT-C22,DS3-CB-ES35"
+              },
+              {
+                "device_name": "ES35",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-35",
+                "connections": "ES35-CB-DS3"
+              },
+              {
+                "device_name": "ES38",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-38",
+                "connections": "ES38-2xGRZ200-VT-DS9-DS3-VT-C22"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "D01BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D01F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "D03",
+            "bay_name": "BEN CAT",
+            "bay_name_evn": "179",
+            "bay_type": "DLL",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "179",
+                "connections": "CB-DS-DS1-ES15-C22"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "DS9-DS7-VT-ES76,DS9-C29"
+              },
+              {
+                "device_name": "DS7",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-7",
+                "connections": "DS7-DS9-VT-ES76"
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-1",
+                "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-CB-DS-ES15-C22"
+              },
+              {
+                "device_name": "ES15",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-15",
+                "connections": "ES15-CB-DS-DS1-C22"
+              },
+              {
+                "device_name": "ES75",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-75",
+                "connections": ""
+              },
+              {
+                "device_name": "ES76",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-76",
+                "connections": "ES76-DS9-DS7-VT"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "D03F87L",
+                "type": "GRL200",
+                "function": "F87L",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D03F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D03BCU25",
+                "type": "SEL2240",
+                "function": "BCU25",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "D04",
+            "bay_name": "HOC MON",
+            "bay_name_evn": "179",
+            "bay_type": "DLL",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "179",
+                "connections": "CB-VT-DS7-ES75,CB-DS2-DS_1-C22"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "DS9-DS7-VT-ES76,DS9-C29"
+              },
+              {
+                "device_name": "DS7",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-7",
+                "connections": "DS7-VT-CB-ES75,DS7-DS9-VT-ES76"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-2",
+                "connections": "DS2-DS2-DS2-DS-CB-DS1-ES-C22,DS2-CB-DS_1-C22"
+              },
+              {
+                "device_name": "ES76",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-76",
+                "connections": "ES76-DS9-DS7-VT"
+              },
+              {
+                "device_name": "ES75",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-75",
+                "connections": "ES75-VT-CB-DS7"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "D04F87L",
+                "type": "GRL200",
+                "function": "F87L",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D04F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D04BCU25",
+                "type": "SEL2240",
+                "function": "BCU25",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "D12",
+            "bay_name": "BUS TRANSFER",
+            "bay_name_evn": "D12",
+            "bay_type": "DBT",
+            "switching_devices": [
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI",
+                "device_name_evn": "-9",
+                "connections": "DS9-C29-ES94"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI",
+                "device_name_evn": "-2",
+                "connections": "DS2-DS2-DS-DS2-CB-DS1-ES-C22,DS2-CB-DS_1-C22"
+              },
+              {
+                "device_name": "ES95",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "",
+                "connections": ""
+              },
+              {
+                "device_name": "ES94",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "",
+                "connections": "ES94-DS9-C29"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "D12F67",
+                "type": "2xGRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D12BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D12F21",
+                "type": "2xGRZ200",
+                "function": "F21",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "D17",
+            "bay_name": "BUS COUPLER",
+            "bay_name_evn": "212",
+            "bay_type": "DBC",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR3P",
+                "device_name_evn": "212",
+                "connections": "CB-DS2-DS2-DS-DS2-DS1-ES-C22,CB-DS2"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI",
+                "device_name_evn": "-2",
+                "connections": "DS2-CB,DS2-VT-SA-ES24-C22"
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI",
+                "device_name_evn": "-1",
+                "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-DS2-DS2-DS-DS2-CB-ES-C22,DS1-ES"
+              },
+              {
+                "device_name": "ES24",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-24",
+                "connections": "ES24-DS2-VT-SA-C22"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "D17BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D17F21",
+                "type": "GRZ200",
+                "function": "F21",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "D17MM",
+                "type": "PM2130",
+                "function": "MM",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "voltage": "110kV",
+        "bays": [
+          {
+            "bay_id": "C11",
+            "bay_name": "BUSBAR",
+            "bay_name_evn": "C11",
+            "bay_type": "BUSBAR",
+            "switching_devices": [],
+            "IEDs": []
+          },
+          {
+            "bay_id": "C19",
+            "bay_name": "BUSBAR",
+            "bay_name_evn": "C19",
+            "bay_type": "BUSBAR",
+            "switching_devices": [],
+            "IEDs": []
+          },
+          {
+            "bay_id": "C12",
+            "bay_name": "BUSBAR",
+            "bay_name_evn": "C12",
+            "bay_type": "BUSBAR",
+            "switching_devices": [],
+            "IEDs": []
+          },
+          {
+            "bay_id": "E04",
+            "bay_name": "BUS TRANSFER",
+            "bay_name_evn": "E04",
+            "bay_type": "EBT",
+            "switching_devices": [
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI",
+                "device_name_evn": "-2",
+                "connections": "DS2-DS9-DS2-DS9-CB-ES38-GRL200"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI",
+                "device_name_evn": "-9",
+                "connections": ""
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI",
+                "device_name_evn": "-1",
+                "connections": "DS_1-CB-DS2-GRL200,DS_1-GRL200"
+              },
+              {
+                "device_name": "ES15",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-15",
+                "connections": "DS2-CB-DS_1-GRL200"
+              },
+              {
+                "device_name": "ES95",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-95",
+                "connections": ""
+              },
+              {
+                "device_name": "ES94",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "",
+                "connections": "ES-SEL-2240-ES94"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "E04F21",
+                "type": "2xGRZ200",
+                "function": "F21",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E04F67",
+                "type": "2xGRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E04BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "E05",
+            "bay_name": "BUS COUPLER",
+            "bay_name_evn": "112",
+            "bay_type": "EBC",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR3P",
+                "device_name_evn": "112",
+                "connections": "CB-DS9-DS2-DS9-DS2-ES38-GRL200,CB-DS9-ES35"
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI",
+                "device_name_evn": "-1",
+                "connections": "DS1-ES15-GRL200"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI",
+                "device_name_evn": "-2",
+                "connections": "DS9-VT-ES95-ES-GRL200-GRL200,DS9-CB-ES35"
+              },
+              {
+                "device_name": "ES15",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-15",
+                "connections": "ES38-DS9-DS2-DS9-DS2-CB-GRL200"
+              },
+              {
+                "device_name": "ES25",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-25",
+                "connections": "ES35-DS9-CB"
+              },
+              {
+                "device_name": "ES24",
+                "device_type": "XSWI_NC",
+                "device_name_evn": "-24",
+                "connections": "ES-DS9-VT-ES95-GRL200-GRL200"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "E05MM",
+                "type": "PM2130",
+                "function": "MM",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E05BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E05F21",
+                "type": "GRZ200",
+                "function": "F21",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "E07",
+            "bay_name": "MBA AT1",
+            "bay_name_evn": "132",
+            "bay_type": "ETI",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "132",
+                "connections": "CB-ES76-DS7,CB-DS9-DS9-GRL200"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "CB-ES76-DS7-ES75-GRL200-GRL200,CB-SEL-2240"
+              },
+              {
+                "device_name": "DS3",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-3",
+                "connections": "DS7-ES76-CB,DS7-ES76-CB-ES75-GRL200-GRL200"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-2",
+                "connections": "DS9-DS9-DS2-DS2-CB-ES38-GRL200,DS9-CB-DS9-GRL200"
+              },
+              {
+                "device_name": "ES38",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-38",
+                "connections": "ES75-ES76-CB-DS7-GRL200-GRL200"
+              },
+              {
+                "device_name": "ES35",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-35",
+                "connections": "ES76-CB-DS7"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "E07BCU25",
+                "type": "SEL2240",
+                "function": "BCU25",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E07F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "E01",
+            "bay_name": "LAI UYEN",
+            "bay_name_evn": "179",
+            "bay_type": "ELL",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "179",
+                "connections": "CB-VT-ES,CB-DS2-DS1-ES15-GRL200"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "DS-SEL-2240,DS-VT-DS7-ES76"
+              },
+              {
+                "device_name": "DS2",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-2",
+                "connections": "DS2-DS9-DS9-DS2-CB-ES38-GRL200,DS2-CB-DS1-ES15-GRL200"
+              },
+              {
+                "device_name": "DS1",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-1",
+                "connections": "DS1-CB-DS2-ES15-GRL200,DS1-GRL200"
+              },
+              {
+                "device_name": "DS7",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-7",
+                "connections": "DS7-VT-DS-ES76"
+              },
+              {
+                "device_name": "ES75",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-75",
+                "connections": "ES-VT-CB"
+              },
+              {
+                "device_name": "ES15",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-15",
+                "connections": "ES15-CB-DS2-DS1-GRL200"
+              },
+              {
+                "device_name": "ES76",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-76",
+                "connections": "ES76-VT-DS-DS7"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "E01F87L",
+                "type": "GRL200",
+                "function": "F87L",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E01F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E01BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          },
+          {
+            "bay_id": "E02",
+            "bay_name": "LAI UYEN",
+            "bay_name_evn": "179",
+            "bay_type": "ELL",
+            "switching_devices": [
+              {
+                "device_name": "CB",
+                "device_type": "XCBR_GD2",
+                "device_name_evn": "179",
+                "connections": "CB-VT-DS1-ES,CB-DS_1-DS9-GRL200"
+              },
+              {
+                "device_name": "DS9",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-9",
+                "connections": "DS2-VT-DS1-ES,DS2-SEL-2240"
+              },
+              {
+                "device_name": "DS7",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-7",
+                "connections": "DS1-VT-CB-ES,DS1-VT-DS2-ES"
+              },
+              {
+                "device_name": "ES75",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-75",
+                "connections": "ES-VT-CB-DS1"
+              },
+              {
+                "device_name": "ES76",
+                "device_type": "XSWI_GD2",
+                "device_name_evn": "-76",
+                "connections": "ES-VT-DS2-DS1"
+              }
+            ],
+            "IEDs": [
+              {
+                "name": "E02F67",
+                "type": "GRD200",
+                "function": "F67",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E02F87L",
+                "type": "GRL200",
+                "function": "F87L",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              },
+              {
+                "name": "E02BCU",
+                "type": "SEL2240",
+                "function": "BCU",
+                "ip": "",
+                "subnet_mask": "255.0.0.0",
+                "protocol": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "voltage": "22kV",
+        "bays": []
+      },
+      {
+        "voltage": "500kV",
+        "bays": []
+      }
+    ],
+    "transformers": [
+      {
+        "bay_id": "AT1",
+        "bay_name": "TRANSFORMER AT1",
+        "bay_name_evn": "AT1",
+        "bay_type": "DT",
+        "IEDs": [
+          {
+            "name": "AT1F50",
+            "type": "GRD200",
+            "function": "F50",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          },
+          {
+            "name": "AT1F87T1 49",
+            "type": "GRT200",
+            "function": "F87T1 49",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          },
+          {
+            "name": "AT1Wh",
+            "type": "ZxD",
+            "function": "Wh",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          },
+          {
+            "name": "AT1F87T2 49",
+            "type": "GRT200",
+            "function": "F87T2 49",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          },
+          {
+            "name": "AT1F90",
+            "type": "7SJ85",
+            "function": "F90",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          },
+          {
+            "name": "AT1BCU",
+            "type": "SEL2240",
+            "function": "BCU",
+            "ip": "",
+            "subnet_mask": "255.0.0.0",
+            "protocol": ""
+          }
+        ]
+      }
+    ],
+    "servers": [],
+    "acdc_indoor": []
+  }
+}

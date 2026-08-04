@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Node / Nuxt
+node_modules/
+.nuxt/
+.output/
+.nitro/
+frontend/dist/
+
+# Local data & artefacts
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+# ad-hoc dumps at the repo root; the committed test fixture lives in
+# backend/tests/fixtures/ and is deliberately NOT ignored
+/sas_tree.json
+/model_tree.json
+/bind_result.json
+/alarms_decoded.json
+/snapshots/
+/releases/
+/logs/
+*.log
+
+# Secrets & local config
+.env
+.env.*
+!.env.example
+*.lic
+*.pem
+*.key
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# OneDrive conflict copies
+*-Copy.*
+*conflicted copy*

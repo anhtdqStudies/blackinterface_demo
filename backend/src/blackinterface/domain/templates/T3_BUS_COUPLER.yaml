@@ -1,0 +1,19 @@
+id: T3_BUS_COUPLER
+version: 1
+title: "Bus coupler — ties busbar 1 to busbar 2"
+bay_type: BUS_COUPLER
+observed_on: [D17, E05]   # DEMO_SAS v654, measured 2026-08-04
+
+# Symmetric: a selector on each side of the breaker, two earth switches per side.
+nodes:
+  - {id: n_a, kind: internal, label: "busbar-1 side"}
+  - {id: n_b, kind: internal, label: "busbar-2 side"}
+
+slots:
+  - {ln: XSWI1,  role: busbar_selector, endpoints: [BB1, n_a],   order: 0}
+  - {ln: XSWI11, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: left,  required: false}
+  - {ln: XSWI12, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: right, required: false}
+  - {ln: XCBR1,  role: breaker,         endpoints: [n_a, n_b],   order: 2}
+  - {ln: XSWI21, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: left,  required: false}
+  - {ln: XSWI22, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: right, required: false}
+  - {ln: XSWI2,  role: busbar_selector, endpoints: [BB2, n_b],   order: 4}

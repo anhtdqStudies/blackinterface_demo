@@ -1,0 +1,3038 @@
+[
+  {
+    "pdf_path": "C:\\WINDOWS\\SERVIC~1\\COBUIL~1\\AppData\\Local\\Temp\\analyze_input_data_test_kmw2j9_9\\input.pdf",
+    "image_results": [
+      {
+        "path": "C:\\WINDOWS\\SERVIC~1\\COBUIL~1\\AppData\\Local\\Temp\\analyze_input_data_test_kmw2j9_9\\singleline_detected/7fec08aa-0a63-4206-9d32-1c818107597d.png",
+        "diagram_name": "220_kV",
+        "volt_cls": 2,
+        "objs": [
+          {
+            "bbox": [
+              4195,
+              1085,
+              4241,
+              1111
+            ],
+            "center": [
+              4218,
+              1098
+            ],
+            "confidence": 0.9506773948669434,
+            "class_name": "CB",
+            "id": 1,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-DS2-DS2-DS-DS2-DS1-ES-C22,CB-DS2"
+          },
+          {
+            "bbox": [
+              2422,
+              1086,
+              2468,
+              1111
+            ],
+            "center": [
+              2445,
+              1098
+            ],
+            "confidence": 0.9428611993789673,
+            "class_name": "CB",
+            "id": 4,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-VT-DS7-ES75,CB-DS2-DS_1-C22"
+          },
+          {
+            "bbox": [
+              697,
+              1085,
+              743,
+              1111
+            ],
+            "center": [
+              720,
+              1098
+            ],
+            "confidence": 0.9414781332015991,
+            "class_name": "CB",
+            "id": 5,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-DS3-ES35,CB-DS2-DS1-C22"
+          },
+          {
+            "bbox": [
+              1528,
+              1085,
+              1572,
+              1111
+            ],
+            "center": [
+              1550,
+              1098
+            ],
+            "confidence": 0.9434767961502075,
+            "class_name": "CB",
+            "id": 3,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-DS-DS1-ES15-C22"
+          },
+          {
+            "bbox": [
+              995,
+              2238,
+              1023,
+              2284
+            ],
+            "center": [
+              1009,
+              2261
+            ],
+            "confidence": 0.9456316828727722,
+            "class_name": "CB",
+            "id": 2,
+            "name": "CB",
+            "description": "",
+            "connections": "2-19-27"
+          },
+          {
+            "bbox": [
+              3312,
+              1088,
+              3337,
+              1113
+            ],
+            "center": [
+              3324,
+              1101
+            ],
+            "confidence": 0.9314963221549988,
+            "class_name": "CB",
+            "id": 6,
+            "name": "",
+            "description": "",
+            "connections": "CB-DS2-DS_1-C22"
+          },
+          {
+            "bbox": [
+              3298,
+              667,
+              3339,
+              687
+            ],
+            "center": [
+              3319,
+              677
+            ],
+            "confidence": 0.9426953792572021,
+            "class_name": "DS_2",
+            "id": 18,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS9-C29-ES94"
+          },
+          {
+            "bbox": [
+              680,
+              1208,
+              712,
+              1232
+            ],
+            "center": [
+              696,
+              1220
+            ],
+            "confidence": 0.9419821500778198,
+            "class_name": "DS",
+            "id": 10,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-DS2-DS-DS2-CB-DS1-ES-C22,DS2-CB-DS1-C22"
+          },
+          {
+            "bbox": [
+              1532,
+              664,
+              1565,
+              692
+            ],
+            "center": [
+              1549,
+              678
+            ],
+            "confidence": 0.9335116147994995,
+            "class_name": "DS",
+            "id": 13,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS9-DS7-VT-ES76,DS9-C29"
+          },
+          {
+            "bbox": [
+              727,
+              1282,
+              766,
+              1303
+            ],
+            "center": [
+              747,
+              1293
+            ],
+            "confidence": 0.9359345436096191,
+            "class_name": "DS_1",
+            "id": 17,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-DS2-CB-C22,DS1-ES"
+          },
+          {
+            "bbox": [
+              702,
+              665,
+              735,
+              691
+            ],
+            "center": [
+              719,
+              678
+            ],
+            "confidence": 0.9407109022140503,
+            "class_name": "DS",
+            "id": 11,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS9-2xGRZ200-VT-DS3-ES38-VT-C22,DS9-C29"
+          },
+          {
+            "bbox": [
+              2426,
+              664,
+              2460,
+              692
+            ],
+            "center": [
+              2443,
+              678
+            ],
+            "confidence": 0.9421132206916809,
+            "class_name": "DS",
+            "id": 9,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS9-DS7-VT-ES76,DS9-C29"
+          },
+          {
+            "bbox": [
+              2427,
+              776,
+              2468,
+              796
+            ],
+            "center": [
+              2448,
+              786
+            ],
+            "confidence": 0.935442328453064,
+            "class_name": "DS_2",
+            "id": 22,
+            "name": "DS7",
+            "description": "",
+            "connections": "DS7-VT-CB-ES75,DS7-DS9-VT-ES76"
+          },
+          {
+            "bbox": [
+              702,
+              776,
+              743,
+              795
+            ],
+            "center": [
+              722,
+              786
+            ],
+            "confidence": 0.9409595131874084,
+            "class_name": "DS_2",
+            "id": 20,
+            "name": "DS3",
+            "description": "",
+            "connections": "DS3-2xGRZ200-VT-DS9-ES38-VT-C22,DS3-CB-ES35"
+          },
+          {
+            "bbox": [
+              1532,
+              777,
+              1574,
+              795
+            ],
+            "center": [
+              1553,
+              786
+            ],
+            "confidence": 0.9387050271034241,
+            "class_name": "DS_2",
+            "id": 21,
+            "name": "DS7",
+            "description": "",
+            "connections": "DS7-DS9-VT-ES76"
+          },
+          {
+            "bbox": [
+              1557,
+              1282,
+              1596,
+              1303
+            ],
+            "center": [
+              1577,
+              1293
+            ],
+            "confidence": 0.9396278262138367,
+            "class_name": "DS_1",
+            "id": 16,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-CB-DS-ES15-C22"
+          },
+          {
+            "bbox": [
+              4130,
+              1190,
+              4173,
+              1210
+            ],
+            "center": [
+              4151,
+              1200
+            ],
+            "confidence": 0.9343429803848267,
+            "class_name": "DS_2",
+            "id": 23,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-CB,DS2-VT-SA-ES24-C22"
+          },
+          {
+            "bbox": [
+              3275,
+              1208,
+              3307,
+              1232
+            ],
+            "center": [
+              3291,
+              1220
+            ],
+            "confidence": 0.943903386592865,
+            "class_name": "DS",
+            "id": 7,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-DS2-DS-DS2-CB-DS1-ES-C22,DS2-CB-DS_1-C22"
+          },
+          {
+            "bbox": [
+              2405,
+              1208,
+              2437,
+              1233
+            ],
+            "center": [
+              2421,
+              1221
+            ],
+            "confidence": 0.9373357892036438,
+            "class_name": "DS",
+            "id": 12,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-DS2-DS2-DS-CB-DS1-ES-C22,DS2-CB-DS_1-C22"
+          },
+          {
+            "bbox": [
+              1085,
+              2239,
+              1108,
+              2285
+            ],
+            "center": [
+              1097,
+              2262
+            ],
+            "confidence": 0.9421740174293518,
+            "class_name": "DS_2",
+            "id": 19,
+            "name": "DS3",
+            "description": "",
+            "connections": "19-49-45-44-51-29,19-2-27"
+          },
+          {
+            "bbox": [
+              4202,
+              1274,
+              4243,
+              1293
+            ],
+            "center": [
+              4223,
+              1283
+            ],
+            "confidence": 0.9335468411445618,
+            "class_name": "DS_2",
+            "id": 24,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS1-DS_1-ES-DS_1-DS1-DS1-SA-VT,DS1-DS2-DS2-DS-DS2-CB-ES-C22,DS1-ES"
+          },
+          {
+            "bbox": [
+              1510,
+              1208,
+              1542,
+              1233
+            ],
+            "center": [
+              1526,
+              1220
+            ],
+            "confidence": 0.9424724578857422,
+            "class_name": "DS",
+            "id": 8,
+            "name": "",
+            "description": "",
+            "connections": "DS-DS2-DS2-DS2-CB-DS1-ES-C22,DS-CB-DS1-ES15-C22,DS-C22"
+          },
+          {
+            "bbox": [
+              3322,
+              1282,
+              3361,
+              1303
+            ],
+            "center": [
+              3342,
+              1293
+            ],
+            "confidence": 0.9472904205322266,
+            "class_name": "DS_1",
+            "id": 14,
+            "name": "",
+            "description": "",
+            "connections": "DS_1-ES-DS_1-DS1-DS1-DS1-SA-VT,DS_1-CB-DS2-C22,DS_1-ES"
+          },
+          {
+            "bbox": [
+              2452,
+              1283,
+              2491,
+              1303
+            ],
+            "center": [
+              2472,
+              1293
+            ],
+            "confidence": 0.9409448504447937,
+            "class_name": "DS_1",
+            "id": 15,
+            "name": "",
+            "description": "",
+            "connections": "DS_1-DS_1-ES-DS1-DS1-DS1-SA-VT,DS_1-CB-DS2-C22,DS_1-ES"
+          },
+          {
+            "bbox": [
+              1585,
+              1256,
+              1610,
+              1283
+            ],
+            "center": [
+              1598,
+              1269
+            ],
+            "confidence": 0.9292711615562439,
+            "class_name": "ES",
+            "id": 38,
+            "name": "ES15",
+            "description": "",
+            "connections": "ES15-CB-DS-DS1-C22"
+          },
+          {
+            "bbox": [
+              1104,
+              2272,
+              1140,
+              2300
+            ],
+            "center": [
+              1122,
+              2286
+            ],
+            "confidence": 0.9396837949752808,
+            "class_name": "ES",
+            "id": 29,
+            "name": "ES38",
+            "description": "",
+            "connections": "29-49-45-19-44-51"
+          },
+          {
+            "bbox": [
+              4161,
+              1210,
+              4185,
+              1235
+            ],
+            "center": [
+              4173,
+              1223
+            ],
+            "confidence": 0.9415869116783142,
+            "class_name": "ES",
+            "id": 28,
+            "name": "ES24",
+            "description": "",
+            "connections": "ES24-DS2-VT-SA-C22"
+          },
+          {
+            "bbox": [
+              2456,
+              752,
+              2480,
+              778
+            ],
+            "center": [
+              2468,
+              765
+            ],
+            "confidence": 0.9262509346008301,
+            "class_name": "ES",
+            "id": 41,
+            "name": "ES76",
+            "description": "",
+            "connections": "ES76-DS9-DS7-VT"
+          },
+          {
+            "bbox": [
+              1562,
+              797,
+              1587,
+              822
+            ],
+            "center": [
+              1575,
+              810
+            ],
+            "confidence": 0.9477897882461548,
+            "class_name": "ES",
+            "id": 25,
+            "name": "ES75",
+            "description": "",
+            "connections": ""
+          },
+          {
+            "bbox": [
+              2457,
+              797,
+              2481,
+              822
+            ],
+            "center": [
+              2469,
+              810
+            ],
+            "confidence": 0.9459764361381531,
+            "class_name": "ES",
+            "id": 26,
+            "name": "ES75",
+            "description": "",
+            "connections": "ES75-VT-CB-DS7"
+          },
+          {
+            "bbox": [
+              732,
+              796,
+              755,
+              822
+            ],
+            "center": [
+              744,
+              809
+            ],
+            "confidence": 0.9384729266166687,
+            "class_name": "ES",
+            "id": 30,
+            "name": "ES35",
+            "description": "",
+            "connections": "ES35-CB-DS3"
+          },
+          {
+            "bbox": [
+              731,
+              752,
+              756,
+              778
+            ],
+            "center": [
+              744,
+              765
+            ],
+            "confidence": 0.929841935634613,
+            "class_name": "ES",
+            "id": 36,
+            "name": "ES38",
+            "description": "",
+            "connections": "ES38-2xGRZ200-VT-DS9-DS3-VT-C22"
+          },
+          {
+            "bbox": [
+              1562,
+              752,
+              1586,
+              778
+            ],
+            "center": [
+              1574,
+              765
+            ],
+            "confidence": 0.9294824600219727,
+            "class_name": "ES",
+            "id": 37,
+            "name": "ES76",
+            "description": "",
+            "connections": "ES76-DS9-DS7-VT"
+          },
+          {
+            "bbox": [
+              3326,
+              687,
+              3352,
+              714
+            ],
+            "center": [
+              3339,
+              701
+            ],
+            "confidence": 0.9285485744476318,
+            "class_name": "ES",
+            "id": 39,
+            "name": "ES95",
+            "description": "",
+            "connections": ""
+          },
+          {
+            "bbox": [
+              3326,
+              644,
+              3351,
+              669
+            ],
+            "center": [
+              3339,
+              657
+            ],
+            "confidence": 0.9238842129707336,
+            "class_name": "ES",
+            "id": 42,
+            "name": "ES94",
+            "description": "",
+            "connections": "ES94-DS9-C29"
+          },
+          {
+            "bbox": [
+              1047,
+              2272,
+              1084,
+              2300
+            ],
+            "center": [
+              1065,
+              2286
+            ],
+            "confidence": 0.9422221183776855,
+            "class_name": "ES",
+            "id": 27,
+            "name": "",
+            "description": "",
+            "connections": "27-2-19"
+          },
+          {
+            "bbox": [
+              3350,
+              1256,
+              3376,
+              1283
+            ],
+            "center": [
+              3363,
+              1269
+            ],
+            "confidence": 0.9377343654632568,
+            "class_name": "ES",
+            "id": 31,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS_1"
+          },
+          {
+            "bbox": [
+              4160,
+              1165,
+              4185,
+              1192
+            ],
+            "center": [
+              4173,
+              1179
+            ],
+            "confidence": 0.9356848001480103,
+            "class_name": "ES",
+            "id": 32,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS2-DS2-DS-DS2-CB-DS1-C22"
+          },
+          {
+            "bbox": [
+              2479,
+              1256,
+              2505,
+              1283
+            ],
+            "center": [
+              2492,
+              1269
+            ],
+            "confidence": 0.9353832602500916,
+            "class_name": "ES",
+            "id": 33,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS_1"
+          },
+          {
+            "bbox": [
+              4231,
+              1251,
+              4256,
+              1275
+            ],
+            "center": [
+              4243,
+              1263
+            ],
+            "confidence": 0.931902289390564,
+            "class_name": "ES",
+            "id": 34,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS1"
+          },
+          {
+            "bbox": [
+              754,
+              1256,
+              780,
+              1283
+            ],
+            "center": [
+              767,
+              1269
+            ],
+            "confidence": 0.9299302697181702,
+            "class_name": "ES",
+            "id": 35,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS1"
+          },
+          {
+            "bbox": [
+              4231,
+              1292,
+              4255,
+              1315
+            ],
+            "center": [
+              4243,
+              1304
+            ],
+            "confidence": 0.9275919198989868,
+            "class_name": "ES",
+            "id": 40,
+            "name": "",
+            "description": "",
+            "connections": "ES-DS_1-DS_1-DS1-DS1-DS1-SA-VT"
+          },
+          {
+            "bbox": [
+              668,
+              2232,
+              809,
+              2307
+            ],
+            "center": [
+              738,
+              2269
+            ],
+            "confidence": 0.9583118557929993,
+            "class_name": "TR",
+            "id": 50,
+            "name": "TD1",
+            "description": "",
+            "connections": "50-43"
+          },
+          {
+            "bbox": [
+              1480,
+              2184,
+              1636,
+              2341
+            ],
+            "center": [
+              1558,
+              2262
+            ],
+            "confidence": 0.968522846698761,
+            "class_name": "TR",
+            "id": 49,
+            "name": "AT1",
+            "description": "",
+            "connections": "2xGRZ200-VT-DS9-DS3-ES38-VT-C22,2xGRZ200-VT-DS1-VT-SEL-2240-ES76"
+          },
+          {
+            "bbox": [
+              1173,
+              2280,
+              1242,
+              2360
+            ],
+            "center": [
+              1207,
+              2320
+            ],
+            "confidence": 0.8536134362220764,
+            "class_name": "TR",
+            "id": 51,
+            "name": "",
+            "description": "",
+            "connections": "51-49-45-19-44-29"
+          },
+          {
+            "bbox": [
+              3331,
+              491,
+              3435,
+              595
+            ],
+            "center": [
+              3383,
+              543
+            ],
+            "confidence": 0.9612522125244141,
+            "class_name": "VT",
+            "id": 52,
+            "name": "",
+            "description": "",
+            "connections": ""
+          },
+          {
+            "bbox": [
+              1524,
+              492,
+              1641,
+              600
+            ],
+            "center": [
+              1582,
+              546
+            ],
+            "confidence": 0.9548537731170654,
+            "class_name": "VT",
+            "id": 53,
+            "name": "",
+            "description": "",
+            "connections": "VT-DS9-DS7-ES76"
+          },
+          {
+            "bbox": [
+              4171,
+              1379,
+              4257,
+              1462
+            ],
+            "center": [
+              4214,
+              1420
+            ],
+            "confidence": 0.9518465995788574,
+            "class_name": "VT",
+            "id": 54,
+            "name": "",
+            "description": "",
+            "connections": "VT-DS2-SA-ES24-C22"
+          },
+          {
+            "bbox": [
+              4391,
+              1377,
+              4489,
+              1462
+            ],
+            "center": [
+              4440,
+              1420
+            ],
+            "confidence": 0.9501175880432129,
+            "class_name": "VT",
+            "id": 55,
+            "name": "",
+            "description": "",
+            "connections": "VT-DS_1-ES-DS_1-DS1-DS1-DS1-SA"
+          },
+          {
+            "bbox": [
+              2431,
+              492,
+              2537,
+              600
+            ],
+            "center": [
+              2484,
+              546
+            ],
+            "confidence": 0.9487735629081726,
+            "class_name": "VT",
+            "id": 56,
+            "name": "",
+            "description": "",
+            "connections": "VT-CB-DS7-ES75,VT-DS9-DS7-ES76"
+          },
+          {
+            "bbox": [
+              700,
+              493,
+              804,
+              592
+            ],
+            "center": [
+              752,
+              542
+            ],
+            "confidence": 0.9459460377693176,
+            "class_name": "VT",
+            "id": 57,
+            "name": "",
+            "description": "",
+            "connections": "VT-2xGRZ200-DS9-DS3-ES38-VT-C22"
+          },
+          {
+            "bbox": [
+              810,
+              2284,
+              835,
+              2354
+            ],
+            "center": [
+              823,
+              2319
+            ],
+            "confidence": 0.9477476477622986,
+            "class_name": "SA",
+            "id": 43,
+            "name": "",
+            "description": "",
+            "connections": "43-50"
+          },
+          {
+            "bbox": [
+              1312,
+              2285,
+              1337,
+              2353
+            ],
+            "center": [
+              1325,
+              2319
+            ],
+            "confidence": 0.9453023076057434,
+            "class_name": "SA",
+            "id": 44,
+            "name": "",
+            "description": "",
+            "connections": "44-49-45-19-51-29"
+          },
+          {
+            "bbox": [
+              1591,
+              2777,
+              1659,
+              2801
+            ],
+            "center": [
+              1625,
+              2789
+            ],
+            "confidence": 0.9400047659873962,
+            "class_name": "SA",
+            "id": 45,
+            "name": "",
+            "description": "",
+            "connections": "45-49-19-44-51-29"
+          },
+          {
+            "bbox": [
+              1591,
+              1777,
+              1658,
+              1800
+            ],
+            "center": [
+              1625,
+              1789
+            ],
+            "confidence": 0.9379962086677551,
+            "class_name": "SA",
+            "id": 46,
+            "name": "",
+            "description": "",
+            "connections": "46-49-57-11-20-36-80"
+          },
+          {
+            "bbox": [
+              4083,
+              1403,
+              4144,
+              1425
+            ],
+            "center": [
+              4114,
+              1414
+            ],
+            "confidence": 0.9362392425537109,
+            "class_name": "SA",
+            "id": 47,
+            "name": "",
+            "description": "",
+            "connections": "SA-DS2-VT-ES24-C22"
+          },
+          {
+            "bbox": [
+              4288,
+              1404,
+              4348,
+              1424
+            ],
+            "center": [
+              4318,
+              1414
+            ],
+            "confidence": 0.9332577586174011,
+            "class_name": "SA",
+            "id": 48,
+            "name": "",
+            "description": "",
+            "connections": "SA-DS_1-ES-DS_1-DS1-DS1-DS1-VT"
+          },
+          {
+            "bbox": [
+              2079,
+              2390,
+              2293,
+              2472
+            ],
+            "center": [
+              2186,
+              2431
+            ],
+            "confidence": 0.9743604063987732,
+            "class_name": "ied",
+            "id": 58,
+            "name": "GRD 200",
+            "description": "F50/51, 50/51N, 50BF, FR"
+          },
+          {
+            "bbox": [
+              3568,
+              917,
+              3800,
+              990
+            ],
+            "center": [
+              3684,
+              954
+            ],
+            "confidence": 0.9710723757743835,
+            "class_name": "ied",
+            "id": 59,
+            "name": "2xGRD 200",
+            "description": "F67/67N,50/51,50/51N, 85, FR/FL"
+          },
+          {
+            "bbox": [
+              3567,
+              1002,
+              3800,
+              1065
+            ],
+            "center": [
+              3684,
+              1033
+            ],
+            "confidence": 0.9693423509597778,
+            "class_name": "ied",
+            "id": 60,
+            "name": "SEL-2240",
+            "description": "BCU,25 J,25"
+          },
+          {
+            "bbox": [
+              2078,
+              2291,
+              2294,
+              2380
+            ],
+            "center": [
+              2186,
+              2335
+            ],
+            "confidence": 0.9678510427474976,
+            "class_name": "ied",
+            "id": 61,
+            "name": "GRT 200",
+            "description": "F87T1 49,50/51,50/51N,50REF,FR"
+          },
+          {
+            "bbox": [
+              936,
+              923,
+              1157,
+              985
+            ],
+            "center": [
+              1046,
+              954
+            ],
+            "confidence": 0.9669850468635559,
+            "class_name": "ied",
+            "id": 62,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              1772,
+              772,
+              2035,
+              842
+            ],
+            "center": [
+              1903,
+              807
+            ],
+            "confidence": 0.9667932391166687,
+            "class_name": "ied",
+            "id": 63,
+            "name": "GRL200",
+            "description": "F87L,21/21N,67/67N,50/51,50/51N 25/79,27/59,SOTF,85,FL/FR"
+          },
+          {
+            "bbox": [
+              2666,
+              772,
+              2930,
+              842
+            ],
+            "center": [
+              2798,
+              807
+            ],
+            "confidence": 0.9664024114608765,
+            "class_name": "ied",
+            "id": 64,
+            "name": "GRL200",
+            "description": "F87L,21/211 F87L,21/21N,67/67N,50/51,50/51N, 25/79,27/59,SOTF,85,FL/FR"
+          },
+          {
+            "bbox": [
+              2079,
+              1965,
+              2292,
+              2053
+            ],
+            "center": [
+              2185,
+              2009
+            ],
+            "confidence": 0.9657905101776123,
+            "class_name": "ied",
+            "id": 65,
+            "name": "GRT 200",
+            "description": "F87T2 49,50/51,50/51N,FR"
+          },
+          {
+            "bbox": [
+              3567,
+              773,
+              3800,
+              846
+            ],
+            "center": [
+              3684,
+              810
+            ],
+            "confidence": 0.9647775888442993,
+            "class_name": "ied",
+            "id": 66,
+            "name": "2xGRZ 200",
+            "description": "F21/21N,67/67N,50/51,50/51N 25/79,85/FR/FL"
+          },
+          {
+            "bbox": [
+              2666,
+              894,
+              2929,
+              967
+            ],
+            "center": [
+              2797,
+              930
+            ],
+            "confidence": 0.9645910859107971,
+            "class_name": "ied",
+            "id": 67,
+            "name": "GRD200",
+            "description": "F67/67N,50/51,50/51N, 27/59,81,85/FR"
+          },
+          {
+            "bbox": [
+              1772,
+              894,
+              2034,
+              967
+            ],
+            "center": [
+              1903,
+              930
+            ],
+            "confidence": 0.9638907313346863,
+            "class_name": "ied",
+            "id": 68,
+            "name": "GRD 200",
+            "description": "F67/67N,50/51,50/51N, 27/59,81,85/FR"
+          },
+          {
+            "bbox": [
+              2078,
+              1867,
+              2291,
+              1948
+            ],
+            "center": [
+              2184,
+              1908
+            ],
+            "confidence": 0.9625884294509888,
+            "class_name": "ied",
+            "id": 69,
+            "name": "7SJ85",
+            "description": "F90"
+          },
+          {
+            "bbox": [
+              2079,
+              2480,
+              2291,
+              2556
+            ],
+            "center": [
+              2185,
+              2518
+            ],
+            "confidence": 0.9620458483695984,
+            "class_name": "ied",
+            "id": 70,
+            "name": "GRD200",
+            "description": "F50/51, 50/51N, 50BF, FR 27,59,64 (22"
+          },
+          {
+            "bbox": [
+              935,
+              847,
+              1157,
+              915
+            ],
+            "center": [
+              1046,
+              881
+            ],
+            "confidence": 0.9617387056350708,
+            "class_name": "ied",
+            "id": 71,
+            "name": "GRD 200",
+            "description": "F67/67N,50/51,50/51N,50BF 25, FR"
+          },
+          {
+            "bbox": [
+              2079,
+              2564,
+              2291,
+              2640
+            ],
+            "center": [
+              2185,
+              2602
+            ],
+            "confidence": 0.9616981148719788,
+            "class_name": "ied",
+            "id": 72,
+            "name": "ZxD",
+            "description": "Wh,Varh"
+          },
+          {
+            "bbox": [
+              2668,
+              976,
+              2929,
+              1049
+            ],
+            "center": [
+              2798,
+              1013
+            ],
+            "confidence": 0.9615605473518372,
+            "class_name": "ied",
+            "id": 73,
+            "name": "SEL-2240",
+            "description": "BCU25"
+          },
+          {
+            "bbox": [
+              1773,
+              976,
+              2035,
+              1049
+            ],
+            "center": [
+              1904,
+              1013
+            ],
+            "confidence": 0.9610776901245117,
+            "class_name": "ied",
+            "id": 74,
+            "name": "SEL-2240",
+            "description": "BCU25"
+          },
+          {
+            "bbox": [
+              2077,
+              2079,
+              2293,
+              2157
+            ],
+            "center": [
+              2185,
+              2118
+            ],
+            "confidence": 0.9594314098358154,
+            "class_name": "ied",
+            "id": 75,
+            "name": "SEL-2240",
+            "description": "BCU"
+          },
+          {
+            "bbox": [
+              4320,
+              1117,
+              4542,
+              1189
+            ],
+            "center": [
+              4431,
+              1153
+            ],
+            "confidence": 0.9590058326721191,
+            "class_name": "ied",
+            "id": 76,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              4320,
+              891,
+              4543,
+              956
+            ],
+            "center": [
+              4431,
+              923
+            ],
+            "confidence": 0.9563709497451782,
+            "class_name": "ied",
+            "id": 77,
+            "name": "GRZ200",
+            "description": "F21/21N,67/67N,50/51,50/51N 25,FR"
+          },
+          {
+            "bbox": [
+              4320,
+              964,
+              4542,
+              1029
+            ],
+            "center": [
+              4431,
+              997
+            ],
+            "confidence": 0.9536958932876587,
+            "class_name": "ied",
+            "id": 78,
+            "name": "PM2130",
+            "description": "MM"
+          },
+          {
+            "bbox": [
+              4320,
+              1038,
+              4541,
+              1102
+            ],
+            "center": [
+              4431,
+              1070
+            ],
+            "confidence": 0.9529329538345337,
+            "class_name": "ied",
+            "id": 79,
+            "name": "PM2130",
+            "description": "MM"
+          },
+          {
+            "bbox": [
+              2644,
+              725,
+              2955,
+              1059
+            ],
+            "center": [
+              2799,
+              892
+            ],
+            "confidence": 0.9788752198219299,
+            "class_name": "Cubicle",
+            "id": 87,
+            "name": "DMO DLL D04",
+            "description": ""
+          },
+          {
+            "bbox": [
+              1750,
+              726,
+              2060,
+              1060
+            ],
+            "center": [
+              1905,
+              893
+            ],
+            "confidence": 0.978603184223175,
+            "class_name": "Cubicle",
+            "id": 88,
+            "name": "DMO DLL D03",
+            "description": ""
+          },
+          {
+            "bbox": [
+              3517,
+              724,
+              3834,
+              1079
+            ],
+            "center": [
+              3676,
+              901
+            ],
+            "confidence": 0.9779992699623108,
+            "class_name": "Cubicle",
+            "id": 89,
+            "name": "DMO DBT",
+            "description": ""
+          },
+          {
+            "bbox": [
+              903,
+              726,
+              1186,
+              1003
+            ],
+            "center": [
+              1045,
+              865
+            ],
+            "confidence": 0.9760317206382751,
+            "class_name": "Cubicle",
+            "id": 90,
+            "name": "DMO DTI",
+            "description": ""
+          },
+          {
+            "bbox": [
+              4287,
+              836,
+              4578,
+              1204
+            ],
+            "center": [
+              4433,
+              1020
+            ],
+            "confidence": 0.9752447605133057,
+            "class_name": "Cubicle",
+            "id": 91,
+            "name": "DMO DBC",
+            "description": ""
+          },
+          {
+            "bbox": [
+              2040,
+              2208,
+              2328,
+              2657
+            ],
+            "center": [
+              2184,
+              2433
+            ],
+            "confidence": 0.9750178456306458,
+            "class_name": "Cubicle",
+            "id": 92,
+            "name": "CMA DT1 AT1",
+            "description": ""
+          },
+          {
+            "bbox": [
+              2040,
+              1793,
+              2329,
+              2196
+            ],
+            "center": [
+              2184,
+              1994
+            ],
+            "confidence": 0.9736968874931335,
+            "class_name": "Cubicle",
+            "id": 93,
+            "name": "CMA_DT2_AT1",
+            "description": ""
+          },
+          {
+            "bbox": [
+              542,
+              300,
+              1400,
+              385
+            ],
+            "center": [
+              996,
+              342
+            ],
+            "confidence": 0.9496254920959473,
+            "class_name": "BAY",
+            "id": 83,
+            "full_bbox": [
+              543,
+              301,
+              1401.0,
+              1379
+            ],
+            "name": "D01",
+            "description": "MBA AT1",
+            "up": true
+          },
+          {
+            "bbox": [
+              1400,
+              302,
+              2270,
+              385
+            ],
+            "center": [
+              1835,
+              343
+            ],
+            "confidence": 0.9500516057014465,
+            "class_name": "BAY",
+            "id": 82,
+            "full_bbox": [
+              1401.0,
+              303,
+              2271.5,
+              1372
+            ],
+            "name": "D03",
+            "description": "BEN CAT",
+            "up": true
+          },
+          {
+            "bbox": [
+              2270,
+              301,
+              3205,
+              385
+            ],
+            "center": [
+              2737,
+              343
+            ],
+            "confidence": 0.9415445923805237,
+            "class_name": "BAY",
+            "id": 86,
+            "full_bbox": [
+              2271.5,
+              302,
+              3206.0,
+              1379
+            ],
+            "name": "D04",
+            "description": "HOC MON",
+            "up": true
+          },
+          {
+            "bbox": [
+              3205,
+              299,
+              4021,
+              386
+            ],
+            "center": [
+              3613,
+              342
+            ],
+            "confidence": 0.9466370344161987,
+            "class_name": "BAY",
+            "id": 84,
+            "full_bbox": [
+              3206.0,
+              300,
+              4022.5,
+              1380
+            ],
+            "name": "D12",
+            "description": "BUS TRANSFER",
+            "up": true
+          },
+          {
+            "bbox": [
+              4021,
+              299,
+              4847,
+              386
+            ],
+            "center": [
+              4409,
+              342
+            ],
+            "confidence": 0.9453742504119873,
+            "class_name": "BAY",
+            "id": 85,
+            "full_bbox": [
+              4022.5,
+              300,
+              4848,
+              1489
+            ],
+            "name": "D17",
+            "description": "BUS COUPLER",
+            "up": true
+          },
+          {
+            "bbox": [
+              567,
+              1218,
+              4858,
+              1249
+            ],
+            "center": [
+              606,
+              1238
+            ],
+            "confidence": 0.9482900500297546,
+            "class_name": "BB",
+            "id": 80,
+            "name": "C22",
+            "description": "",
+            "connections": "C22-2xGRZ200-VT-DS9-DS3-ES38-VT,C22-DS2-DS2-DS-DS2-CB-DS1-ES,C22-CB-DS2-DS_1,C22-CB-DS-DS1-ES15,C22-DS2-VT-SA-ES24,C22-CB-DS2-DS_1,C22-DS2-CB-DS1,C22-DS"
+          },
+          {
+            "bbox": [
+              584,
+              611,
+              4855,
+              649
+            ],
+            "center": [
+              623,
+              627
+            ],
+            "confidence": 0.8670852780342102,
+            "class_name": "BB",
+            "id": 81,
+            "name": "C29",
+            "description": "",
+            "connections": "C29-DS9,C29-DS9,C29-DS9,C29-DS9-ES94"
+          }
+        ]
+      },
+      {
+        "path": "C:\\WINDOWS\\SERVIC~1\\COBUIL~1\\AppData\\Local\\Temp\\analyze_input_data_test_kmw2j9_9\\singleline_detected/77d9aa3e-8a58-4377-95d0-f78e83744fc0.png",
+        "diagram_name": "110_kV",
+        "volt_cls": 2,
+        "objs": [
+          {
+            "bbox": [
+              1531,
+              1193,
+              1578,
+              1218
+            ],
+            "center": [
+              1554,
+              1205
+            ],
+            "confidence": 0.9435663819313049,
+            "class_name": "CB",
+            "id": 1,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-DS9-DS2-DS9-DS2-ES38-GRL200,CB-DS9-ES35"
+          },
+          {
+            "bbox": [
+              2249,
+              1192,
+              2295,
+              1218
+            ],
+            "center": [
+              2272,
+              1205
+            ],
+            "confidence": 0.9375946521759033,
+            "class_name": "CB",
+            "id": 5,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-ES76-DS7,CB-DS9-DS9-GRL200"
+          },
+          {
+            "bbox": [
+              4044,
+              1193,
+              4089,
+              1218
+            ],
+            "center": [
+              4067,
+              1205
+            ],
+            "confidence": 0.941688060760498,
+            "class_name": "CB",
+            "id": 3,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-VT-DS1-ES,CB-DS_1-DS9-GRL200"
+          },
+          {
+            "bbox": [
+              3150,
+              1192,
+              3194,
+              1218
+            ],
+            "center": [
+              3172,
+              1205
+            ],
+            "confidence": 0.9405225515365601,
+            "class_name": "CB",
+            "id": 4,
+            "name": "CB",
+            "description": "",
+            "connections": "CB-VT-ES,CB-DS2-DS1-ES15-GRL200"
+          },
+          {
+            "bbox": [
+              691,
+              1195,
+              716,
+              1221
+            ],
+            "center": [
+              704,
+              1208
+            ],
+            "confidence": 0.9418231844902039,
+            "class_name": "CB",
+            "id": 2,
+            "name": "",
+            "description": "",
+            "connections": "CB-DS_1-DS2-GRL200"
+          },
+          {
+            "bbox": [
+              2254,
+              772,
+              2288,
+              798
+            ],
+            "center": [
+              2271,
+              785
+            ],
+            "confidence": 0.9479802250862122,
+            "class_name": "DS",
+            "id": 6,
+            "name": "DS9",
+            "description": "",
+            "connections": "CB-ES76-DS7-ES75-GRL200-GRL200,CB-SEL-2240"
+          },
+          {
+            "bbox": [
+              3154,
+              772,
+              3188,
+              798
+            ],
+            "center": [
+              3171,
+              785
+            ],
+            "confidence": 0.9453414082527161,
+            "class_name": "DS",
+            "id": 8,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS-SEL-2240,DS-VT-DS7-ES76"
+          },
+          {
+            "bbox": [
+              654,
+              1316,
+              687,
+              1340
+            ],
+            "center": [
+              671,
+              1328
+            ],
+            "confidence": 0.9367225170135498,
+            "class_name": "DS",
+            "id": 10,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-DS9-DS2-DS9-CB-ES38-GRL200"
+          },
+          {
+            "bbox": [
+              677,
+              775,
+              718,
+              795
+            ],
+            "center": [
+              698,
+              785
+            ],
+            "confidence": 0.9353742003440857,
+            "class_name": "DS_2",
+            "id": 20,
+            "name": "DS9",
+            "description": "",
+            "connections": ""
+          },
+          {
+            "bbox": [
+              4049,
+              772,
+              4083,
+              799
+            ],
+            "center": [
+              4066,
+              786
+            ],
+            "confidence": 0.9478238821029663,
+            "class_name": "DS",
+            "id": 7,
+            "name": "DS9",
+            "description": "",
+            "connections": "DS2-VT-DS1-ES,DS2-SEL-2240"
+          },
+          {
+            "bbox": [
+              3132,
+              1316,
+              3164,
+              1339
+            ],
+            "center": [
+              3148,
+              1328
+            ],
+            "confidence": 0.9237539768218994,
+            "class_name": "DS",
+            "id": 12,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS2-DS9-DS9-DS2-CB-ES38-GRL200,DS2-CB-DS1-ES15-GRL200"
+          },
+          {
+            "bbox": [
+              2256,
+              884,
+              2297,
+              903
+            ],
+            "center": [
+              2276,
+              893
+            ],
+            "confidence": 0.9337765574455261,
+            "class_name": "DS_2",
+            "id": 22,
+            "name": "DS3",
+            "description": "",
+            "connections": "DS7-ES76-CB,DS7-ES76-CB-ES75-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              2232,
+              1317,
+              2265,
+              1340
+            ],
+            "center": [
+              2249,
+              1328
+            ],
+            "confidence": 0.9402220845222473,
+            "class_name": "DS",
+            "id": 9,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS9-DS9-DS2-DS2-CB-ES38-GRL200,DS9-CB-DS9-GRL200"
+          },
+          {
+            "bbox": [
+              4050,
+              883,
+              4090,
+              903
+            ],
+            "center": [
+              4070,
+              893
+            ],
+            "confidence": 0.9442591071128845,
+            "class_name": "DS_2",
+            "id": 17,
+            "name": "DS7",
+            "description": "",
+            "connections": "DS1-VT-CB-ES,DS1-VT-DS2-ES"
+          },
+          {
+            "bbox": [
+              3179,
+              1390,
+              3219,
+              1411
+            ],
+            "center": [
+              3199,
+              1401
+            ],
+            "confidence": 0.9325590133666992,
+            "class_name": "DS_1",
+            "id": 16,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS1-CB-DS2-ES15-GRL200,DS1-GRL200"
+          },
+          {
+            "bbox": [
+              702,
+              1390,
+              740,
+              1411
+            ],
+            "center": [
+              721,
+              1401
+            ],
+            "confidence": 0.9326105713844299,
+            "class_name": "DS_1",
+            "id": 15,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS_1-CB-DS2-GRL200,DS_1-GRL200"
+          },
+          {
+            "bbox": [
+              1536,
+              1381,
+              1579,
+              1400
+            ],
+            "center": [
+              1557,
+              1391
+            ],
+            "confidence": 0.935407817363739,
+            "class_name": "DS_2",
+            "id": 19,
+            "name": "DS1",
+            "description": "",
+            "connections": "DS1-ES15-GRL200"
+          },
+          {
+            "bbox": [
+              3156,
+              884,
+              3195,
+              903
+            ],
+            "center": [
+              3175,
+              893
+            ],
+            "confidence": 0.93418288230896,
+            "class_name": "DS_2",
+            "id": 21,
+            "name": "DS7",
+            "description": "",
+            "connections": "DS7-VT-DS-ES76"
+          },
+          {
+            "bbox": [
+              1466,
+              1297,
+              1509,
+              1317
+            ],
+            "center": [
+              1488,
+              1307
+            ],
+            "confidence": 0.9377487301826477,
+            "class_name": "DS_2",
+            "id": 18,
+            "name": "DS2",
+            "description": "",
+            "connections": "DS9-VT-ES95-ES-GRL200-GRL200,DS9-CB-ES35"
+          },
+          {
+            "bbox": [
+              4026,
+              1316,
+              4059,
+              1340
+            ],
+            "center": [
+              4043,
+              1328
+            ],
+            "confidence": 0.9277328848838806,
+            "class_name": "DS",
+            "id": 11,
+            "name": "",
+            "description": "",
+            "connections": "DS9-DS2-DS9-DS2-CB-ES38-GRL200,DS9-DS_1-CB-GRL200,DS9-GRL200"
+          },
+          {
+            "bbox": [
+              2279,
+              1390,
+              2318,
+              1411
+            ],
+            "center": [
+              2299,
+              1401
+            ],
+            "confidence": 0.9389548897743225,
+            "class_name": "DS_1",
+            "id": 13,
+            "name": "",
+            "description": "",
+            "connections": "DS9-CB-DS9-GRL200,DS9-GRL200,DS9-DS1-GRL200,DS9-GRL200"
+          },
+          {
+            "bbox": [
+              4074,
+              1390,
+              4112,
+              1411
+            ],
+            "center": [
+              4093,
+              1400
+            ],
+            "confidence": 0.9350723624229431,
+            "class_name": "DS_1",
+            "id": 14,
+            "name": "",
+            "description": "",
+            "connections": "DS_1-GRL200,DS_1-DS9-CB-GRL200,DS_1-ES24-GRL200,DS_1-GRL200"
+          },
+          {
+            "bbox": [
+              1567,
+              1359,
+              1592,
+              1384
+            ],
+            "center": [
+              1579,
+              1371
+            ],
+            "confidence": 0.9230116009712219,
+            "class_name": "ES",
+            "id": 36,
+            "name": "ES15",
+            "description": "",
+            "connections": "ES38-DS9-DS2-DS9-DS2-CB-GRL200"
+          },
+          {
+            "bbox": [
+              729,
+              1364,
+              755,
+              1391
+            ],
+            "center": [
+              742,
+              1377
+            ],
+            "confidence": 0.9432315230369568,
+            "class_name": "ES",
+            "id": 23,
+            "name": "ES15",
+            "description": "",
+            "connections": "DS2-CB-DS_1-GRL200"
+          },
+          {
+            "bbox": [
+              4079,
+              905,
+              4103,
+              929
+            ],
+            "center": [
+              4091,
+              917
+            ],
+            "confidence": 0.9276993274688721,
+            "class_name": "ES",
+            "id": 34,
+            "name": "ES75",
+            "description": "",
+            "connections": "ES-VT-CB-DS1"
+          },
+          {
+            "bbox": [
+              3184,
+              905,
+              3209,
+              929
+            ],
+            "center": [
+              3196,
+              917
+            ],
+            "confidence": 0.9288302659988403,
+            "class_name": "ES",
+            "id": 31,
+            "name": "ES75",
+            "description": "",
+            "connections": "ES-VT-CB"
+          },
+          {
+            "bbox": [
+              1496,
+              1273,
+              1521,
+              1300
+            ],
+            "center": [
+              1508,
+              1287
+            ],
+            "confidence": 0.9294424057006836,
+            "class_name": "ES",
+            "id": 30,
+            "name": "ES25",
+            "description": "",
+            "connections": "ES35-DS9-CB"
+          },
+          {
+            "bbox": [
+              3207,
+              1364,
+              3233,
+              1391
+            ],
+            "center": [
+              3220,
+              1377
+            ],
+            "confidence": 0.9375811815261841,
+            "class_name": "ES",
+            "id": 27,
+            "name": "ES15",
+            "description": "",
+            "connections": "ES15-CB-DS2-DS1-GRL200"
+          },
+          {
+            "bbox": [
+              1496,
+              1317,
+              1520,
+              1343
+            ],
+            "center": [
+              1508,
+              1330
+            ],
+            "confidence": 0.9283984303474426,
+            "class_name": "ES",
+            "id": 32,
+            "name": "ES24",
+            "description": "",
+            "connections": "ES-DS9-VT-ES95-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              3184,
+              860,
+              3208,
+              885
+            ],
+            "center": [
+              3196,
+              872
+            ],
+            "confidence": 0.9314677715301514,
+            "class_name": "ES",
+            "id": 29,
+            "name": "ES76",
+            "description": "",
+            "connections": "ES76-VT-DS-DS7"
+          },
+          {
+            "bbox": [
+              4079,
+              860,
+              4102,
+              885
+            ],
+            "center": [
+              4091,
+              873
+            ],
+            "confidence": 0.9282347559928894,
+            "class_name": "ES",
+            "id": 33,
+            "name": "ES76",
+            "description": "",
+            "connections": "ES-VT-DS2-DS1"
+          },
+          {
+            "bbox": [
+              2284,
+              860,
+              2309,
+              886
+            ],
+            "center": [
+              2296,
+              873
+            ],
+            "confidence": 0.9376019239425659,
+            "class_name": "ES",
+            "id": 26,
+            "name": "ES38",
+            "description": "",
+            "connections": "ES75-ES76-CB-DS7-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              706,
+              795,
+              731,
+              822
+            ],
+            "center": [
+              719,
+              808
+            ],
+            "confidence": 0.9397550821304321,
+            "class_name": "ES",
+            "id": 25,
+            "name": "ES95",
+            "description": "",
+            "connections": ""
+          },
+          {
+            "bbox": [
+              2284,
+              904,
+              2308,
+              930
+            ],
+            "center": [
+              2296,
+              917
+            ],
+            "confidence": 0.9202450513839722,
+            "class_name": "ES",
+            "id": 37,
+            "name": "ES35",
+            "description": "",
+            "connections": "ES76-CB-DS7"
+          },
+          {
+            "bbox": [
+              706,
+              752,
+              730,
+              777
+            ],
+            "center": [
+              718,
+              764
+            ],
+            "confidence": 0.927482008934021,
+            "class_name": "ES",
+            "id": 35,
+            "name": "ES94",
+            "description": "",
+            "connections": "ES-SEL-2240-ES94"
+          },
+          {
+            "bbox": [
+              2307,
+              1364,
+              2333,
+              1391
+            ],
+            "center": [
+              2320,
+              1377
+            ],
+            "confidence": 0.9415448307991028,
+            "class_name": "ES",
+            "id": 24,
+            "name": "",
+            "description": "",
+            "connections": "DS1-DS9-GRL200"
+          },
+          {
+            "bbox": [
+              4102,
+              1364,
+              4127,
+              1391
+            ],
+            "center": [
+              4114,
+              1377
+            ],
+            "confidence": 0.9371060729026794,
+            "class_name": "ES",
+            "id": 28,
+            "name": "",
+            "description": "",
+            "connections": "ES24-DS_1-GRL200"
+          },
+          {
+            "bbox": [
+              1567,
+              1400,
+              1592,
+              1424
+            ],
+            "center": [
+              1579,
+              1412
+            ],
+            "confidence": 0.9142465591430664,
+            "class_name": "ES",
+            "id": 38,
+            "name": "",
+            "description": "",
+            "connections": "ES15-DS1-GRL200,ES15-GRL200"
+          },
+          {
+            "bbox": [
+              2257,
+              602,
+              2358,
+              699
+            ],
+            "center": [
+              2307,
+              651
+            ],
+            "confidence": 0.9637967348098755,
+            "class_name": "VT",
+            "id": 41,
+            "name": "",
+            "description": "",
+            "connections": "ES76-CB-DS7-ES75-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              712,
+              599,
+              813,
+              719
+            ],
+            "center": [
+              762,
+              659
+            ],
+            "confidence": 0.963405966758728,
+            "class_name": "VT",
+            "id": 42,
+            "name": "",
+            "description": "",
+            "connections": "ES94-SEL-2240-ES"
+          },
+          {
+            "bbox": [
+              3163,
+              600,
+              3262,
+              709
+            ],
+            "center": [
+              3213,
+              654
+            ],
+            "confidence": 0.9573962092399597,
+            "class_name": "VT",
+            "id": 43,
+            "name": "",
+            "description": "",
+            "connections": "VT-CB-ES,VT-DS-DS7-ES76"
+          },
+          {
+            "bbox": [
+              4056,
+              600,
+              4156,
+              708
+            ],
+            "center": [
+              4106,
+              654
+            ],
+            "confidence": 0.9564745426177979,
+            "class_name": "VT",
+            "id": 44,
+            "name": "",
+            "description": "",
+            "connections": "VT-CB-DS1-ES,VT-DS2-DS1-ES"
+          },
+          {
+            "bbox": [
+              1502,
+              1486,
+              1592,
+              1571
+            ],
+            "center": [
+              1547,
+              1529
+            ],
+            "confidence": 0.9523589611053467,
+            "class_name": "VT",
+            "id": 45,
+            "name": "",
+            "description": "",
+            "connections": "VT-DS9-ES95-ES-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              1727,
+              1482,
+              1824,
+              1572
+            ],
+            "center": [
+              1776,
+              1527
+            ],
+            "confidence": 0.9496262669563293,
+            "class_name": "VT",
+            "id": 46,
+            "name": "",
+            "description": "",
+            "connections": "VT-ES-GRL200"
+          },
+          {
+            "bbox": [
+              1419,
+              1510,
+              1480,
+              1532
+            ],
+            "center": [
+              1449,
+              1521
+            ],
+            "confidence": 0.9429179430007935,
+            "class_name": "SA",
+            "id": 39,
+            "name": "",
+            "description": "",
+            "connections": "ES95-DS9-VT-ES-GRL200-GRL200"
+          },
+          {
+            "bbox": [
+              1625,
+              1510,
+              1684,
+              1531
+            ],
+            "center": [
+              1655,
+              1521
+            ],
+            "confidence": 0.9331424236297607,
+            "class_name": "SA",
+            "id": 40,
+            "name": "",
+            "description": "",
+            "connections": "ES-VT-GRL200"
+          },
+          {
+            "bbox": [
+              1656,
+              1146,
+              1877,
+              1209
+            ],
+            "center": [
+              1766,
+              1177
+            ],
+            "confidence": 0.9676713943481445,
+            "class_name": "ied",
+            "id": 47,
+            "name": "PM2130",
+            "description": "MM"
+          },
+          {
+            "bbox": [
+              3395,
+              879,
+              3656,
+              950
+            ],
+            "center": [
+              3525,
+              914
+            ],
+            "confidence": 0.9674617052078247,
+            "class_name": "ied",
+            "id": 48,
+            "name": "GRL200",
+            "description": "F87L,21/21N,67/67N,50/51,50/51N, 25/7927/59,SOTF85FL/FR"
+          },
+          {
+            "bbox": [
+              945,
+              880,
+              1180,
+              953
+            ],
+            "center": [
+              1062,
+              917
+            ],
+            "confidence": 0.967144250869751,
+            "class_name": "ied",
+            "id": 49,
+            "name": "2xGRZ200",
+            "description": "F21/21N,67/67N,50/51,50/51N 25/79,85/FR/FL"
+          },
+          {
+            "bbox": [
+              946,
+              1024,
+              1179,
+              1098
+            ],
+            "center": [
+              1063,
+              1061
+            ],
+            "confidence": 0.9670619964599609,
+            "class_name": "ied",
+            "id": 50,
+            "name": "2xGRD 200",
+            "description": "F67/67N,50/51,50/51N, 85, FR/FL"
+          },
+          {
+            "bbox": [
+              1656,
+              1224,
+              1878,
+              1295
+            ],
+            "center": [
+              1767,
+              1259
+            ],
+            "confidence": 0.966620683670044,
+            "class_name": "ied",
+            "id": 51,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              4288,
+              1001,
+              4550,
+              1074
+            ],
+            "center": [
+              4419,
+              1038
+            ],
+            "confidence": 0.9663223028182983,
+            "class_name": "ied",
+            "id": 52,
+            "name": "GRD 200",
+            "description": "F67/67N,50/51,50/51N, 27/59,81,85/FR"
+          },
+          {
+            "bbox": [
+              4289,
+              880,
+              4551,
+              950
+            ],
+            "center": [
+              4420,
+              915
+            ],
+            "confidence": 0.9659387469291687,
+            "class_name": "ied",
+            "id": 53,
+            "name": "GRL200",
+            "description": "F87L,21/21N,67/67N,50/51,50/51N, 25/7927/59,SOTF85FL/FR"
+          },
+          {
+            "bbox": [
+              3393,
+              1001,
+              3656,
+              1074
+            ],
+            "center": [
+              3525,
+              1038
+            ],
+            "confidence": 0.965331494808197,
+            "class_name": "ied",
+            "id": 54,
+            "name": "GRD200",
+            "description": "F67/67N,50/51,50/51N, 27/59,81,85/FR"
+          },
+          {
+            "bbox": [
+              2489,
+              1031,
+              2709,
+              1093
+            ],
+            "center": [
+              2599,
+              1062
+            ],
+            "confidence": 0.9651399254798889,
+            "class_name": "ied",
+            "id": 55,
+            "name": "SEL-2240",
+            "description": "BCU25"
+          },
+          {
+            "bbox": [
+              1656,
+              998,
+              1878,
+              1063
+            ],
+            "center": [
+              1767,
+              1030
+            ],
+            "confidence": 0.9628360271453857,
+            "class_name": "ied",
+            "id": 56,
+            "name": "GRZ 200",
+            "description": "F21/21N,67/67N,50/51,50/51N 25, FR"
+          },
+          {
+            "bbox": [
+              2488,
+              954,
+              2710,
+              1022
+            ],
+            "center": [
+              2599,
+              988
+            ],
+            "confidence": 0.9625283479690552,
+            "class_name": "ied",
+            "id": 57,
+            "name": "GRD200",
+            "description": "F67/67N,50/51,50/51N,50BF 25, FR"
+          },
+          {
+            "bbox": [
+              3394,
+              1084,
+              3657,
+              1156
+            ],
+            "center": [
+              3525,
+              1120
+            ],
+            "confidence": 0.9587891101837158,
+            "class_name": "ied",
+            "id": 58,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              4288,
+              1084,
+              4551,
+              1156
+            ],
+            "center": [
+              4419,
+              1120
+            ],
+            "confidence": 0.9581596255302429,
+            "class_name": "ied",
+            "id": 59,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              1656,
+              1072,
+              1878,
+              1135
+            ],
+            "center": [
+              1767,
+              1103
+            ],
+            "confidence": 0.9576202630996704,
+            "class_name": "ied",
+            "id": 60,
+            "name": "PM2130",
+            "description": "MM"
+          },
+          {
+            "bbox": [
+              946,
+              1110,
+              1179,
+              1172
+            ],
+            "center": [
+              1063,
+              1141
+            ],
+            "confidence": 0.9555854797363281,
+            "class_name": "ied",
+            "id": 61,
+            "name": "SEL-2240",
+            "description": "BCU,25"
+          },
+          {
+            "bbox": [
+              3370,
+              832,
+              3682,
+              1168
+            ],
+            "center": [
+              3526,
+              1000
+            ],
+            "confidence": 0.9793412089347839,
+            "class_name": "Cubicle",
+            "id": 70,
+            "name": "DMO ELL E01",
+            "description": ""
+          },
+          {
+            "bbox": [
+              4264,
+              832,
+              4576,
+              1168
+            ],
+            "center": [
+              4420,
+              1000
+            ],
+            "confidence": 0.9789203405380249,
+            "class_name": "Cubicle",
+            "id": 71,
+            "name": "DMO ELL E02",
+            "description": ""
+          },
+          {
+            "bbox": [
+              2457,
+              831,
+              2737,
+              1110
+            ],
+            "center": [
+              2597,
+              971
+            ],
+            "confidence": 0.9782006740570068,
+            "class_name": "Cubicle",
+            "id": 72,
+            "name": "DMO ETI",
+            "description": ""
+          },
+          {
+            "bbox": [
+              898,
+              830,
+              1213,
+              1187
+            ],
+            "center": [
+              1055,
+              1008
+            ],
+            "confidence": 0.9779250621795654,
+            "class_name": "Cubicle",
+            "id": 73,
+            "name": "DMO_EBT",
+            "description": ""
+          },
+          {
+            "bbox": [
+              1623,
+              945,
+              1915,
+              1313
+            ],
+            "center": [
+              1769,
+              1129
+            ],
+            "confidence": 0.9766900539398193,
+            "class_name": "Cubicle",
+            "id": 74,
+            "name": "DMO_EBC",
+            "description": ""
+          },
+          {
+            "bbox": [
+              544,
+              300,
+              1402,
+              386
+            ],
+            "center": [
+              998,
+              343
+            ],
+            "confidence": 0.9501379132270813,
+            "class_name": "BAY",
+            "id": 65,
+            "full_bbox": [
+              545,
+              301,
+              1403.5,
+              1487
+            ],
+            "name": "E04",
+            "description": "BUS TRANSFER",
+            "up": true
+          },
+          {
+            "bbox": [
+              1402,
+              299,
+              2072,
+              386
+            ],
+            "center": [
+              1737,
+              342
+            ],
+            "confidence": 0.9483664035797119,
+            "class_name": "BAY",
+            "id": 66,
+            "full_bbox": [
+              1403.5,
+              300,
+              2073.0,
+              1592
+            ],
+            "name": "E05",
+            "description": "BUS COUPLER",
+            "up": true
+          },
+          {
+            "bbox": [
+              2072,
+              302,
+              2946,
+              385
+            ],
+            "center": [
+              2509,
+              343
+            ],
+            "confidence": 0.9469289779663086,
+            "class_name": "BAY",
+            "id": 67,
+            "full_bbox": [
+              2073.0,
+              303,
+              2947.5,
+              1489
+            ],
+            "name": "E07",
+            "description": "MBA AT1",
+            "up": true
+          },
+          {
+            "bbox": [
+              2946,
+              301,
+              3876,
+              386
+            ],
+            "center": [
+              3411,
+              343
+            ],
+            "confidence": 0.9386506080627441,
+            "class_name": "BAY",
+            "id": 69,
+            "full_bbox": [
+              2947.5,
+              302,
+              3877.5,
+              1491
+            ],
+            "name": "E01",
+            "description": "LAI UYEN",
+            "up": true
+          },
+          {
+            "bbox": [
+              3876,
+              301,
+              4851,
+              385
+            ],
+            "center": [
+              4338,
+              343
+            ],
+            "confidence": 0.9408091306686401,
+            "class_name": "BAY",
+            "id": 68,
+            "full_bbox": [
+              3877.5,
+              302,
+              4852,
+              1493
+            ],
+            "name": "E02",
+            "description": "LAI UYEN",
+            "up": true
+          },
+          {
+            "bbox": [
+              561,
+              1404,
+              4864,
+              1434
+            ],
+            "center": [
+              612,
+              1416
+            ],
+            "confidence": 0.9460411071777344,
+            "class_name": "BB",
+            "id": 64,
+            "name": "C11",
+            "description": "",
+            "connections": "GRL200-DS9-VT-ES95-ES-GRL200,GRL200-ES76-CB-DS7-ES75-GRL200,GRL200-DS1-ES15,GRL200-DS_1,GRL200-DS_1-ES24,GRL200-DS_1,GRL200-ES-VT,GRL200-DS9,GRL200-DS9-DS1,GRL200-ES15,GRL200-DS9,GRL200-DS_1,GRL200-DS1"
+          },
+          {
+            "bbox": [
+              601,
+              726,
+              4882,
+              755
+            ],
+            "center": [
+              643,
+              738
+            ],
+            "confidence": 0.9528329372406006,
+            "class_name": "BB",
+            "id": 62,
+            "name": "C19",
+            "description": "",
+            "connections": "SEL-2240-DS,SEL-2240-ES94-ES,SEL-2240-DS2,SEL-2240-CB"
+          },
+          {
+            "bbox": [
+              577,
+              1327,
+              4864,
+              1357
+            ],
+            "center": [
+              611,
+              1348
+            ],
+            "confidence": 0.9470891356468201,
+            "class_name": "BB",
+            "id": 63,
+            "name": "C12",
+            "description": "",
+            "connections": "GRL200-DS9-DS2-DS9-DS2-CB-ES38,GRL200-DS9-VT-ES95-ES-GRL200,GRL200-CB-DS9-DS9,GRL200-ES76-CB-DS7-ES75-GRL200,GRL200-CB-DS_1-DS2,GRL200-CB-DS2-DS1-ES15,GRL200-DS_1-DS9-CB,GRL200-DS9"
+          }
+        ]
+      }
+    ]
+  }
+]
