@@ -9,6 +9,8 @@ Checks:
   3. No forbidden OneATS write calls in source (AGENTS.md I1)
   4. Docs freshness (measured-fact docs carry a date)
   5. Backend toolchain: ruff / mypy / pytest  (skipped if uv not installed)
+  6. API contract: backend/openapi.json matches the running app (ADR-0009)
+  7. Frontend toolchain: typecheck / lint / format  (skipped if npm missing)
 
 Exit code 0 = all green, 1 = something failed.
 """
@@ -24,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 BACKEND = ROOT / "backend"
+FRONTEND = ROOT / "frontend"
 SRC = BACKEND / "src" / "blackinterface"
 
 LAYERS = ("domain", "integration", "diagram", "api", "agent", "store")
@@ -68,7 +71,10 @@ REQUIRED_PATHS = (
     "backend/pyproject.toml",
     "backend/src/blackinterface/__init__.py",
     "backend/tests/fixtures/sas_tree.json",
-    "frontend/dev/index.html",
+    "backend/openapi.json",
+    "frontend/package.json",
+    "frontend/src/main.ts",
+    "frontend/src/api/client.ts",
 )
 
 #: Bay templates are data the topology builder depends on; an empty directory
@@ -250,6 +256,54 @@ def check_backend_toolchain(r: Report) -> None:
             r.fail(label, out[:1500])
 
 
+def check_api_contract(r: Report) -> None:
+    """backend/openapi.json is the frontend's source of types (ADR-0009).
+
+    If it drifts from the running app, the frontend compiles against an API that
+    no longer exists — and the mismatch shows up at runtime in a substation
+    rather than at build time here.
+    """
+    section("6. API contract")
+    if not shutil.which("uv") or not (BACKEND / ".venv").exists():
+        r.skip("openapi.json freshness", "backend environment not set up")
+        return
+    cmd = ["uv", "run", "python", "../tools/export_openapi.py", "--check"]
+    proc = subprocess.run(cmd, cwd=BACKEND, capture_output=True, text=True)
+    if proc.returncode != 0 and _is_onedrive_lock(proc.stdout + proc.stderr):
+        proc = subprocess.run(cmd, cwd=BACKEND, capture_output=True, text=True)
+    if proc.returncode == 0:
+        r.ok("backend/openapi.json is up to date")
+    else:
+        r.fail("backend/openapi.json is stale", (proc.stdout + proc.stderr).strip()[:800])
+
+
+def check_frontend_toolchain(r: Report) -> None:
+    section("7. Frontend toolchain")
+    npm = shutil.which("npm") or shutil.which("npm.cmd")
+    if npm is None:
+        r.skip("typecheck / lint / format", "npm not installed")
+        return
+    if not (FRONTEND / "node_modules").exists():
+        r.skip("typecheck / lint / format", "run `cd frontend && npm install` first")
+        return
+
+    for label, args in (
+        ("typecheck", ["run", "typecheck"]),
+        ("lint", ["run", "lint"]),
+        ("format", ["run", "format:check"]),
+    ):
+        proc = subprocess.run([npm, *args], cwd=FRONTEND, capture_output=True, text=True)
+        if proc.returncode == 0:
+            r.ok(label)
+        else:
+            r.fail(f"frontend {label}", (proc.stdout + proc.stderr).strip()[:1500])
+
+    if not (FRONTEND / "dist" / "index.html").exists():
+        r.skip("built SPA", "run `cd frontend && npm run build` to serve a UI")
+    else:
+        r.ok("frontend/dist present - the API will serve a UI")
+
+
 def main() -> int:
     print(f"Black Interface repo check  {DIM}{ROOT}{RESET}")
     r = Report()
@@ -258,6 +312,8 @@ def main() -> int:
     check_no_write_calls(r)
     check_docs_dated(r)
     check_backend_toolchain(r)
+    check_api_contract(r)
+    check_frontend_toolchain(r)
 
     print()
     if r.failures:

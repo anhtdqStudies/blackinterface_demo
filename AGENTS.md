@@ -96,7 +96,8 @@ Point catalog phải freeze thành snapshot có hash, pin vào release, pin kèm
 | Store | **SQLite** | config, release, topology, event store. **Không dùng MongoDB** |
 | Agent | **Pydantic AI** | |
 | LLM | OpenRouter (dev) → Ollama (trạm) | qua interface `LLMProvider`, đổi bằng config |
-| Frontend | **Nuxt build static (SPA)** | FastAPI serve tĩnh → 1 process, không cần Node runtime |
+| Frontend | **Vite + Vue 3 + TypeScript** (ADR-0009) | build tĩnh → FastAPI serve → 1 process, không cần Node runtime |
+| Type API | **sinh từ OpenAPI** (`openapi-typescript`) | backend đổi field → frontend lỗi biên dịch |
 | Đóng gói | embedded CPython + Inno Setup → Windows Service | |
 
 **Không được thêm** vào stack mà không có ADR: MongoDB, Postgres, Docker, Redis,
@@ -108,6 +109,9 @@ Node runtime ở production, message broker.
 
 ```
 backend/src/blackinterface/
+  config.py      # MỌI setting BI_* ở đây. Không nơi nào khác đọc os.environ
+  errors.py      # bộ lỗi đóng; mọi lỗi API là một trong số này
+  logs.py        # structlog; gọi configure() một lần lúc khởi động
   domain/        # L4 Neutral Station Model — contract hợp nhất, immutable
     models.py        Bay/Device/Busbar/ConnectivityNode/PointSample/ValidationIssue
     observation.py   StationObs — đầu vào trung tính cho mọi importer
@@ -121,26 +125,36 @@ backend/src/blackinterface/
   diagram/       # L6 graph → layout → ViewModel → SVG
     layout.py        StationGraph -> DiagramView (toạ độ, deterministic)
   api/           # L3 Typed Domain API (FastAPI, HTTP/SSE)
-    source.py        StationStore: fixture | opcua, cấu hình qua BI_*
-    app.py           endpoint + serve frontend/dev
+    source.py        StationStore: fixture | opcua
+    errors.py        exception -> JSON {"error": {code, message, detail}}
+    app.py           endpoint + serve frontend/dist
   agent/         # L2 BlackCore (Pydantic AI: intent, tools, planner, evidence)
-  store/         # SQLite: release, snapshot, event store
-frontend/
-  dev/index.html # viewer 1 file, không cần Node — xem §4.1
+  store/         # SQLite (ADR-0006)
+    db.py            connection, WAL, migration tiến-một-chiều
+    meta.py          repository app_meta — mẫu cho các repository sau
+    migrations/      NNN_name.sql, đánh số liên tục từ 001
+backend/openapi.json  # HỢP ĐỒNG API. Sinh ra, được check.py gác
+frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009), xem frontend/README.md
+  src/api/schema.d.ts  # SINH từ openapi.json. ĐỪNG SỬA TAY
 tools/           # script vận hành/kiểm chứng — chạy được độc lập
 docs/            # xem §0
 document/        # tài liệu gốc ATS (manual PDF, output service SLD) — CHỈ ĐỌC
 ```
 
-### 4.1 Frontend hiện tại là bản dev, không phải bản chốt
+### 4.1 Hợp đồng giữa backend và frontend là máy giữ, không phải người nhớ
 
-`frontend/dev/index.html` là **một file HTML tĩnh**, FastAPI serve trực tiếp,
-không build, không Node. Nó tồn tại để **nhìn thấy kết quả ngay** trong lúc dựng
-từng module.
+```
+FastAPI app  ──export_openapi.py──>  backend/openapi.json
+                                          │ openapi-typescript
+                                          ▼
+                                  frontend/src/api/schema.d.ts
+```
 
-Bản chính thức vẫn là **Nuxt static SPA** như §3. Khi dựng Nuxt, đây là bản tham
-chiếu về mặt hành vi — đừng xoá cho tới lúc đó, và đừng để nó phình thành
-ứng dụng thật.
+Đổi endpoint mà quên xuất lại → `tools/check.py` đỏ.
+Frontend dùng sai tên field → lỗi biên dịch, không phải `undefined` lúc chạy.
+
+Không có frontend dự phòng: chưa `npm run build` thì API chạy nhưng không có
+giao diện. Cố ý — một frontend cũ còn sót lại nguy hiểm hơn là không có gì.
 
 Chiều phụ thuộc **một chiều**: `api → domain ← integration`, `agent → api`,
 `diagram → domain`. `domain` không import bất cứ lớp nào khác.
@@ -186,20 +200,31 @@ DataServer là chân lý. SLD chỉ dùng để đối chiếu.
 ## 6. Công cụ kiểm tra
 
 ```bash
+# --- một lệnh gác tất cả (chạy từ gốc repo) ---
+python tools/check.py
+
+# --- backend ---
 cd backend
-uv sync                      # cài môi trường
-uv run ruff check .          # lint
-uv run ruff format --check . # format
-uv run mypy src              # type check
-uv run pytest                # test (không cần DataServer)
-uv run pytest -m live        # test cần DataServer đang chạy
+uv sync
+uv run ruff check . && uv run ruff format --check .
+uv run mypy src
+uv run pytest                # 107 test, không cần DataServer
+uv run pytest -m live        # cần DataServer đang chạy
+uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
-# chạy thử có giao diện:
-uv run uvicorn blackinterface.api.app:app --port 8080   # rồi mở http://127.0.0.1:8080
+# --- frontend ---
+cd frontend
+npm install
+npm run check                # api:types + typecheck + lint + format
+npm run build                # -> dist/, FastAPI sẽ serve
+npm run dev                  # http://localhost:5173, proxy /api sang :8080
 
-# từ gốc repo:
-python tools/check.py             # chạy tất cả ở trên + kiểm tra cấu trúc docs
-python tools/verify_dataserver.py # xác minh lại "sự thật đã đo" trên DataServer live
+# --- chạy thử có giao diện ---
+cd backend && uv run uvicorn blackinterface.api.app:app --port 8080
+# rồi mở http://127.0.0.1:8080   (phải npm run build trước)
+
+# --- công cụ OneATS ---
+python tools/verify_dataserver.py    # xác minh lại "sự thật đã đo" trên hệ live
 python tools/probe_dataserver.py --dump --slim --depth 4 \
   --out backend/tests/fixtures/sas_tree.json   # tạo lại fixture
 ```
@@ -239,6 +264,7 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 
 ## 9. Trạng thái repo
 
-- **Chưa init git** (repo nằm trong OneDrive — xem `docs/90-progress/status.md`).
-  Đừng tự chạy `git init` nếu người dùng chưa yêu cầu.
+- **Có git** (khởi tạo 2026-08-04, chưa có remote). Branch mặc định `master`.
+  Làm việc trên branch riêng, đừng commit thẳng lên `master` nếu không được yêu cầu.
 - `document/` là tài liệu gốc, **chỉ đọc**, không sửa không xoá.
+- Repo nằm trong OneDrive → xem bẫy về `.venv` ở §7.

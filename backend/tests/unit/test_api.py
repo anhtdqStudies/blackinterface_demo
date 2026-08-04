@@ -8,15 +8,18 @@ import pytest
 from fastapi.testclient import TestClient
 
 from blackinterface.api import app as app_module
-from blackinterface.api.source import Settings, StationStore
+from blackinterface.api.source import StationStore
+from blackinterface.config import Settings
 from tests.conftest import SAS_TREE
 
 
 @pytest.fixture(scope="module")
-def client() -> Iterator[TestClient]:
+def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     if not SAS_TREE.exists():
         pytest.skip(f"fixture missing: {SAS_TREE}")
-    app_module.store = StationStore(Settings(source="fixture", fixture=SAS_TREE))
+    data_dir = tmp_path_factory.mktemp("data")
+    app_module.store = StationStore(Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir))
+    app_module.database = app_module.Database(data_dir / "test.sqlite")
     with TestClient(app_module.app) as test_client:
         yield test_client
 
@@ -77,3 +80,23 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         if method.lower() in {"post", "put", "patch", "delete"}
     }
     assert writes == {"POST /api/reload"}
+
+
+def test_errors_share_one_shape(client: TestClient) -> None:
+    """One error body for everything, so the generated TS types cover it."""
+    body = client.get("/api/bays/NOPE").json()
+    assert set(body) == {"error"}
+    assert body["error"]["code"] == "not_found"
+    assert body["error"]["detail"] == {"bay_id": "NOPE"}
+
+
+def test_not_loaded_reports_503_with_a_reason() -> None:
+    """A broken source must not look like an empty station."""
+    app_module.store = StationStore(
+        Settings(source="fixture", fixture=SAS_TREE.parent / "does-not-exist.json")
+    )
+    with TestClient(app_module.app, raise_server_exceptions=False) as broken:
+        response = broken.get("/api/station")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "model_not_loaded"
+    assert "does-not-exist.json" in broken.get("/api/health").json()["load_error"]

@@ -14,9 +14,11 @@
 ## 0. Chuẩn bị (1 lần)
 
 ```bash
-cd backend
-uv sync
+cd backend  && uv sync
+cd frontend && npm install && npm run build
 ```
+
+**Phải build frontend**, nếu không API chạy nhưng không có giao diện (ADR-0009).
 
 Nếu gặp `os error 396` hoặc `Access is denied` — đó là OneDrive giữ file `.venv`.
 Chạy lại lệnh, lần thứ hai luôn được. Xem `AGENTS.md` §7.
@@ -34,6 +36,8 @@ Mở `http://127.0.0.1:8080`
 
 Mặc định app đọc **fixture** (`backend/tests/fixtures/sas_tree.json`) — chạy được
 khi không có DataServer. Để nối hệ thật, xem §6.
+
+Khi đang sửa frontend thì dùng `npm run dev` ở cổng 5173 thay vì build lại mỗi lần.
 
 ---
 
@@ -183,7 +187,8 @@ Tương tự, ngăn `D12` có `IsLive` lỗi. Kiểm tra panel của D12 hiển 
 
 ### TC-06 — Thiếu dữ liệu thì phải nói ra
 
-**Làm**: mở panel phải, kéo xuống mục **"Cảnh báo dựng model"**.
+**Làm**: mở panel phải, kéo xuống mục **"Cảnh báo dựng model"** (hoặc tab
+**Cảnh báo** trên thanh trên cùng để xem đầy đủ, tách theo mức độ).
 
 **Phải thấy đúng 1 cảnh báo**:
 
@@ -220,7 +225,7 @@ Test `test_no_write_endpoint_exists` sẽ fail nếu ai đó thêm vào.
 
 ```bash
 cd backend
-uv run pytest          # 96 test, không cần DataServer
+uv run pytest          # 107 test, không cần DataServer
 uv run pytest -m live  # 2 test, cần DataServer đang chạy
 ```
 
@@ -252,6 +257,7 @@ python tools/check.py
 
 | Triệu chứng | Nguyên nhân thường gặp |
 |---|---|
+| Mở `/` ra 404 | Chưa `npm run build`. Không có frontend dự phòng (ADR-0009) |
 | Trang trắng, header báo "Không tải được model" | Fixture chưa có → xem §6 để tạo lại |
 | `bay_type = UNKNOWN` | Trạm dùng quy ước LN khác. Xem `domain/bay_types.py`, cần template mới |
 | Cảnh báo `slot_unmapped` | Ngăn có dao cách ly mà template không đặt → **graph thiếu thiết bị**, phải sửa template |

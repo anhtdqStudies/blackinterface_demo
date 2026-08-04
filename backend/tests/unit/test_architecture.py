@@ -21,9 +21,15 @@ import blackinterface
 
 LAYERS = ("domain", "integration", "diagram", "api", "agent", "store")
 
-# AGENTS.md I6 — domain is the contract; it depends on nothing else.
+# AGENTS.md I6 — domain is the contract; it depends on nothing else. Not on a
+# sibling layer, and not on process-wide concerns either: a pure domain takes
+# its inputs as arguments, so it must not reach for config or a database.
 FORBIDDEN_TRANSITIVE: dict[str, tuple[str, ...]] = {
-    "domain": tuple(f"blackinterface.{layer}" for layer in LAYERS if layer != "domain"),
+    "domain": (
+        *(f"blackinterface.{layer}" for layer in LAYERS if layer != "domain"),
+        "blackinterface.config",
+        "blackinterface.logs",
+    ),
     # AGENTS.md I5 — agent reaches the rest of the system only through api.
     "agent": ("blackinterface.integration", "blackinterface.diagram", "blackinterface.store"),
 }

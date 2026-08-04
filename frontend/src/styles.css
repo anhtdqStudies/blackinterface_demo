@@ -1,0 +1,106 @@
+/* Design tokens.
+ *
+ * The state colours are not decoration — they follow EVN/IEC convention and an
+ * operator reads them without thinking:
+ *   red   = closed / energised
+ *   green = open / de-energised
+ *   grey  = UNDETERMINED, i.e. quality is not GOOD and we refuse to guess (I2)
+ *
+ * Grey must never be mistakable for green. Getting that wrong is a safety bug,
+ * not a style bug.
+ */
+:root {
+  --bg: #0d0f12;
+  --panel: #151920;
+  --panel-2: #1c222c;
+  --line: #2b3240;
+  --fg: #e6e9ef;
+  --dim: #8b93a3;
+  --accent: #5b9dff;
+
+  --closed: #e5484d;
+  --open: #30a46c;
+  --intermediate: #f5a524;
+  --undetermined: #8b8d98;
+
+  --radius: 6px;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    13px/1.5 ui-sans-serif,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+button {
+  background: var(--panel-2);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 11px;
+  cursor: pointer;
+  font: inherit;
+}
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+button.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #08111f;
+  font-weight: 600;
+}
+
+a {
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+td {
+  padding: 3px 0;
+  vertical-align: top;
+}
+td:first-child {
+  color: var(--dim);
+  width: 38%;
+  padding-right: 8px;
+}
+
+.dim {
+  color: var(--dim);
+}
+.empty {
+  color: var(--dim);
+  font-style: italic;
+}

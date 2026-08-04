@@ -3,20 +3,22 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-04 · phiên: dựng module #1 (bay template + topology + viewer)
+**Cập nhật lần cuối**: 2026-08-04 · phiên: module #1 + khung dự án (git, frontend, store)
 
 ---
 
 ## Đang ở đâu
 
-**Giai đoạn: 1 — Module #1 XONG. Có sản phẩm chạy được, nhìn thấy được.**
+**Giai đoạn: 1 — Module #1 xong. Khung dự án xong. Có git.**
 
 Trỏ vào DataServer → ra sơ đồ một sợi 13 ngăn / 80 thiết bị, **không vẽ tay,
 không map point**. Mục tiêu M1 đã chứng minh được trên `DEMO_SAS`.
 
 Chạy thử:
 ```bash
-cd backend && uv run uvicorn blackinterface.api.app:app --port 8080
+cd backend  && uv sync
+cd frontend && npm install && npm run build
+cd backend  && uv run uvicorn blackinterface.api.app:app --port 8080
 ```
 → mở `http://127.0.0.1:8080` · kịch bản: `docs/40-testing/manual-test-01-topology.md`
 
@@ -92,9 +94,39 @@ cd backend && uv run uvicorn blackinterface.api.app:app --port 8080
 - `BB29.IsLive` và `D12.IsLive` trả `BadWaitingForInitialData` → có sẵn ca thật
   để kiểm chứng invariant I2.
 
+### Khung dự án (2026-08-04) ✅
+
+Trước module #1 chỉ có một **lát cắt dọc**: chạy được từ OPC UA tới màn hình,
+nhưng chưa có lưu trữ, cấu hình, log, xử lý lỗi, frontend thật, version control.
+Phiên này bổ sung đúng những thứ **mọi module còn lại đều đụng vào**.
+
+- ✅ **Git** — khởi tạo, commit đầu tiên gom toàn bộ hiện trạng (84 file)
+- ✅ **ADR-0009** — frontend là Vite + Vue 3 + TS, thay phần frontend của ADR-0006
+- ✅ `config.py` — mọi setting `BI_*` một chỗ; không nơi nào khác đọc `os.environ`
+- ✅ `errors.py` + `api/errors.py` — bộ lỗi đóng, một hình dạng JSON duy nhất
+- ✅ `logs.py` — structlog, người đọc được khi dev, JSON ở trạm
+- ✅ `store/` — SQLite WAL, migration tiến-một-chiều, repository đầu tiên
+- ✅ **Frontend thật** — routing, Pinia, component sơ đồ tách riêng, 3 view
+- ✅ **Hợp đồng API cưỡng chế bằng máy**: FastAPI → `openapi.json` →
+      `schema.d.ts`. Đổi field mà quên xuất → `check.py` đỏ
+- ✅ Xoá `frontend/dev/index.html` (282 dòng) — không để tồn tại hai frontend
+- ✅ `tools/check.py` giờ gác 7 mục, gồm cả frontend và hợp đồng API
+
+**Chưa làm, cố ý**: `agent/`, đóng gói Inno Setup, `EvidenceRecord`.
+Thiết kế chúng trước khi viết module tương ứng là đoán — đúng cái sai lầm mà
+ba phát hiện của phiên trước (`get_children()` trùng, DBB/EBB, vị trí thanh cái)
+đã chứng minh.
+
+**Chưa kiểm chứng**: giao diện mới mới verify ở mức build + serve + typecheck,
+**chưa xem bằng mắt trên trình duyệt**. Cần chạy `docs/40-testing/manual-test-01-topology.md`.
+
 ---
 
 ## Việc kế tiếp (theo thứ tự)
+
+### 0. Xem lại giao diện mới bằng mắt ← **LÀM TRƯỚC**
+Chạy 7 test case trong `docs/40-testing/manual-test-01-topology.md`.
+Chưa ai nhìn frontend mới trên trình duyệt.
 
 ### 1. Energization solver ← **BẮT ĐẦU TỪ ĐÂY**
 Đây là thứ biến sơ đồ hiện tại thành sơ đồ *có nghĩa*: tô màu theo **mang điện**,
@@ -161,7 +193,8 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 | Endpoint DataServer không bảo mật (None + Anonymous) | **Cao** | Tồn tại độc lập với Black Interface; phải báo team vận hành |
 | CPU-only tại trạm → LLM chậm | Trung bình | ADR-0006. Giảm nhẹ: câu trả lời ngắn + structured view |
 | SQLite ghi đồng thời (event store + reader) | Thấp | Bật WAL, tách connection đọc/ghi |
-| Repo trong OneDrive, **chưa init git** | Trung bình | Người dùng chọn chưa init. Chưa có version control = mất việc là mất thật |
+| Git chưa có remote — chỉ tồn tại trên máy này | Trung bình | Ổ cứng hỏng là mất. Đẩy lên GitHub/GitLab nội bộ ATS khi được phép |
+| `.venv` trong OneDrive bị khoá lúc `uv sync` | Thấp | Đã set `link-mode = "copy"`; `check.py` tự retry 1 lần |
 
 ---
 
@@ -183,3 +216,11 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 - Đính chính: `DBB`/`EBB` là bảo vệ so lệch, không phải thanh cái
 - Bắt được 1 lỗi thật lúc test live: `get_children()` của OneATS trả trùng
   → 320 thiết bị thay vì 80. Đã dedupe theo NodeId + ghi vào bảng bẫy
+
+### 2026-08-04 — Khung dự án
+- Init git, commit toàn bộ hiện trạng; branch `skeleton/project-structure`
+- ADR-0009: bỏ Nuxt, dùng Vite + Vue 3 + TS
+- Thêm `config.py` / `errors.py` / `logs.py` / `store/` (SQLite WAL + migration)
+- Dựng frontend thật, xoá viewer tạm 282 dòng
+- Nối hợp đồng API bằng máy: `openapi.json` → `schema.d.ts`, `check.py` gác
+- `tools/check.py`: 7 mục, xanh toàn bộ. Backend 107 test + 2 live

@@ -3,22 +3,24 @@
 The frontend talks to these endpoints directly. BlackCore, when it exists, will
 call the same ones with the same rights: no private path, no elevated access.
 
-Everything here is read-only. There is no write endpoint and no place to add
-one without also changing the invariants (I1).
+Everything here is read-only with respect to OneATS. There is no write endpoint
+and no place to add one without also changing the invariants (I1).
 """
 
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from blackinterface.api.source import REPO_ROOT, StationStore
+from blackinterface.api import errors as error_handlers
+from blackinterface.api.source import StationStore
+from blackinterface.config import get_settings
 from blackinterface.diagram.layout import DiagramView, layout_voltage_level
 from blackinterface.domain.models import (
     Bay,
@@ -29,19 +31,33 @@ from blackinterface.domain.models import (
     SwitchState,
     ValidationIssue,
 )
+from blackinterface.errors import NotFoundError
+from blackinterface.logs import configure as configure_logging
+from blackinterface.logs import get_logger
+from blackinterface.store.db import Database
 
-FRONTEND_DIR = REPO_ROOT / "frontend" / "dev"
+log = get_logger(__name__)
 
-store = StationStore()
+settings = get_settings()
+store = StationStore(settings)
+database = Database(settings.db_path)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    try:
-        await store.reload()
-    except Exception as exc:  # a broken source must not hide behind a dead app
-        app.state.load_error = f"{type(exc).__name__}: {exc}"
+    configure_logging(settings.log_level, settings.log_json)
+    log.info(
+        "starting",
+        source=settings.source,
+        db=str(settings.db_path),
+        frontend=str(settings.frontend_dir) if settings.frontend_dir else None,
+    )
+    database.migrate()
+    # A failed load must not take the process down: /api/health has to stay
+    # answerable so an operator can see *why* nothing is showing.
+    await store.try_reload()
     yield
+    database.close()
 
 
 app = FastAPI(
@@ -49,6 +65,13 @@ app = FastAPI(
     version="0.1.0",
     summary="Read-only station model from OneATS DataServer",
     lifespan=lifespan,
+)
+error_handlers.install(app)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
 )
 
 
@@ -165,15 +188,6 @@ def _busbar_out(busbar: Busbar) -> BusbarOut:
     )
 
 
-def _graph() -> StationGraph:
-    if not store.loaded:
-        raise HTTPException(
-            status_code=503,
-            detail=getattr(app.state, "load_error", "station model not loaded"),
-        )
-    return store.graph
-
-
 # ------------------------------------------------------------------ endpoints
 @app.get("/api/health", response_model=HealthOut)
 async def health() -> HealthOut:
@@ -181,24 +195,22 @@ async def health() -> HealthOut:
         ok=store.loaded,
         loaded=store.loaded,
         source=store.settings.source,
-        load_error=getattr(app.state, "load_error", None),
+        load_error=store.load_error,
         load_seconds=store.load_seconds,
     )
 
 
 @app.post("/api/reload", response_model=HealthOut)
 async def reload_station() -> HealthOut:
-    try:
-        await store.reload()
-        app.state.load_error = None
-    except Exception as exc:
-        app.state.load_error = f"{type(exc).__name__}: {exc}"
+    """Re-read the source. The only non-GET endpoint, and it writes nothing
+    to OneATS."""
+    await store.try_reload()
     return await health()
 
 
 @app.get("/api/station", response_model=StationOut)
 async def station() -> StationOut:
-    graph = _graph()
+    graph = store.graph
     bound = sum(1 for d in graph.devices if d.position.quality is Quality.GOOD)
     determined = sum(1 for d in graph.devices if d.state is not SwitchState.UNDETERMINED)
     return StationOut(
@@ -223,16 +235,16 @@ async def station() -> StationOut:
 
 @app.get("/api/bays", response_model=list[BayOut])
 async def bays() -> list[BayOut]:
-    graph = _graph()
+    graph = store.graph
     return [_bay_out(b, graph) for b in graph.bays]
 
 
 @app.get("/api/bays/{bay_id}", response_model=BayDetailOut)
 async def bay_detail(bay_id: str) -> BayDetailOut:
-    graph = _graph()
+    graph = store.graph
     bay = graph.bay(bay_id)
     if bay is None:
-        raise HTTPException(status_code=404, detail=f"no such bay: {bay_id}")
+        raise NotFoundError(f"no such bay: {bay_id}", bay_id=bay_id)
     return BayDetailOut(
         **_bay_out(bay, graph).model_dump(),
         devices=[_device_out(d) for d in graph.devices_of(bay_id)],
@@ -241,28 +253,30 @@ async def bay_detail(bay_id: str) -> BayDetailOut:
 
 @app.get("/api/busbars", response_model=list[BusbarOut])
 async def busbars() -> list[BusbarOut]:
-    return [_busbar_out(b) for b in _graph().busbars]
+    return [_busbar_out(b) for b in store.graph.busbars]
 
 
 @app.get("/api/diagram/{voltage_level}", response_model=DiagramView)
 async def diagram(voltage_level: str) -> DiagramView:
-    graph = _graph()
+    graph = store.graph
     if voltage_level not in graph.voltage_levels:
-        raise HTTPException(
-            status_code=404,
-            detail=f"no such voltage level: {voltage_level}. Have {list(graph.voltage_levels)}",
+        raise NotFoundError(
+            f"no such voltage level: {voltage_level}",
+            voltage_level=voltage_level,
+            available=list(graph.voltage_levels),
         )
     return layout_voltage_level(graph, voltage_level)
 
 
-# --------------------------------------------------------------- dev frontend
-if FRONTEND_DIR.exists():
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIR), name="assets")
+# ------------------------------------------------------------------- frontend
+# Serves frontend/dist when the SPA has been built, otherwise the single-file
+# dev viewer. See ADR-0009.
+_frontend = settings.frontend_dir
+if _frontend is not None:
+    if (_frontend / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=_frontend / "assets"), name="assets")
 
     @app.get("/", include_in_schema=False)
     async def index() -> FileResponse:
-        return FileResponse(FRONTEND_DIR / "index.html")
-
-
-def _repo_root() -> Path:
-    return REPO_ROOT
+        assert _frontend is not None
+        return FileResponse(_frontend / "index.html")
