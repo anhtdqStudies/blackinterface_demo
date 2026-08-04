@@ -1,8 +1,16 @@
 id: T2_TRANSFORMER
-version: 1
+version: 2
 title: "Transformer incoming bay — double busbar + transfer busbar"
 bay_type: TRANSFORMER
 observed_on: [D01, E07]   # DEMO_SAS v654, measured 2026-08-04
+
+# Ground truth: CheckLiveState in document/DEMO_SAS-MODELExplorer.xlsx.
+#
+#   AT1L = ((C21L and 231-1C) or (C22L and 231-2C)) and 231C and 231-3C
+#          or (C29L and 231-9C)
+#
+# Same shape as T1_LINE: -9 feeds the transformer side directly, bypassing the
+# breaker and -3. XSWI9 therefore attaches to the transformer-side node.
 
 nodes:
   - {id: n_bb,   kind: internal, label: "busbar side"}
@@ -10,11 +18,19 @@ nodes:
   - {id: n_tr,   kind: external, label: "Transformer"}
 
 slots:
-  - {ln: XSWI1,  role: busbar_selector,           endpoints: [BB1, n_bb],    order: 0}
-  - {ln: XSWI2,  role: busbar_selector,           endpoints: [BB2, n_bb],    order: 0, required: false}
-  - {ln: XSWI9,  role: transfer_selector,         endpoints: [BB9, n_bb],    order: 0, required: false}
-  - {ln: XSWI11, role: earth_switch,              endpoints: [n_bb, EARTH],  order: 1, side: left, required: false}
-  - {ln: XCBR1,  role: breaker,                   endpoints: [n_bb, n_mid],  order: 2}
-  - {ln: XSWI3,  role: transformer_disconnector,  endpoints: [n_mid, n_tr],  order: 3}
-  - {ln: XSWI31, role: earth_switch,              endpoints: [n_tr, EARTH],  order: 4, side: left,  required: false}
-  - {ln: XSWI32, role: earth_switch,              endpoints: [n_tr, EARTH],  order: 4, side: right, required: false}
+  - {ln: XSWI1,  role: busbar_selector,          endpoints: [BB1, n_bb],   order: 0}
+  - {ln: XSWI2,  role: busbar_selector,          endpoints: [BB2, n_bb],   order: 0,
+     required: false}
+  - {ln: XSWI11, role: earth_switch,             endpoints: [n_bb, EARTH], order: 1, side: left,
+     required: false}
+  - {ln: XCBR1,  role: breaker,                  endpoints: [n_bb, n_mid], order: 2}
+  - {ln: XSWI31, role: earth_switch,             endpoints: [n_mid, EARTH], order: 3, side: left,
+     required: false}
+  - {ln: XSWI3,  role: transformer_disconnector, endpoints: [n_mid, n_tr], order: 4}
+  - {ln: XSWI32, role: earth_switch,             endpoints: [n_tr, EARTH], order: 5, side: right,
+     required: false}
+  - {ln: XSWI9,  role: transfer_selector,        endpoints: [BB9, n_tr],   order: 6,
+     required: false}
+
+# ASSUMPTION - earth switch placement (XSWI31 = -35 breaker side, XSWI32 = -38
+# transformer side) is read off the Grid Designer drawing, not proven. See Q6.

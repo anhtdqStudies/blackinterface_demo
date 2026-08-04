@@ -226,6 +226,10 @@
             "title": "Bottom",
             "type": "number"
           },
+          "caption": {
+            "title": "Caption",
+            "type": "string"
+          },
           "error_count": {
             "default": 0,
             "title": "Error Count",
@@ -263,6 +267,7 @@
         "required": [
           "bay_id",
           "label",
+          "caption",
           "bay_type",
           "template_id",
           "x",
@@ -590,6 +595,11 @@
           "quality": {
             "$ref": "#/components/schemas/Quality",
             "default": "MISSING"
+          },
+          "transfer": {
+            "default": false,
+            "title": "Transfer",
+            "type": "boolean"
           },
           "x1": {
             "title": "X1",

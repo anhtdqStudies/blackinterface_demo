@@ -201,6 +201,8 @@ export interface components {
             bay_type: string;
             /** Bottom */
             bottom: number;
+            /** Caption */
+            caption: string;
             /**
              * Error Count
              * @default 0
@@ -338,6 +340,11 @@ export interface components {
             label: string;
             /** @default MISSING */
             quality: components["schemas"]["Quality"];
+            /**
+             * Transfer
+             * @default false
+             */
+            transfer: boolean;
             /** X1 */
             x1: number;
             /** X2 */

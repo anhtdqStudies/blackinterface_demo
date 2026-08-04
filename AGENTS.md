@@ -189,7 +189,30 @@ ADR là **immutable** — muốn đổi thì viết ADR mới với `Supersedes:
   Manual có chỗ sai/lệch so với hệ chạy thật (đã gặp: manual mô tả alarm theo
   OPC UA A&C, thực tế OneATS dùng interface riêng).
 
-### 5.5 Không tin dữ liệu extract SLD
+### 5.5 Nguồn sự thật về TOPOLOGY: script Lua trong model export
+
+`document/DEMO_SAS-MODELExplorer.xlsx` → dòng `CheckLiveState`, cột `R` chứa
+**mã Lua tính IsLive của chính OneATS**. Đây là bằng chứng độc lập duy nhất về
+đấu nối thật — DataServer không có connectivity, extract SLD thì sai.
+
+```lua
+-- E01L = (((C11L and 171-1C) or (C12L and 171-2C)) and 171C and 171-7C)
+--        or (C19L and 171-9C)
+```
+
+Vế thứ hai không có máy cắt: **`-9` cấp điện thẳng cho đường dây, bỏ qua cả máy
+cắt lẫn `-7`.** Đây là thứ đã bắt được lỗi thật trong template v1.
+
+Đọc lại bằng:
+```bash
+python -c "import zipfile,xml.etree.ElementTree as ET; ..."   # xem git log commit template v2
+```
+Test khoá lại: `backend/tests/unit/test_topology_ground_truth.py`.
+
+**Lua KHÔNG nói gì về dao tiếp địa** (tiếp địa đóng khi có điện là sự cố, sim
+không mô hình hoá). Vị trí tiếp địa hiện đọc từ bản vẽ Grid Designer → câu hỏi Q6.
+
+### 5.6 Không tin dữ liệu extract SLD
 `document/SLD_serviceOut/` là output computer-vision, **có lỗi đã xác nhận**:
 số hiệu EVN sai (D03 ghi 179, thực tế 271), sót nguyên ngăn J01 22kV,
 20–26% thiếu tên, 36–40% thiếu connections.
@@ -250,6 +273,8 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `node.get_children()` trả danh sách sạch | **Không.** OneATS lộ cùng một con qua nhiều reference type → trùng lặp. Phải dedupe theo NodeId (`_children()` trong `discovery.py`). Không dedupe → số thiết bị gấp 4. |
 | `DataValue.StatusCode_` | Chỉ đúng với asyncua 1.x. Trong venv là asyncua **2.0.1**, field tên `StatusCode`. `tools/` chạy bằng python hệ thống nên có thể lệch version — chạy tools qua `uv run` nếu cần chắc. |
 | `DBB`/`EBB` là thanh cái | **Sai.** Đó là **bảo vệ so lệch thanh cái**. Thanh cái thật ở `/SAS/Subs/BB11..BB29`. |
+| `-9` (XSWI9) là dao chọn thanh cái như `-1`/`-2` | **Sai ở ngăn đường dây/MBA.** `-9` nối thanh cái vòng thẳng vào phía **đường dây**, bỏ qua máy cắt. Ở ngăn nối vòng (D12/E04) thì `-9` lại nằm sau máy cắt. Cùng số hiệu LN, khác vị trí điện — xem §5.5. |
+| Màu: đỏ = có điện | **Sai.** OneATS: **thiết bị** đỏ=đóng/xanh lá=mở; **dây dẫn** xanh dương=có điện/xanh lá=không điện. |
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
 
 ---

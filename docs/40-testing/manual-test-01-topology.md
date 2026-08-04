@@ -106,35 +106,40 @@ hoàn toàn**. Ở đây nó có mặt. Đó là lý do ADR-0002 loại SLD kh�
 **Phải thấy** (trạng thái đo lúc 2026-08-04, nếu chạy live thì có thể khác):
 
 ```
-BB29 ────────────────  (thanh cái vòng, xám nét đứt — xem TC-05)
-        │
-      -9  MỞ (xanh)
-BB21 ────┼────────────  (đỏ = có điện)
-        │
-      -1  ĐÓNG (đỏ)
-BB22 ────┼────────────
-        │
-      -2  MỞ (xanh)
-        │
-  -15 ⏚  MỞ
-        │
-      271  ĐÓNG (máy cắt, ô vuông đặc đỏ)
-        │
-      -7  ĐÓNG
-        │
-  -75 ⏚   ⏚ -76   (cả hai MỞ)
-        │
-      ○ Line
+BB21 ══════╤═══════   xanh dương = có điện
+           │
+          -1  ĐÓNG (đỏ)
+BB22 ══════╪═══════
+           │
+          -2  MỞ (xanh lá)
+           │
+    -15 ⏚  MỞ
+           │
+         [271] ĐÓNG (máy cắt, ô vuông đặc đỏ)
+           │
+    -75 ⏚  MỞ
+           │
+          -7  ĐÓNG
+           │
+           │  ⏚ -76  MỞ
+BB29 ══════╪═══════   xám nét đứt — xem TC-05
+           │
+          -9  MỞ
+           │
+           ○ Line
 ```
 
-**Kiểm tra 3 điều**:
+**Kiểm tra 4 điều**:
 
 1. **Đúng điện**: `-1` đóng và `-2` mở → ngăn đang bám **thanh cái 1**, không phải
    thanh cái 2. Đây là trạng thái **runtime**, không phải hình vẽ cố định.
 2. **Đúng tên**: nhãn phải là số hiệu EVN thật (`271`, `-1`, `-75`), không phải
    `XCBR1`, `XSWI1`.
-3. **Đúng cấu trúc**: 3 dao chọn thanh cái ở trên máy cắt, dao đường dây `-7` ở
-   dưới, 2 tiếp địa `-75/-76` ở phía đường dây, 1 tiếp địa `-15` phía thanh cái.
+3. **`-9` phải nằm ở phía ĐƯỜNG DÂY**, dưới `-7`, cạnh thanh cái vòng BB29 —
+   không nằm cạnh `-1`/`-2`. Đây là điểm sửa lỗi ngày 2026-08-04: thanh cái vòng
+   cấp điện thẳng cho đường dây, bỏ qua máy cắt (xem `AGENTS.md` §5.5).
+4. **Bảng màu theo OneATS**: thiết bị đỏ=đóng / xanh lá=mở; thanh cái
+   **xanh dương=có điện** / xanh lá=không điện. Đừng nhầm hai loại xanh lá.
 
 **Đối chiếu ngoài hệ thống**: mở OneATS Grid Viewer (hoặc HMI hiện có) cùng lúc,
 so từng vị trí dao của D03. Phải khớp 100%. **Đây là phép kiểm quan trọng nhất

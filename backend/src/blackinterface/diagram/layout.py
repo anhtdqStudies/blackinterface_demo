@@ -1,13 +1,27 @@
 """Turn a station graph into coordinates. Deterministic, no LLM (AGENTS.md I4).
 
-One view per voltage level. Busbars are horizontal rails; each bay is a
-vertical column hanging below them. Busbar selectors sit on short stubs that
-reach up to their own rail, which is how a single-line diagram is actually
-drawn — and it makes "which busbar is this bay on right now?" readable at a
-glance once the stubs are coloured by position.
+Layout follows the OneATS Grid Designer convention, so an operator who knows
+the existing HMI reads this without relearning anything:
 
-The geometry comes from the bay template (slot order and side), so a new bay
-type is a YAML file, not a change here.
+    C21 ═════════════╤═══════   main busbar 1
+    C22 ═════════╤═══╪═══════   main busbar 2
+                 │   │
+                [-2][-1]        busbar selectors, on stubs at their own rail
+                 └─┬─┘
+                 [271]          breaker
+                   │
+                 [-7]  ⏚        line disconnector + earth switches
+                   │
+    C29 ═══════╤═══╪═══════     transfer busbar, on the terminal side
+              [-9] │
+                   ○            the line leaves here
+
+The transfer busbar sits between the bay and its terminal because that is where
+it connects electrically: `-9` bypasses the breaker and feeds the line directly.
+Putting it beside the main busbars would draw a line that does not exist.
+
+Geometry comes from the bay template (slot order and side), so a new bay type is
+a YAML file, not a change here.
 """
 
 from __future__ import annotations
@@ -23,22 +37,24 @@ from blackinterface.domain.models import (
     StationGraph,
     SwitchState,
 )
-from blackinterface.domain.templates import TemplateRegistry, default_registry
+from blackinterface.domain.templates import BayTemplate, TemplateRegistry, default_registry
 
 # ---- geometry constants (SVG user units) -----------------------------------
-MARGIN_X = 90.0
-COLUMN_PITCH = 190.0
-RAIL_TOP = 60.0
-RAIL_GAP = 62.0
-RAIL_MARGIN = 70.0
-STUB = 34.0  # how far below its rail a busbar selector sits
-SPINE_GAP = 140.0  # from the lowest rail down to the first internal node
-ROW_HEIGHT = 62.0
-SIDE_OFFSET = 46.0  # x offset for a side-mounted earth switch
-TERMINAL_DROP = 56.0  # tail below the last node, for the external terminal
+MARGIN_X = 100.0
+COLUMN_PITCH = 200.0
+RAIL_TOP = 70.0
+RAIL_GAP = 56.0  # between the main busbars
+RAIL_MARGIN = 78.0  # how far a rail extends past the outermost bay
+SPINE_GAP = 96.0  # last main rail -> first node of the bay spine
+ROW_HEIGHT = 62.0  # between consecutive spine nodes
+TRANSFER_GAP = 74.0  # deepest spine node -> transfer busbar rail
+TERMINAL_DROP = 58.0  # transfer rail -> the external terminal
+STUB = 32.0  # how far from its rail a busbar selector sits
+SIDE_OFFSET = 48.0  # x offset for a side-mounted earth switch
+LABEL_BLOCK = 66.0  # room under the terminal for the bay caption
 
-#: Rails top to bottom: transfer busbar above the two main busbars.
-RAIL_ORDER = (9, 1, 2)
+#: EVN numbering: busbar index 9 is the transfer busbar.
+TRANSFER_INDEX = 9
 
 SELECTOR_ROLES = (DeviceRole.BUSBAR_SELECTOR, DeviceRole.TRANSFER_SELECTOR)
 
@@ -61,6 +77,7 @@ class RailView(Frozen):
     is_live: bool | None = None
     quality: Quality = Quality.MISSING
     inferred: bool = False
+    transfer: bool = False
 
 
 class SymbolView(Frozen):
@@ -93,6 +110,7 @@ class TerminalView(Frozen):
 class ColumnView(Frozen):
     bay_id: str
     label: str
+    caption: str  # EVN designation of the bay's breaker, e.g. "271"
     bay_type: str
     template_id: str | None
     x: float
@@ -113,14 +131,6 @@ class DiagramView(Frozen):
     terminals: tuple[TerminalView, ...] = ()
 
 
-def _rail_y(index: int) -> float:
-    try:
-        rank = RAIL_ORDER.index(index)
-    except ValueError:
-        rank = len(RAIL_ORDER)
-    return RAIL_TOP + rank * RAIL_GAP
-
-
 def layout_voltage_level(
     graph: StationGraph,
     voltage_level: str,
@@ -128,18 +138,28 @@ def layout_voltage_level(
 ) -> DiagramView:
     """Lay out every bay at one voltage level."""
     registry = registry or default_registry()
-    busbars = sorted(
-        (b for b in graph.busbars if b.voltage_level == voltage_level),
-        key=lambda b: _rail_y(b.index),
-    )
-    rail_y = {b.node_id: _rail_y(b.index) for b in busbars}
-    lowest_rail = max(rail_y.values(), default=RAIL_TOP)
+
+    busbars = [b for b in graph.busbars if b.voltage_level == voltage_level]
+    main = sorted((b for b in busbars if b.index != TRANSFER_INDEX), key=lambda b: b.index)
+    transfer = next((b for b in busbars if b.index == TRANSFER_INDEX), None)
+
+    rail_y = {b.node_id: RAIL_TOP + i * RAIL_GAP for i, b in enumerate(main)}
+    spine_top = max(rail_y.values(), default=RAIL_TOP) + SPINE_GAP
 
     bays = [
         b
         for b in graph.bays
         if b.voltage_level == voltage_level and b.template_id and graph.devices_of(b.id)
     ]
+    templates = {b.id: registry.by_id(b.template_id or "") for b in bays}
+
+    # The transfer rail goes below the deepest bay spine, so `-9` always has
+    # room between the node it feeds and its own busbar.
+    depth = max((len(t.nodes) for t in templates.values() if t), default=1)
+    spine_bottom = spine_top + (depth - 1) * ROW_HEIGHT
+    if transfer is not None:
+        rail_y[transfer.node_id] = spine_bottom + TRANSFER_GAP
+    terminal_y = max(rail_y.values(), default=spine_bottom) + TERMINAL_DROP
 
     symbols: list[SymbolView] = []
     edges: list[EdgeView] = []
@@ -147,13 +167,25 @@ def layout_voltage_level(
     terminals: list[TerminalView] = []
 
     for i, bay in enumerate(bays):
-        column_x = MARGIN_X + i * COLUMN_PITCH
+        template = templates[bay.id]
+        if template is None:
+            continue
         _layout_bay(
-            graph, bay, column_x, lowest_rail, rail_y, registry, symbols, edges, columns, terminals
+            graph=graph,
+            bay=bay,
+            template=template,
+            column_x=MARGIN_X + i * COLUMN_PITCH,
+            spine_top=spine_top,
+            rail_y=rail_y,
+            terminal_y=terminal_y,
+            symbols=symbols,
+            edges=edges,
+            columns=columns,
+            terminals=terminals,
         )
 
     width = MARGIN_X * 2 + max(len(bays) - 1, 0) * COLUMN_PITCH + MARGIN_X
-    height = max((c.bottom for c in columns), default=lowest_rail) + 60.0
+    height = max((c.bottom for c in columns), default=terminal_y) + LABEL_BLOCK
     rails = tuple(
         RailView(
             busbar_id=b.id,
@@ -164,8 +196,9 @@ def layout_voltage_level(
             is_live=b.is_live.value if isinstance(b.is_live.value, bool) else None,
             quality=b.is_live.quality,
             inferred=b.inferred,
+            transfer=b.index == TRANSFER_INDEX,
         )
-        for b in busbars
+        for b in sorted(busbars, key=lambda bb: rail_y[bb.node_id])
     )
     return DiagramView(
         voltage_level=voltage_level,
@@ -180,32 +213,30 @@ def layout_voltage_level(
 
 
 def _layout_bay(
+    *,
     graph: StationGraph,
     bay: Bay,
+    template: BayTemplate,
     column_x: float,
-    lowest_rail: float,
+    spine_top: float,
     rail_y: dict[str, float],
-    registry: TemplateRegistry,
+    terminal_y: float,
     symbols: list[SymbolView],
     edges: list[EdgeView],
     columns: list[ColumnView],
     terminals: list[TerminalView],
 ) -> None:
-    template = registry.by_id(bay.template_id or "")
-    if template is None:
-        return
-
     node_kind = {n.id: n.kind for n in graph.nodes}
 
-    # Internal/external nodes stack down the spine in template declaration order.
+    # The template declares its nodes top to bottom; that is the bay spine.
     node_y: dict[str, float] = {
-        f"{bay.id}.{node.id}": lowest_rail + SPINE_GAP + rank * ROW_HEIGHT
+        f"{bay.id}.{node.id}": spine_top + rank * ROW_HEIGHT
         for rank, node in enumerate(template.nodes)
     }
     node_y.update(rail_y)
 
     devices = {d.ln: d for d in graph.devices_of(bay.id)}
-    lowest = lowest_rail
+    lowest = spine_top
 
     for slot in template.slots:
         device = devices.get(slot.ln)
@@ -215,17 +246,16 @@ def _layout_bay(
         ys = [node_y.get(n) for n in ends]
 
         if slot.role in SELECTOR_ROLES:
-            rail = next((y for n, y in zip(ends, ys, strict=True) if n in rail_y), None)
-            y = (rail if rail is not None else lowest_rail) + STUB
+            y = _selector_y(ends, ys, rail_y, spine_top)
         elif slot.role is DeviceRole.EARTH_SWITCH:
             attached = next(
                 (y for n, y in zip(ends, ys, strict=True) if node_kind.get(n) != NodeKind.EARTH),
                 None,
             )
-            y = attached if attached is not None else lowest_rail + SPINE_GAP
+            y = attached if attached is not None else spine_top
         else:
             known = [y for y in ys if y is not None]
-            y = sum(known) / len(known) if known else lowest_rail + SPINE_GAP
+            y = sum(known) / len(known) if known else spine_top
 
         x = column_x + {"left": -SIDE_OFFSET, "right": SIDE_OFFSET}.get(slot.side, 0.0)
         symbols.append(
@@ -244,7 +274,7 @@ def _layout_bay(
         lowest = max(lowest, y)
         edges.extend(_edges_for(device, x, y, column_x, node_y, node_kind))
 
-    # External terminal: a tail below the last node in the spine.
+    # External terminal: the tail runs from its node past the transfer rail.
     for node in template.nodes:
         if node.kind is not NodeKind.EXTERNAL:
             continue
@@ -253,28 +283,50 @@ def _layout_bay(
         edges.append(
             EdgeView(
                 id=f"{node_id}.tail",
-                points=(Point(x=column_x, y=y), Point(x=column_x, y=y + TERMINAL_DROP)),
+                points=(Point(x=column_x, y=y), Point(x=column_x, y=terminal_y)),
             )
         )
-        terminals.append(
-            TerminalView(node_id=node_id, label=node.label, x=column_x, y=y + TERMINAL_DROP)
-        )
-        lowest = max(lowest, y + TERMINAL_DROP)
+        terminals.append(TerminalView(node_id=node_id, label=node.label, x=column_x, y=terminal_y))
+        lowest = max(lowest, terminal_y)
 
+    breaker = devices.get("XCBR1")
     errors = sum(1 for issue in bay.issues if issue.severity == "error")
     columns.append(
         ColumnView(
             bay_id=bay.id,
             label=bay.name,
+            caption=breaker.name if breaker else "",
             bay_type=str(bay.bay_type),
             template_id=bay.template_id,
             x=column_x,
             top=RAIL_TOP,
-            bottom=lowest + 30.0,
+            bottom=lowest + 24.0,
             issue_count=len(bay.issues),
             error_count=errors,
         )
     )
+
+
+def _selector_y(
+    ends: list[str],
+    ys: list[float | None],
+    rail_y: dict[str, float],
+    fallback: float,
+) -> float:
+    """A selector sits on a short stub off its own rail, on the bay's side of it.
+
+    Main busbars are above the bay, the transfer busbar below it, so the stub
+    direction depends on which side the node it feeds is on.
+    """
+    rail = next((y for n, y in zip(ends, ys, strict=True) if n in rail_y), None)
+    if rail is None:
+        return fallback
+    other = next(
+        (y for n, y in zip(ends, ys, strict=True) if n not in rail_y and y is not None), None
+    )
+    if other is None:
+        return rail + STUB
+    return rail + STUB if other > rail else rail - STUB
 
 
 def _edges_for(
@@ -294,7 +346,7 @@ def _edges_for(
                 EdgeView(
                     id=f"{device.id}.{terminal.seq}",
                     device_id=device.id,
-                    points=(Point(x=x, y=y), Point(x=x, y=y + 26.0)),
+                    points=(Point(x=x, y=y), Point(x=x, y=y + 24.0)),
                 )
             )
             continue

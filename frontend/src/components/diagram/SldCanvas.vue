@@ -92,11 +92,15 @@ function points(edge: Diagram['edges'][number]): string {
     </svg>
 
     <div class="legend">
-      <span><i style="background: var(--closed)" />ĐÓNG / có điện</span>
-      <span><i style="background: var(--open)" />MỞ / không điện</span>
+      <span class="group">Thiết bị:</span>
+      <span><i style="background: var(--closed)" />ĐÓNG</span>
+      <span><i style="background: var(--open)" />MỞ</span>
       <span><i style="background: var(--intermediate)" />TRUNG GIAN</span>
-      <span><i style="background: var(--undetermined)" />KHÔNG XÁC ĐỊNH (quality ≠ GOOD)</span>
-      <span>▭ máy cắt · ╱ dao cách ly · ⏚ tiếp địa</span>
+      <span><i style="background: var(--undetermined)" />KHÔNG XÁC ĐỊNH</span>
+      <span class="group">Thanh cái:</span>
+      <span><i style="background: var(--live)" />có điện</span>
+      <span><i style="background: var(--dead)" />không điện</span>
+      <span class="group">▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa</span>
     </div>
   </div>
 </template>
@@ -128,5 +132,9 @@ svg text {
   height: 9px;
   border-radius: 2px;
   margin-right: 5px;
+}
+.legend .group {
+  color: var(--fg);
+  opacity: 0.75;
 }
 </style>

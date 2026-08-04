@@ -42,9 +42,29 @@ def test_rails_exist_for_every_busbar_at_the_level(station: StationGraph) -> Non
     assert {r.busbar_id for r in view.rails} == {"BB21", "BB22", "BB29"}
 
 
-def test_transfer_busbar_is_drawn_above_the_main_busbars(station: StationGraph) -> None:
-    rails = {r.busbar_id: r.y for r in layout_voltage_level(station, "220kV").rails}
-    assert rails["BB29"] < rails["BB21"] < rails["BB22"]
+def test_transfer_busbar_is_drawn_on_the_terminal_side(station: StationGraph) -> None:
+    """Main busbars above the bay, transfer busbar below it, terminal below that.
+
+    Not a style choice: `-9` connects the transfer busbar to the LINE-side node,
+    so drawing it beside the main busbars would imply a connection that does not
+    exist. Matches OneATS Grid Designer.
+    """
+    view = layout_voltage_level(station, "220kV")
+    rails = {r.busbar_id: r.y for r in view.rails}
+    assert rails["BB21"] < rails["BB22"] < rails["BB29"]
+
+    d03 = {s.ln: s.y for s in view.symbols if s.bay_id == "D03"}
+    assert rails["BB22"] < d03["XCBR1"] < d03["XSWI7"] < rails["BB29"]
+
+    terminal = next(t for t in view.terminals if t.node_id == "D03.n_line")
+    assert terminal.y > rails["BB29"]
+
+
+def test_transfer_selector_sits_between_its_node_and_its_rail(station: StationGraph) -> None:
+    view = layout_voltage_level(station, "220kV")
+    rail = next(r.y for r in view.rails if r.busbar_id == "BB29")
+    d03 = {s.ln: s.y for s in view.symbols if s.bay_id == "D03"}
+    assert d03["XSWI7"] < d03["XSWI9"] < rail
 
 
 def test_columns_do_not_overlap(station: StationGraph) -> None:

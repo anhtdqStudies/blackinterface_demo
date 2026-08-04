@@ -178,6 +178,7 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 | Q3 | `IsLive` (thanh cái + ngăn) và `SAS_SIM.CheckLiveState`: OneATS tính thế nào? Vì sao `BB29`/`D12` trả `BadWaitingForInitialData`? | Team DataServer | **Việc kế tiếp #1** |
 | Q4 | Có trạm thật thứ 2–3 để verify ADR-0002 + ADR-0008 không? | Nội bộ ATS | **Cao** — mã thanh cái theo cấp điện áp và quy ước LN mới đo trên 1 trạm |
 | Q5 | Account read-only trên DataServer: xin ở đâu? | Team vận hành | Invariant I1 khi triển khai thật |
+| Q6 | **Dao tiếp địa nối vào node nào?** `-75/-76` quanh `-7`, `-35/-38` quanh `-3`, `-94/-95` quanh `-9` | Team thiết kế / bản vẽ Grid Designer | Đang đọc từ ảnh chụp SLD, **chưa chứng minh**. Không ảnh hưởng energization, nhưng ảnh hưởng câu hỏi an toàn ("đoạn này đã tiếp địa chưa") ở module #2+ |
 
 ---
 
@@ -216,6 +217,23 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 - Đính chính: `DBB`/`EBB` là bảo vệ so lệch, không phải thanh cái
 - Bắt được 1 lỗi thật lúc test live: `get_children()` của OneATS trả trùng
   → 320 thiết bị thay vì 80. Đã dedupe theo NodeId + ghi vào bảng bẫy
+
+### 2026-08-04 — Sửa topology theo ground truth + layout kiểu Grid Designer
+- **Phát hiện nguồn sự thật mới**: `document/DEMO_SAS-MODELExplorer.xlsx` chứa
+  mã Lua `CheckLiveState` — chính công thức OneATS dùng để tính `IsLive`.
+  Xem `AGENTS.md` §5.5.
+- **Sửa lỗi thật trong template v1**: `XSWI9` (`-9`) ở ngăn đường dây và MBA
+  nối vào **phía đường dây**, bỏ qua máy cắt — không phải phía thanh cái.
+  Template cũ sẽ báo "đường dây mất điện" khi thực tế đang được cấp qua
+  thanh cái vòng. T1, T2 → v2.
+- Sửa T5 (22kV): `-3` nằm **trước** máy cắt, không phải sau.
+- Xác nhận T3 (nối thanh cái) và T4 (nối vòng) đã đúng.
+- `tests/unit/test_topology_ground_truth.py` — mỗi test trích đúng dòng Lua nó khoá
+- Layout theo Grid Designer: 2 thanh cái chính ở trên, ngăn ở giữa,
+  **thanh cái vòng ở phía đầu ra**, terminal dưới cùng
+- Ký hiệu theo Grid Designer: máy cắt = ô vuông đặc, dao = hình thoi đặc
+- **Đính chính bảng màu**: dây dẫn xanh dương = có điện (không phải đỏ).
+  Thiết bị vẫn đỏ = đóng.
 
 ### 2026-08-04 — Khung dự án
 - Init git, commit toàn bộ hiện trạng; branch `skeleton/project-structure`

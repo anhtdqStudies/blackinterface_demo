@@ -1,8 +1,19 @@
 id: T1_LINE
-version: 1
+version: 2
 title: "Line bay — double busbar + transfer busbar"
 bay_type: LINE
 observed_on: [D03, D04, E01, E02]   # DEMO_SAS v654, measured 2026-08-04
+
+# Ground truth for the current path: the CheckLiveState Lua script exported in
+# document/DEMO_SAS-MODELExplorer.xlsx.
+#
+#   E01L = (((C11L and 171-1C) or (C12L and 171-2C)) and 171C and 171-7C)
+#          or (C19L and 171-9C)
+#
+# Read the second clause: the transfer busbar energises the line through -9
+# ALONE, bypassing both the breaker and -7. So XSWI9 attaches to the LINE-side
+# node, not the busbar side. v1 of this template had it on the busbar side,
+# which made a line fed from the transfer busbar look dead.
 
 nodes:
   - {id: n_bb,   kind: internal, label: "busbar side"}
@@ -10,11 +21,20 @@ nodes:
   - {id: n_line, kind: external, label: "Line"}
 
 slots:
-  - {ln: XSWI1,  role: busbar_selector,     endpoints: [BB1, n_bb],      order: 0}
-  - {ln: XSWI2,  role: busbar_selector,     endpoints: [BB2, n_bb],      order: 0, required: false}
-  - {ln: XSWI9,  role: transfer_selector,   endpoints: [BB9, n_bb],      order: 0, required: false}
-  - {ln: XSWI11, role: earth_switch,        endpoints: [n_bb, EARTH],    order: 1, side: left, required: false}
-  - {ln: XCBR1,  role: breaker,             endpoints: [n_bb, n_mid],    order: 2}
-  - {ln: XSWI7,  role: line_disconnector,   endpoints: [n_mid, n_line],  order: 3}
-  - {ln: XSWI71, role: earth_switch,        endpoints: [n_line, EARTH],  order: 4, side: left,  required: false}
-  - {ln: XSWI72, role: earth_switch,        endpoints: [n_line, EARTH],  order: 4, side: right, required: false}
+  - {ln: XSWI1,  role: busbar_selector,   endpoints: [BB1, n_bb],      order: 0}
+  - {ln: XSWI2,  role: busbar_selector,   endpoints: [BB2, n_bb],      order: 0, required: false}
+  - {ln: XSWI11, role: earth_switch,      endpoints: [n_bb, EARTH],    order: 1, side: left,
+     required: false}
+  - {ln: XCBR1,  role: breaker,           endpoints: [n_bb, n_mid],    order: 2}
+  - {ln: XSWI71, role: earth_switch,      endpoints: [n_mid, EARTH],   order: 3, side: left,
+     required: false}
+  - {ln: XSWI7,  role: line_disconnector, endpoints: [n_mid, n_line],  order: 4}
+  - {ln: XSWI72, role: earth_switch,      endpoints: [n_line, EARTH],  order: 5, side: right,
+     required: false}
+  - {ln: XSWI9,  role: transfer_selector, endpoints: [BB9, n_line],    order: 6, required: false}
+
+# ASSUMPTION - not proven. The Lua says nothing about earth switches (a closed
+# earth switch on a live node is a fault, which the simulation does not model),
+# and the DataServer carries no connectivity. Placement of XSWI71 (-75) below
+# and XSWI72 (-76) above the line disconnector is read off the Grid Designer
+# drawing. See open question Q6 in docs/90-progress/status.md.

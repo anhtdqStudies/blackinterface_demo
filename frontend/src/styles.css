@@ -1,12 +1,17 @@
 /* Design tokens.
  *
- * The state colours are not decoration — they follow EVN/IEC convention and an
- * operator reads them without thinking:
- *   red   = closed / energised
- *   green = open / de-energised
- *   grey  = UNDETERMINED, i.e. quality is not GOOD and we refuse to guess (I2)
+ * The state colours are not decoration. They copy OneATS Grid Designer, because
+ * the operators at this station already read that palette without thinking:
  *
- * Grey must never be mistakable for green. Getting that wrong is a safety bug,
+ *   devices     red = CLOSED,     green = OPEN
+ *   conductors  blue = energised, green = de-energised
+ *   both        grey = UNDETERMINED - quality is not GOOD, we refuse to guess (I2)
+ *
+ * Yes, green means two different things depending on what it is painting. That
+ * is the existing convention; inventing a better one would be worse.
+ *
+ * Grey must never be mistakable for green. "De-energised" is the sentence that
+ * makes someone reach into a cubicle, so getting that wrong is a safety bug,
  * not a style bug.
  */
 :root {
@@ -18,10 +23,15 @@
   --dim: #8b93a3;
   --accent: #5b9dff;
 
+  /* device position */
   --closed: #e5484d;
-  --open: #30a46c;
+  --open: #24c07a;
   --intermediate: #f5a524;
   --undetermined: #8b8d98;
+
+  /* conductor energisation */
+  --live: #4aa3ff;
+  --dead: #24c07a;
 
   --radius: 6px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
