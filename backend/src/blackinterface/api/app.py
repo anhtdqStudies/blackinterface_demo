@@ -21,7 +21,12 @@ from pydantic import BaseModel
 from blackinterface.api import errors as error_handlers
 from blackinterface.api.source import StationStore
 from blackinterface.config import get_settings
-from blackinterface.diagram.layout import DiagramView, layout_voltage_level
+from blackinterface.diagram.layout import (
+    DiagramView,
+    StationView,
+    layout_station,
+    layout_voltage_level,
+)
 from blackinterface.domain.models import (
     Bay,
     Busbar,
@@ -254,6 +259,12 @@ async def bay_detail(bay_id: str) -> BayDetailOut:
 @app.get("/api/busbars", response_model=list[BusbarOut])
 async def busbars() -> list[BusbarOut]:
     return [_busbar_out(b) for b in store.graph.busbars]
+
+
+@app.get("/api/diagram", response_model=StationView)
+async def station_diagram() -> StationView:
+    """The whole station in one drawing — every voltage level, stacked."""
+    return layout_station(store.graph)
 
 
 @app.get("/api/diagram/{voltage_level}", response_model=DiagramView)

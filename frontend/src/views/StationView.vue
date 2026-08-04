@@ -24,8 +24,16 @@ function clearSelection(): void {
   selectedDevice.value = null
 }
 
-// Switching voltage level shows a different set of bays; keeping a selection
-// from the previous one would be confusing.
+// The drawing shows every voltage level at once, so the tabs only move the eye
+// and re-aim the side panel.
+function goToLevel(level: string): void {
+  store.selectVoltageLevel(level)
+  clearSelection()
+  const section = store.diagram?.sections.find((s) => s.voltage_level === level)
+  const canvas = document.querySelector('.canvas')
+  if (section && canvas) canvas.scrollTo({ top: section.top, behavior: 'smooth' })
+}
+
 watch(() => store.voltageLevel, clearSelection)
 </script>
 
@@ -37,7 +45,7 @@ watch(() => store.voltageLevel, clearSelection)
           v-for="level in store.voltageLevels"
           :key="level"
           :class="{ on: level === store.voltageLevel }"
-          @click="store.selectVoltageLevel(level)"
+          @click="goToLevel(level)"
         >
           {{ level }}
         </button>

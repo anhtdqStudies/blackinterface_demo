@@ -14,11 +14,15 @@ export type BayDetail = components['schemas']['BayDetailOut']
 export type Device = components['schemas']['DeviceOut']
 export type Busbar = components['schemas']['BusbarOut']
 export type Diagram = components['schemas']['DiagramView']
+/** Every voltage level in one drawing. What the SLD view renders. */
+export type StationDiagram = components['schemas']['StationView']
+export type Section = components['schemas']['SectionView']
 export type Symbol_ = components['schemas']['SymbolView']
 export type Rail = components['schemas']['RailView']
 export type Edge = components['schemas']['EdgeView']
 export type Column = components['schemas']['ColumnView']
 export type Terminal = components['schemas']['TerminalView']
+export type Junction = components['schemas']['JunctionView']
 export type Issue = components['schemas']['ValidationIssue']
 export type SwitchState = components['schemas']['SwitchState']
 export type Quality = components['schemas']['Quality']
@@ -75,6 +79,9 @@ export const api = {
   bays: () => request<Bay[]>('/api/bays'),
   bay: (id: string) => request<BayDetail>(`/api/bays/${encodeURIComponent(id)}`),
   busbars: () => request<Busbar[]>('/api/busbars'),
+  /** The whole station, all voltage levels stacked. */
+  stationDiagram: () => request<StationDiagram>('/api/diagram'),
+  /** One voltage level on its own. Kept for tooling and manual inspection. */
   diagram: (voltageLevel: string) =>
     request<Diagram>(`/api/diagram/${encodeURIComponent(voltageLevel)}`),
   /** Re-read the source. Writes nothing to OneATS (AGENTS.md I1). */

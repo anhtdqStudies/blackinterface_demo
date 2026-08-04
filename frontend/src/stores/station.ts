@@ -11,12 +11,14 @@
  */
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { ApiError, api, type Bay, type Diagram, type Station } from '@/api/client'
+import { ApiError, api, type Bay, type Station, type StationDiagram } from '@/api/client'
 
 export const useStationStore = defineStore('station', () => {
   const station = ref<Station | null>(null)
   const bays = ref<Bay[]>([])
-  const diagram = ref<Diagram | null>(null)
+  /** One drawing for the whole station — every voltage level, stacked. */
+  const diagram = ref<StationDiagram | null>(null)
+  /** Which level the side panel is describing. The drawing always shows all. */
   const voltageLevel = ref<string | null>(null)
 
   const loading = ref(false)
@@ -38,14 +40,19 @@ export const useStationStore = defineStore('station', () => {
     loading.value = true
     error.value = null
     try {
-      const [summary, bayList] = await Promise.all([api.station(), api.bays()])
+      const [summary, bayList, drawing] = await Promise.all([
+        api.station(),
+        api.bays(),
+        api.stationDiagram(),
+      ])
       station.value = summary
       bays.value = bayList
+      diagram.value = drawing
       const wanted =
         voltageLevel.value && summary.voltage_levels.includes(voltageLevel.value)
           ? voltageLevel.value
           : summary.voltage_levels[0]
-      if (wanted) await selectVoltageLevel(wanted)
+      if (wanted) selectVoltageLevel(wanted)
     } catch (cause) {
       capture(cause)
     } finally {
@@ -53,14 +60,9 @@ export const useStationStore = defineStore('station', () => {
     }
   }
 
-  async function selectVoltageLevel(level: string): Promise<void> {
+  /** Changes what the side panel lists. The drawing is not refetched. */
+  function selectVoltageLevel(level: string): void {
     voltageLevel.value = level
-    try {
-      diagram.value = await api.diagram(level)
-    } catch (cause) {
-      diagram.value = null
-      capture(cause)
-    }
   }
 
   /** Ask the backend to re-read its source, then refresh everything. */

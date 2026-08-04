@@ -275,6 +275,8 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `DBB`/`EBB` là thanh cái | **Sai.** Đó là **bảo vệ so lệch thanh cái**. Thanh cái thật ở `/SAS/Subs/BB11..BB29`. |
 | `-9` (XSWI9) là dao chọn thanh cái như `-1`/`-2` | **Sai ở ngăn đường dây/MBA.** `-9` nối thanh cái vòng thẳng vào phía **đường dây**, bỏ qua máy cắt. Ở ngăn nối vòng (D12/E04) thì `-9` lại nằm sau máy cắt. Cùng số hiệu LN, khác vị trí điện — xem §5.5. |
 | Màu: đỏ = có điện | **Sai.** OneATS: **thiết bị** đỏ=đóng/xanh lá=mở; **dây dẫn** xanh dương=có điện/xanh lá=không điện. |
+| Vẽ `-1` và `-2` trên cùng một đường thẳng đứng | **Sai và nguy hiểm.** Đường đó chạm cả hai thanh cái tại cùng một điểm → hình luôn trông như có đường dẫn xuyên qua cả hai, bất kể dao ở đâu. Mỗi dao nối thanh cái phải có **làn x riêng** + **chấm nối**; cắt ngang không chấm = không nối. `test_no_conductor_runs_through_another_devices_busbar_connection` khoá điều này. |
+| Mỗi cấp điện áp một hình riêng | SLD thật vẽ **cả trạm trong một hình**, cấp cao nhất trên cùng và **lật ngược** để hai nhóm thanh cái quay vào nhau. `layout_station()`; `/api/diagram`. |
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
 
 ---

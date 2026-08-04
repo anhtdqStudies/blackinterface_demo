@@ -6,7 +6,7 @@ import math
 
 import pytest
 
-from blackinterface.diagram.layout import layout_voltage_level
+from blackinterface.diagram.layout import Point, layout_station, layout_voltage_level
 from blackinterface.domain.models import BayType, StationGraph
 
 LEVELS = ("220kV", "110kV", "22kV")
@@ -101,3 +101,118 @@ def test_edges_connect_to_the_symbol_they_belong_to(station: StationGraph) -> No
 
 def test_layout_is_deterministic(station: StationGraph) -> None:
     assert layout_voltage_level(station, "220kV") == layout_voltage_level(station, "220kV")
+
+
+# --------------------------------------------------------------- busbar lanes
+# The drawing has to distinguish "on busbar 1" from "on busbar 2". These tests
+# pin the geometry that makes that readable; without them a refactor can quietly
+# put both isolators back on one vertical, which shows a path through both
+# busbars regardless of what the isolators are actually doing.
+
+
+def _on_segment(point: tuple[float, float], a: Point, b: Point) -> bool:
+    """Segments here are axis-aligned, so this stays exact — no float slop."""
+    x, y = point
+    if a.x == b.x == x:
+        return min(a.y, b.y) <= y <= max(a.y, b.y)
+    if a.y == b.y == y:
+        return min(a.x, b.x) <= x <= max(a.x, b.x)
+    return False
+
+
+@pytest.mark.parametrize("level", ("220kV", "110kV"))
+def test_no_conductor_runs_through_another_devices_busbar_connection(
+    station: StationGraph, level: str
+) -> None:
+    """The bug this pins: -1 and -2 drawn on one vertical.
+
+    The busbar-1 drop then passed straight through the point where busbar 2 is
+    joined, so the picture showed a continuous path across both busbars whatever
+    the isolators were doing. A conductor may cross a busbar; it may not cross
+    somebody else's junction dot.
+    """
+    view = layout_voltage_level(station, level)
+    assert view.junctions, "expected busbar connections at this level"
+
+    for junction in view.junctions:
+        owner = junction.id.rsplit(".", 1)[0]  # "D03.XSWI1.0" -> "D03.XSWI1"
+        bay = owner.split(".")[0]
+        for edge in view.edges:
+            if not edge.id.startswith(f"{bay}.") or edge.id.startswith(f"{owner}."):
+                continue
+            for a, b in zip(edge.points, edge.points[1:], strict=False):
+                assert not _on_segment((junction.x, junction.y), a, b), (
+                    f"{edge.id} runs through {owner}'s busbar connection"
+                )
+
+
+def test_every_busbar_connection_is_marked_and_nothing_else_is(
+    station: StationGraph,
+) -> None:
+    """A dot means connected. The bay spine crosses rails it is not on."""
+    view = layout_voltage_level(station, "220kV")
+    rail_y = {r.y for r in view.rails}
+    dots = {(j.x, j.y) for j in view.junctions}
+
+    d03 = {s.ln: s for s in view.symbols if s.bay_id == "D03"}
+    for ln, busbar in (("XSWI1", "BB21"), ("XSWI2", "BB22"), ("XSWI9", "BB29")):
+        y = next(r.y for r in view.rails if r.busbar_id == busbar)
+        assert (d03[ln].x, y) in dots, f"{ln} should be dotted onto {busbar}"
+
+    # The line tail runs down the column and passes BB29 without joining it.
+    column_x = next(c.x for c in view.columns if c.bay_id == "D03")
+    for y in rail_y:
+        assert (column_x, y) not in dots
+
+
+def test_transfer_isolator_does_not_share_the_column_with_the_line_tail(
+    station: StationGraph,
+) -> None:
+    """Otherwise the tail's crossing of BB29 lands on -9's connection point."""
+    view = layout_voltage_level(station, "220kV")
+    column_x = next(c.x for c in view.columns if c.bay_id == "D03")
+    xswi9 = next(s for s in view.symbols if s.bay_id == "D03" and s.ln == "XSWI9")
+    assert xswi9.x != column_x
+
+
+# ------------------------------------------------------------- whole station
+def test_station_stacks_every_level_highest_first(station: StationGraph) -> None:
+    view = layout_station(station)
+    assert [s.voltage_level for s in view.sections] == ["220kV", "110kV", "22kV"]
+    tops = [s.top for s in view.sections]
+    assert tops == sorted(tops)
+
+
+def test_top_band_is_mirrored_so_the_busbar_groups_face_each_other(
+    station: StationGraph,
+) -> None:
+    """220 kV busbars at the bottom of their band, 110 kV at the top of theirs."""
+    view = layout_station(station)
+    hv, mv = view.sections[0], view.sections[1]
+    assert hv.flipped and not mv.flipped
+
+    rails = {r.busbar_id: r.y for r in view.rails}
+    # Mirrored: the transfer busbar is now above the main pair, and the main
+    # pair is the closest thing to the 110 kV band.
+    assert rails["BB29"] < rails["BB22"] < rails["BB21"] < hv.bottom
+    assert mv.top < rails["BB11"] < rails["BB12"] < rails["BB19"]
+    assert rails["BB21"] < rails["BB11"]
+
+
+def test_station_terminals_point_away_from_the_busbars(station: StationGraph) -> None:
+    view = layout_station(station)
+    hv_rail = max(r.y for r in view.rails if r.busbar_id.startswith("BB2"))
+    for terminal in view.terminals:
+        if terminal.node_id.startswith(("D0", "D1")):
+            assert terminal.flipped
+            assert terminal.y < hv_rail
+
+
+def test_station_draws_every_device_once(station: StationGraph) -> None:
+    view = layout_station(station)
+    drawn = [s.device_id for s in view.symbols]
+    assert sorted(drawn) == sorted(d.id for d in station.devices)
+
+
+def test_station_layout_is_deterministic(station: StationGraph) -> None:
+    assert layout_station(station) == layout_station(station)

@@ -126,7 +126,16 @@ ba phát hiện của phiên trước (`get_children()` trùng, DBB/EBB, vị tr
 
 ### 0. Xem lại giao diện mới bằng mắt ← **LÀM TRƯỚC**
 Chạy 7 test case trong `docs/40-testing/manual-test-01-topology.md`.
-Chưa ai nhìn frontend mới trên trình duyệt.
+Trọng tâm TC-03: **hai thanh cái phải tách bạch được bằng mắt** (làn riêng +
+chấm nối), và cả trạm phải nằm trong **một hình**, 220kV lật ngược ở trên.
+
+**Còn thiếu so với bản Grid Designer** (bảng so sánh, chưa làm):
+- [ ] Giá trị đo trên đầu mỗi ngăn (kV/kA/MW/MVar) — nguồn `MMXU1`, chưa vào model
+- [ ] Hz/kV cạnh mỗi thanh cái — nguồn `Subs.BB*`, đã browse được, chưa vào model
+- [ ] Ký hiệu MBA AT1 nối 220↔110 — **cần bằng chứng ghép ngăn**, DataServer
+      không có. Hiện mỗi ngăn MBA chỉ kết thúc bằng ký hiệu cuộn dây (I3)
+- [ ] Tên ngăn dạng chữ ("Ben Cat", "Hoc Mon") — chỉ có trong bản vẽ Grid
+      Designer, DataServer không mang
 
 ### 1. Energization solver ← **BẮT ĐẦU TỪ ĐÂY**
 Đây là thứ biến sơ đồ hiện tại thành sơ đồ *có nghĩa*: tô màu theo **mang điện**,
@@ -228,6 +237,25 @@ Không có cái này thì mục tiêu M2 không tồn tại.
   thanh cái vòng. T1, T2 → v2.
 - Sửa T5 (22kV): `-3` nằm **trước** máy cắt, không phải sau.
 - Xác nhận T3 (nối thanh cái) và T4 (nối vòng) đã đúng.
+
+### 2026-08-04 — Sơ đồ đọc được: làn thanh cái + gộp cả trạm một hình
+Người dùng đối chiếu với ảnh chụp HMI OneATS và chỉ ra hai chỗ sai.
+
+- **Lỗi đọc hình, đã sửa**: `-1` và `-2` vẽ chung một đường thẳng đứng, nên
+  đường đó chạm cả BB21 lẫn BB22 tại cùng một điểm — hình luôn trông như có
+  đường dẫn xuyên qua cả hai thanh cái, **bất kể dao đang ở đâu**. Cũng vậy
+  với đuôi đường dây cắt ngang BB29 đúng chỗ `-9` nối vào.
+  Sửa: mỗi dao nối thanh cái có **làn x riêng** (`_assign_lanes`), mỗi chỗ nối
+  thật có **chấm** (`JunctionView`), cắt ngang không chấm = không nối.
+  Khoá bằng `test_no_conductor_runs_through_another_devices_busbar_connection`
+  — test này duyệt mọi đoạn dây và mọi chấm nối trong cùng ngăn.
+- **Gộp cả trạm vào một hình**: `layout_station()` + `GET /api/diagram`.
+  220kV lật ngược (thanh cái chính xuống dưới, đường dây đi lên), 110kV và 22kV
+  bình thường → hai nhóm thanh cái quay vào nhau, đúng cách bản vẽ Grid
+  Designer của trạm đang trình bày. Tab cấp điện áp giờ chỉ để nhảy tới dải.
+- Ngăn MBA kết thúc bằng ký hiệu cuộn dây; **cố ý không vẽ** đường nối D01↔E07
+  vì DataServer không có bằng chứng ghép ngăn (I3).
+- 124 test offline xanh; `tools/check.py` xanh cả 7 mục.
 - `tests/unit/test_topology_ground_truth.py` — mỗi test trích đúng dòng Lua nó khoá
 - Layout theo Grid Designer: 2 thanh cái chính ở trên, ngăn ở giữa,
   **thanh cái vòng ở phía đầu ra**, terminal dưới cùng

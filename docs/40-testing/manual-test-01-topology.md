@@ -68,8 +68,9 @@ nhiều ngày vẽ và gán point thủ công.
 
 ### TC-02 — Suy loại ngăn không cần SLD
 
-**Làm**: bấm lần lượt tab `220kV`, `110kV`, `22kV`. Nhìn nhãn dưới mỗi cột và
-danh sách ngăn ở panel phải.
+**Làm**: sơ đồ vẽ **cả trạm trong một hình** — 220kV trên cùng, rồi 110kV, rồi
+22kV. Bấm lần lượt tab `220kV`, `110kV`, `22kV` để nhảy tới từng dải và đổi
+danh sách ngăn ở panel phải. Nhìn nhãn cạnh mỗi cột.
 
 **Phải thấy đúng 13 ngăn này**:
 
@@ -101,45 +102,48 @@ hoàn toàn**. Ở đây nó có mặt. Đó là lý do ADR-0002 loại SLD kh�
 
 ### TC-03 — Sơ đồ một sợi khớp thực tế
 
-**Làm**: ở tab `220kV`, nhìn cột `D03`.
+**Làm**: nhìn cột `D03` ở dải 220kV (dải trên cùng, **lật ngược**: thanh cái
+chính nằm dưới, đường dây đi lên trên).
 
-**Phải thấy** (trạng thái đo lúc 2026-08-04, nếu chạy live thì có thể khác):
+**Phải thấy** (trạng thái đo lúc 2026-08-04, nếu chạy live thì có thể khác).
+Dưới đây vẽ theo chiều chưa lật cho dễ đọc:
 
 ```
-BB21 ══════╤═══════   xanh dương = có điện
-           │
-          -1  ĐÓNG (đỏ)
-BB22 ══════╪═══════
-           │
-          -2  MỞ (xanh lá)
-           │
-    -15 ⏚  MỞ
-           │
-         [271] ĐÓNG (máy cắt, ô vuông đặc đỏ)
-           │
-    -75 ⏚  MỞ
-           │
-          -7  ĐÓNG
-           │
-           │  ⏚ -76  MỞ
-BB29 ══════╪═══════   xám nét đứt — xem TC-05
-           │
-          -9  MỞ
-           │
-           ○ Line
+BB21 ═══●═══════════   ● = chấm nối · xanh dương = có điện
+        │
+BB22 ═══╪═══●═══════   -1 cắt ngang BB22 mà KHÔNG có chấm → không nối
+       -1   │          ĐÓNG (đỏ)
+        │  -2          MỞ (xanh lá)
+        └─┬─┘
+   -15 ⏚  │  MỞ
+        [271]          ĐÓNG (máy cắt, ô vuông đặc đỏ)
+   -75 ⏚  │  MỞ
+         -7            ĐÓNG
+          │  ⏚ -76     MỞ
+BB29 ══●══╪═════════   xám nét đứt — xem TC-05
+      -9  │            MỞ
+          ↓ Line       đuôi cắt ngang BB29, không có chấm
 ```
 
-**Kiểm tra 4 điều**:
+**Kiểm tra 5 điều**:
 
-1. **Đúng điện**: `-1` đóng và `-2` mở → ngăn đang bám **thanh cái 1**, không phải
+1. **Hai thanh cái phải tách bạch được bằng mắt.** `-1` và `-2` nằm trên **hai
+   đường thẳng đứng riêng**. Chỗ nào có **chấm tròn** là có nối; dây cắt ngang
+   thanh cái mà không có chấm là **không** nối. Trước 2026-08-04 cả hai vẽ chung
+   một đường nên hình luôn trông như nối cả hai thanh cái bất kể dao ở đâu.
+2. **Đúng điện**: `-1` đóng và `-2` mở → ngăn đang bám **thanh cái 1**, không phải
    thanh cái 2. Đây là trạng thái **runtime**, không phải hình vẽ cố định.
-2. **Đúng tên**: nhãn phải là số hiệu EVN thật (`271`, `-1`, `-75`), không phải
+3. **Đúng tên**: nhãn phải là số hiệu EVN thật (`271`, `-1`, `-75`), không phải
    `XCBR1`, `XSWI1`.
-3. **`-9` phải nằm ở phía ĐƯỜNG DÂY**, dưới `-7`, cạnh thanh cái vòng BB29 —
+4. **`-9` phải nằm ở phía ĐƯỜNG DÂY**, sau `-7`, cạnh thanh cái vòng BB29 —
    không nằm cạnh `-1`/`-2`. Đây là điểm sửa lỗi ngày 2026-08-04: thanh cái vòng
    cấp điện thẳng cho đường dây, bỏ qua máy cắt (xem `AGENTS.md` §5.5).
-4. **Bảng màu theo OneATS**: thiết bị đỏ=đóng / xanh lá=mở; thanh cái
+5. **Bảng màu theo OneATS**: thiết bị đỏ=đóng / xanh lá=mở; thanh cái
    **xanh dương=có điện** / xanh lá=không điện. Đừng nhầm hai loại xanh lá.
+
+**Ngăn máy biến áp** (D01, E07) kết thúc bằng **hai vòng tròn** = cuộn dây, không
+phải mũi tên. Không có dây nối D01 với E07: DataServer không nói ngăn nào ghép
+với ngăn nào, nên vẽ đường đó là bịa ra một đường dẫn điện (I3).
 
 **Đối chiếu ngoài hệ thống**: mở OneATS Grid Viewer (hoặc HMI hiện có) cùng lúc,
 so từng vị trí dao của D03. Phải khớp 100%. **Đây là phép kiểm quan trọng nhất

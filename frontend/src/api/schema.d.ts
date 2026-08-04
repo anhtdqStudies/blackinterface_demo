@@ -55,6 +55,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/diagram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Station Diagram
+         * @description The whole station in one drawing — every voltage level, stacked.
+         */
+        get: operations["station_diagram_api_diagram_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/diagram/{voltage_level}": {
         parameters: {
             query?: never;
@@ -209,12 +229,19 @@ export interface components {
              */
             error_count: number;
             /**
+             * Flipped
+             * @default false
+             */
+            flipped: boolean;
+            /**
              * Issue Count
              * @default 0
              */
             issue_count: number;
             /** Label */
             label: string;
+            /** Label Y */
+            label_y: number;
             /** Template Id */
             template_id: string | null;
             /** Top */
@@ -266,6 +293,11 @@ export interface components {
             /** Height */
             height: number;
             /**
+             * Junctions
+             * @default []
+             */
+            junctions: components["schemas"]["JunctionView"][];
+            /**
              * Rails
              * @default []
              */
@@ -312,6 +344,18 @@ export interface components {
             /** Source */
             source: string;
         };
+        /**
+         * JunctionView
+         * @description A real connection to a busbar. Drawn as a dot; a crossing has none.
+         */
+        JunctionView: {
+            /** Id */
+            id: string;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+        };
         /** Point */
         Point: {
             /** X */
@@ -353,6 +397,22 @@ export interface components {
             y: number;
         };
         /**
+         * SectionView
+         * @description One voltage level's band inside the station drawing.
+         */
+        SectionView: {
+            /** Bay Count */
+            bay_count: number;
+            /** Bottom */
+            bottom: number;
+            /** Flipped */
+            flipped: boolean;
+            /** Top */
+            top: number;
+            /** Voltage Level */
+            voltage_level: string;
+        };
+        /**
          * Severity
          * @enum {string}
          */
@@ -387,6 +447,53 @@ export interface components {
             voltage_levels: string[];
         };
         /**
+         * StationView
+         * @description Every voltage level in one drawing, the way an SLD is normally read.
+         */
+        StationView: {
+            /**
+             * Columns
+             * @default []
+             */
+            columns: components["schemas"]["ColumnView"][];
+            /**
+             * Edges
+             * @default []
+             */
+            edges: components["schemas"]["EdgeView"][];
+            /** Height */
+            height: number;
+            /**
+             * Junctions
+             * @default []
+             */
+            junctions: components["schemas"]["JunctionView"][];
+            /** Name */
+            name: string;
+            /**
+             * Rails
+             * @default []
+             */
+            rails: components["schemas"]["RailView"][];
+            /**
+             * Sections
+             * @default []
+             */
+            sections: components["schemas"]["SectionView"][];
+            /**
+             * Symbols
+             * @default []
+             */
+            symbols: components["schemas"]["SymbolView"][];
+            /**
+             * Terminals
+             * @default []
+             */
+            terminals: components["schemas"]["TerminalView"][];
+            /** Width */
+            width: number;
+        };
+        /**
          * SwitchState
          * @description Position of a switching device.
          *
@@ -402,6 +509,11 @@ export interface components {
             bay_id: string;
             /** Device Id */
             device_id: string;
+            /**
+             * Flipped
+             * @default false
+             */
+            flipped: boolean;
             /** Label */
             label: string;
             /** Ln */
@@ -419,6 +531,13 @@ export interface components {
          * @description Where the bay leaves the station: a line, a transformer, a feeder.
          */
         TerminalView: {
+            /** Bay Type */
+            bay_type: string;
+            /**
+             * Flipped
+             * @default false
+             */
+            flipped: boolean;
             /** Label */
             label: string;
             /** Node Id */
@@ -530,6 +649,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BusbarOut"][];
+                };
+            };
+        };
+    };
+    station_diagram_api_diagram_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StationView"];
                 };
             };
         };

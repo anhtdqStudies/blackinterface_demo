@@ -27,14 +27,19 @@ const diamond = computed(() => {
   return `${x},${y - h} ${x + h},${y} ${x},${y + h} ${x - h},${y}`
 })
 
-/** Ground hatch: three bars of decreasing width under an earth switch. */
+/** Ground hatch: three bars of decreasing width beyond an earth switch. */
 const groundBars = [9, 6, 3]
 
-// Labels sit right of centre-mounted devices, and outward for side-mounted ones
-// so two earth switches on the same node do not overlap.
+/** In a mirrored band the ground points up, so earth is still away from the bay. */
+const dir = computed(() => (props.symbol.flipped ? -1 : 1))
+
+// Labels sit right of centre-mounted devices, and opposite the hatch for earth
+// switches so two of them on the same node do not overlap.
 const labelAnchor = computed(() => (props.symbol.role === 'earth_switch' ? 'middle' : 'start'))
 const labelX = computed(() => (isEarth.value ? props.symbol.x : props.symbol.x + 15))
-const labelY = computed(() => (isEarth.value ? props.symbol.y - 12 : props.symbol.y + 4))
+const labelY = computed(() =>
+  isEarth.value ? props.symbol.y - dir.value * 12 : props.symbol.y + 4,
+)
 </script>
 
 <template>
@@ -72,9 +77,9 @@ const labelY = computed(() => (isEarth.value ? props.symbol.y - 12 : props.symbo
       <template v-if="isEarth">
         <line
           :x1="symbol.x"
-          :y1="symbol.y + half"
+          :y1="symbol.y + dir * half"
           :x2="symbol.x"
-          :y2="symbol.y + half + 4"
+          :y2="symbol.y + dir * (half + 4)"
           :stroke="color"
           stroke-width="1.6"
         />
@@ -82,9 +87,9 @@ const labelY = computed(() => (isEarth.value ? props.symbol.y - 12 : props.symbo
           v-for="(w, i) in groundBars"
           :key="i"
           :x1="symbol.x - w"
-          :y1="symbol.y + half + 4 + i * 3"
+          :y1="symbol.y + dir * (half + 4 + i * 3)"
           :x2="symbol.x + w"
-          :y2="symbol.y + half + 4 + i * 3"
+          :y2="symbol.y + dir * (half + 4 + i * 3)"
           :stroke="color"
           stroke-width="1.6"
         />

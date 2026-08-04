@@ -235,6 +235,11 @@
             "title": "Error Count",
             "type": "integer"
           },
+          "flipped": {
+            "default": false,
+            "title": "Flipped",
+            "type": "boolean"
+          },
           "issue_count": {
             "default": 0,
             "title": "Issue Count",
@@ -243,6 +248,10 @@
           "label": {
             "title": "Label",
             "type": "string"
+          },
+          "label_y": {
+            "title": "Label Y",
+            "type": "number"
           },
           "template_id": {
             "anyOf": [
@@ -272,7 +281,8 @@
           "template_id",
           "x",
           "top",
-          "bottom"
+          "bottom",
+          "label_y"
         ],
         "title": "ColumnView",
         "type": "object"
@@ -406,6 +416,14 @@
             "title": "Height",
             "type": "number"
           },
+          "junctions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/JunctionView"
+            },
+            "title": "Junctions",
+            "type": "array"
+          },
           "rails": {
             "default": [],
             "items": {
@@ -537,6 +555,30 @@
         "title": "HealthOut",
         "type": "object"
       },
+      "JunctionView": {
+        "description": "A real connection to a busbar. Drawn as a dot; a crossing has none.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "x",
+          "y"
+        ],
+        "title": "JunctionView",
+        "type": "object"
+      },
       "Point": {
         "properties": {
           "x": {
@@ -622,6 +664,40 @@
           "x2"
         ],
         "title": "RailView",
+        "type": "object"
+      },
+      "SectionView": {
+        "description": "One voltage level's band inside the station drawing.",
+        "properties": {
+          "bay_count": {
+            "title": "Bay Count",
+            "type": "integer"
+          },
+          "bottom": {
+            "title": "Bottom",
+            "type": "number"
+          },
+          "flipped": {
+            "title": "Flipped",
+            "type": "boolean"
+          },
+          "top": {
+            "title": "Top",
+            "type": "number"
+          },
+          "voltage_level": {
+            "title": "Voltage Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "voltage_level",
+          "top",
+          "bottom",
+          "flipped",
+          "bay_count"
+        ],
+        "title": "SectionView",
         "type": "object"
       },
       "Severity": {
@@ -731,6 +807,86 @@
         "title": "StationOut",
         "type": "object"
       },
+      "StationView": {
+        "description": "Every voltage level in one drawing, the way an SLD is normally read.",
+        "properties": {
+          "columns": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ColumnView"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "edges": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EdgeView"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "height": {
+            "title": "Height",
+            "type": "number"
+          },
+          "junctions": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/JunctionView"
+            },
+            "title": "Junctions",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rails": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RailView"
+            },
+            "title": "Rails",
+            "type": "array"
+          },
+          "sections": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SectionView"
+            },
+            "title": "Sections",
+            "type": "array"
+          },
+          "symbols": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/SymbolView"
+            },
+            "title": "Symbols",
+            "type": "array"
+          },
+          "terminals": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TerminalView"
+            },
+            "title": "Terminals",
+            "type": "array"
+          },
+          "width": {
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "width",
+          "height"
+        ],
+        "title": "StationView",
+        "type": "object"
+      },
       "SwitchState": {
         "description": "Position of a switching device.\n\nMaps IEC 61850 Dbpos, but with one addition that matters (AGENTS.md I2):\n`UNDETERMINED` is what we report whenever quality is not GOOD. We never\nturn bad data into a position.",
         "enum": [
@@ -751,6 +907,11 @@
           "device_id": {
             "title": "Device Id",
             "type": "string"
+          },
+          "flipped": {
+            "default": false,
+            "title": "Flipped",
+            "type": "boolean"
           },
           "label": {
             "title": "Label",
@@ -795,6 +956,15 @@
       "TerminalView": {
         "description": "Where the bay leaves the station: a line, a transformer, a feeder.",
         "properties": {
+          "bay_type": {
+            "title": "Bay Type",
+            "type": "string"
+          },
+          "flipped": {
+            "default": false,
+            "title": "Flipped",
+            "type": "boolean"
+          },
           "label": {
             "title": "Label",
             "type": "string"
@@ -816,7 +986,8 @@
           "node_id",
           "label",
           "x",
-          "y"
+          "y",
+          "bay_type"
         ],
         "title": "TerminalView",
         "type": "object"
@@ -985,6 +1156,25 @@
           }
         },
         "summary": "Busbars"
+      }
+    },
+    "/api/diagram": {
+      "get": {
+        "description": "The whole station in one drawing — every voltage level, stacked.",
+        "operationId": "station_diagram_api_diagram_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StationView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Station Diagram"
       }
     },
     "/api/diagram/{voltage_level}": {
