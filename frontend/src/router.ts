@@ -23,6 +23,11 @@ const routes: RouteRecordRaw[] = [
     name: 'issues',
     component: () => import('@/views/IssuesView.vue'),
   },
+  {
+    path: '/projects',
+    name: 'projects',
+    component: () => import('@/views/ProjectsView.vue'),
+  },
   { path: '/:pathMatch(.*)*', redirect: '/station' },
 ]
 

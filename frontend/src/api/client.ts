@@ -8,6 +8,8 @@
 import type { components } from './schema'
 
 export type Health = components['schemas']['HealthOut']
+export type Project = components['schemas']['ProjectOut']
+export type ProjectLoad = components['schemas']['ProjectLoadOut']
 export type Station = components['schemas']['StationOut']
 export type Bay = components['schemas']['BayOut']
 export type BayDetail = components['schemas']['BayDetailOut']
@@ -86,4 +88,24 @@ export const api = {
     request<Diagram>(`/api/diagram/${encodeURIComponent(voltageLevel)}`),
   /** Re-read the source. Writes nothing to OneATS (AGENTS.md I1). */
   reload: () => request<Health>('/api/reload', { method: 'POST' }),
+
+  // Projects — named DataServer connections plus their snapshots. Every call
+  // below writes only to the local SQLite store, never to OneATS (I1).
+  projects: () => request<Project[]>('/api/projects'),
+  /** Create a project and immediately browse its DataServer. */
+  createProject: (name: string, opcuaUrl: string) =>
+    request<ProjectLoad>('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, opcua_url: opcuaUrl }),
+    }),
+  /** Make a project current; renders from its snapshot when one exists. */
+  openProject: (id: number) =>
+    request<ProjectLoad>(`/api/projects/${id}/open`, { method: 'POST' }),
+  /** Browse the project's DataServer live and replace its snapshot. */
+  refreshProject: (id: number) =>
+    request<ProjectLoad>(`/api/projects/${id}/refresh`, { method: 'POST' }),
+  /** Remove a project and its snapshot. Returns the remaining projects. */
+  deleteProject: (id: number) =>
+    request<Project[]>(`/api/projects/${id}`, { method: 'DELETE' }),
 }

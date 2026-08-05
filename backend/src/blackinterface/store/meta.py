@@ -13,6 +13,8 @@ from blackinterface.store.db import Database
 #: Keys in use. Kept here so `app_meta` does not become a junk drawer.
 LAST_MODEL_VERSION = "last_model_version"
 LAST_LOADED_AT = "last_loaded_at"
+#: id of the project reopened on startup; absent = fall back to BI_SOURCE.
+ACTIVE_PROJECT_ID = "active_project_id"
 
 
 class MetaRepository:

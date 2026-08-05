@@ -38,6 +38,20 @@ class NotFoundError(BlackInterfaceError):
     http_status = 404
 
 
+class InvalidInputError(BlackInterfaceError):
+    """The client sent something we understand enough to reject precisely."""
+
+    code = "invalid_input"
+    http_status = 400
+
+
+class ConflictError(BlackInterfaceError):
+    """The request collides with existing state, e.g. a duplicate project name."""
+
+    code = "conflict"
+    http_status = 409
+
+
 class ModelNotLoadedError(BlackInterfaceError):
     """No station model in memory yet, or the last load failed."""
 

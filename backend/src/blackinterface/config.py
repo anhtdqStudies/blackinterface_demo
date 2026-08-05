@@ -65,15 +65,6 @@ class Settings(BaseSettings):
         dist = REPO_ROOT / "frontend" / "dist"
         return dist if (dist / "index.html").exists() else None
 
-    @property
-    def anonymous_opcua(self) -> bool:
-        """True when we would connect without credentials.
-
-        Allowed against the DEMO server; a real station must not (AGENTS.md I1).
-        Callers should warn, not silently proceed.
-        """
-        return self.source == "opcua" and not self.opcua_user
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

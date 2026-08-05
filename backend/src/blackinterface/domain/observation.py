@@ -55,6 +55,20 @@ class BusbarObs(Frozen):
     source_ref: str | None = None
 
 
+class TransformerObs(Frozen):
+    """A power transformer the source exposes as its own station-level group.
+
+    Measured on DEMO_SAS (2026-08-05): `/SAS/AT1` sits beside the voltage
+    levels and carries `YPTR` (power transformer) and `YLTC` (tap changer).
+    Its id ("AT1") is what transformer bays reference in their `BAY/Name`
+    ("AT1 Incoming") — the pairing evidence for coupling voltage levels.
+    """
+
+    id: str  # e.g. "AT1"
+    name: str = ""
+    source_ref: str | None = None
+
+
 class StationObs(Frozen):
     """Everything one importer run saw. The unit of a snapshot."""
 
@@ -64,3 +78,4 @@ class StationObs(Frozen):
     source: str = ""
     bays: tuple[BayObs, ...] = ()
     busbars: tuple[BusbarObs, ...] = ()
+    transformers: tuple[TransformerObs, ...] = ()

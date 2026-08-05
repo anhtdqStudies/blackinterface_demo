@@ -542,6 +542,28 @@
             "title": "Ok",
             "type": "boolean"
           },
+          "project_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Id"
+          },
+          "project_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Project Name"
+          },
           "source": {
             "title": "Source",
             "type": "string"
@@ -595,6 +617,144 @@
           "y"
         ],
         "title": "Point",
+        "type": "object"
+      },
+      "ProjectCreateIn": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "opcua_url": {
+            "title": "Opcua Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "opcua_url"
+        ],
+        "title": "ProjectCreateIn",
+        "type": "object"
+      },
+      "ProjectLoadOut": {
+        "description": "Result of creating/opening/refreshing a project.\n\n`ok=False` means the project exists but its source could not be read —\nthe row is kept so the operator can fix the URL or the network and retry.",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "project": {
+            "$ref": "#/components/schemas/ProjectOut"
+          }
+        },
+        "required": [
+          "project",
+          "ok"
+        ],
+        "title": "ProjectLoadOut",
+        "type": "object"
+      },
+      "ProjectOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "captured_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captured At"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "has_snapshot": {
+            "title": "Has Snapshot",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "opcua_url": {
+            "title": "Opcua Url",
+            "type": "string"
+          },
+          "snapshot_saved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Saved At"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "opcua_url",
+          "created_at",
+          "updated_at",
+          "has_snapshot",
+          "model_name",
+          "model_version",
+          "captured_at",
+          "snapshot_saved_at",
+          "active"
+        ],
+        "title": "ProjectOut",
         "type": "object"
       },
       "Quality": {
@@ -874,6 +1034,14 @@
             "title": "Terminals",
             "type": "array"
           },
+          "transformers": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TransformerLinkView"
+            },
+            "title": "Transformers",
+            "type": "array"
+          },
           "width": {
             "title": "Width",
             "type": "number"
@@ -969,6 +1137,11 @@
             "title": "Label",
             "type": "string"
           },
+          "linked": {
+            "default": false,
+            "title": "Linked",
+            "type": "boolean"
+          },
           "node_id": {
             "title": "Node Id",
             "type": "string"
@@ -990,6 +1163,43 @@
           "bay_type"
         ],
         "title": "TerminalView",
+        "type": "object"
+      },
+      "TransformerLinkView": {
+        "description": "A power transformer drawn between two voltage-level bands.\n\nOnly exists when the pairing is evidence-backed (see\n`domain.models.Transformer`); an unpaired transformer raises a\nValidationIssue instead of a drawing.",
+        "properties": {
+          "bay_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Bay Ids",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "x",
+          "y",
+          "bay_ids"
+        ],
+        "title": "TransformerLinkView",
         "type": "object"
       },
       "ValidationError": {
@@ -1234,9 +1444,192 @@
         "summary": "Health"
       }
     },
+    "/api/projects": {
+      "get": {
+        "operationId": "projects_api_projects_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectOut"
+                  },
+                  "title": "Response Projects Api Projects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Projects"
+      },
+      "post": {
+        "description": "Create a project and immediately try to browse its DataServer.\n\nSuccess stores a snapshot and makes the project active. Failure keeps the\nproject so the URL can be corrected and retried with /refresh.",
+        "operationId": "create_project_api_projects_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreateIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectLoadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Project"
+      }
+    },
+    "/api/projects/{project_id}": {
+      "delete": {
+        "description": "Remove a project and its snapshot. Returns the remaining projects.",
+        "operationId": "delete_project_api_projects__project_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectOut"
+                  },
+                  "title": "Response Delete Project Api Projects  Project Id  Delete",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Project"
+      }
+    },
+    "/api/projects/{project_id}/open": {
+      "post": {
+        "description": "Make this project current. Renders from its snapshot when one exists;\nonly its first-ever open touches the DataServer.",
+        "operationId": "open_project_api_projects__project_id__open_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectLoadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Project"
+      }
+    },
+    "/api/projects/{project_id}/refresh": {
+      "post": {
+        "description": "Browse the project's DataServer live and replace its snapshot.",
+        "operationId": "refresh_project_api_projects__project_id__refresh_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "title": "Project Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectLoadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh Project"
+      }
+    },
     "/api/reload": {
       "post": {
-        "description": "Re-read the source. The only non-GET endpoint, and it writes nothing\nto OneATS.",
+        "description": "Re-read the current source: the active project's DataServer (updating\nits snapshot), else BI_SOURCE. Writes nothing to OneATS (I1).",
         "operationId": "reload_station_api_reload_post",
         "responses": {
           "200": {

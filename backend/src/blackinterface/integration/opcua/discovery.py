@@ -21,9 +21,19 @@ from typing import Any
 from asyncua import Client, ua
 
 from blackinterface.domain.models import PointSample, Quality
-from blackinterface.domain.observation import BayObs, BusbarObs, LogicalNodeObs, StationObs
+from blackinterface.domain.observation import (
+    BayObs,
+    BusbarObs,
+    LogicalNodeObs,
+    StationObs,
+    TransformerObs,
+)
 
-SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
+#: The DEMO_SAS station root. The path embeds the project name ("PROJECT"),
+#: so it is only a fast path — other projects are found by `_find_station_root`.
+KNOWN_SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
+#: Objects(0) -> Root -> EVN -> RLDC -> <project> -> <station>(5). One spare.
+MAX_ROOT_SEARCH_DEPTH = 6
 VOLTAGE_LEVEL_RE = re.compile(r"^\d+kV$")
 BUSBAR_RE = re.compile(r"^BB\d{2}$")
 
@@ -31,6 +41,10 @@ POSITION_DA = "PosSt"
 NAME_DA = "Name"
 SHORT_NAME_DA = "SName"
 LIVE_DA = "IsLive"
+
+#: A station-level group is a power transformer when it carries one of these
+#: logical nodes. Measured on DEMO_SAS (2026-08-05): /SAS/AT1/YPTR, .../YLTC.
+TRANSFORMER_LNS = ("YPTR", "YLTC")
 
 WANTED_BAY_DA = (POSITION_DA, NAME_DA, SHORT_NAME_DA)
 WANTED_BUSBAR_DA = (NAME_DA, LIVE_DA)
@@ -105,9 +119,10 @@ async def discover_station(
     async with client:
         name = await _read_model_attribute(client, "ModelName") or "UNKNOWN"
         model_version = await _read_model_attribute(client, "ModelVersion")
-        sas = await client.nodes.objects.get_child(SAS_PATH)
+        sas = await _find_station_root(client)
         bays = await _discover_bays(client, sas)
         busbars = await _discover_busbars(client, sas)
+        transformers = await _discover_transformers(client, sas)
 
     return StationObs(
         name=name,
@@ -116,6 +131,44 @@ async def discover_station(
         source=url,
         bays=tuple(bays),
         busbars=tuple(busbars),
+        transformers=tuple(transformers),
+    )
+
+
+async def _find_station_root(client: Client) -> Any:
+    """Locate the node whose children are voltage levels (`220kV`, `110kV`…).
+
+    On DEMO_SAS that is `Objects/Root/EVN/RLDC/PROJECT/SAS`, but the path embeds
+    the project name, so it changes with every project loaded into the
+    DataServer. Try the known path first (fast), then breadth-first search the
+    ns=2 object tree. The tree above the station is narrow — a handful of
+    grouping nodes — so the search touches few nodes before it either finds a
+    voltage level or exhausts the depth budget.
+    """
+    try:
+        return await client.nodes.objects.get_child(KNOWN_SAS_PATH)
+    except Exception:
+        pass
+
+    queue: list[tuple[Any, int]] = [(client.nodes.objects, 0)]
+    while queue:
+        node, depth = queue.pop(0)
+        object_children = []
+        for child in await _children(node):
+            browse_name = await child.read_browse_name()
+            if browse_name.NamespaceIndex == 0:
+                continue  # Server, Types… — the standard namespace, never ours
+            if VOLTAGE_LEVEL_RE.match(browse_name.Name):
+                return node
+            if await child.read_node_class() == ua.NodeClass.Object:
+                object_children.append(child)
+        if depth < MAX_ROOT_SEARCH_DEPTH:
+            queue.extend((child, depth + 1) for child in object_children)
+
+    raise LookupError(
+        "no station root found: no node within depth "
+        f"{MAX_ROOT_SEARCH_DEPTH} of Objects has a voltage-level child "
+        "(a name like '220kV'). Is a project loaded in this DataServer?"
     )
 
 
@@ -186,6 +239,21 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
             )
         )
     return result
+
+
+async def _discover_transformers(client: Client, sas: Any) -> list[TransformerObs]:
+    """Station-level siblings of the voltage levels that carry YPTR/YLTC."""
+    found: list[TransformerObs] = []
+    for child in await _children(sas):
+        name = (await child.read_browse_name()).Name
+        if VOLTAGE_LEVEL_RE.match(name) or name == "Subs":
+            continue
+        if await child.read_node_class() != ua.NodeClass.Object:
+            continue
+        grandchildren = {(await g.read_browse_name()).Name for g in await _children(child)}
+        if any(ln in grandchildren for ln in TRANSFORMER_LNS):
+            found.append(TransformerObs(id=name, name=name, source_ref=child.nodeid.to_string()))
+    return found
 
 
 async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:

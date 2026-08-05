@@ -109,6 +109,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Projects */
+        get: operations["projects_api_projects_get"];
+        put?: never;
+        /**
+         * Create Project
+         * @description Create a project and immediately try to browse its DataServer.
+         *
+         *     Success stores a snapshot and makes the project active. Failure keeps the
+         *     project so the URL can be corrected and retried with /refresh.
+         */
+        post: operations["create_project_api_projects_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Project
+         * @description Remove a project and its snapshot. Returns the remaining projects.
+         */
+        delete: operations["delete_project_api_projects__project_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open Project
+         * @description Make this project current. Renders from its snapshot when one exists;
+         *     only its first-ever open touches the DataServer.
+         */
+        post: operations["open_project_api_projects__project_id__open_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/projects/{project_id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Project
+         * @description Browse the project's DataServer live and replace its snapshot.
+         */
+        post: operations["refresh_project_api_projects__project_id__refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/reload": {
         parameters: {
             query?: never;
@@ -120,8 +205,8 @@ export interface paths {
         put?: never;
         /**
          * Reload Station
-         * @description Re-read the source. The only non-GET endpoint, and it writes nothing
-         *     to OneATS.
+         * @description Re-read the current source: the active project's DataServer (updating
+         *     its snapshot), else BI_SOURCE. Writes nothing to OneATS (I1).
          */
         post: operations["reload_station_api_reload_post"];
         delete?: never;
@@ -341,6 +426,10 @@ export interface components {
             loaded: boolean;
             /** Ok */
             ok: boolean;
+            /** Project Id */
+            project_id?: number | null;
+            /** Project Name */
+            project_name?: string | null;
             /** Source */
             source: string;
         };
@@ -362,6 +451,52 @@ export interface components {
             x: number;
             /** Y */
             y: number;
+        };
+        /** ProjectCreateIn */
+        ProjectCreateIn: {
+            /** Name */
+            name: string;
+            /** Opcua Url */
+            opcua_url: string;
+        };
+        /**
+         * ProjectLoadOut
+         * @description Result of creating/opening/refreshing a project.
+         *
+         *     `ok=False` means the project exists but its source could not be read —
+         *     the row is kept so the operator can fix the URL or the network and retry.
+         */
+        ProjectLoadOut: {
+            /** Error */
+            error?: string | null;
+            /** Ok */
+            ok: boolean;
+            project: components["schemas"]["ProjectOut"];
+        };
+        /** ProjectOut */
+        ProjectOut: {
+            /** Active */
+            active: boolean;
+            /** Captured At */
+            captured_at: string | null;
+            /** Created At */
+            created_at: string;
+            /** Has Snapshot */
+            has_snapshot: boolean;
+            /** Id */
+            id: number;
+            /** Model Name */
+            model_name: string | null;
+            /** Model Version */
+            model_version: string | null;
+            /** Name */
+            name: string;
+            /** Opcua Url */
+            opcua_url: string;
+            /** Snapshot Saved At */
+            snapshot_saved_at: string | null;
+            /** Updated At */
+            updated_at: string;
         };
         /**
          * Quality
@@ -490,6 +625,11 @@ export interface components {
              * @default []
              */
             terminals: components["schemas"]["TerminalView"][];
+            /**
+             * Transformers
+             * @default []
+             */
+            transformers: components["schemas"]["TransformerLinkView"][];
             /** Width */
             width: number;
         };
@@ -540,8 +680,33 @@ export interface components {
             flipped: boolean;
             /** Label */
             label: string;
+            /**
+             * Linked
+             * @default false
+             */
+            linked: boolean;
             /** Node Id */
             node_id: string;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+        };
+        /**
+         * TransformerLinkView
+         * @description A power transformer drawn between two voltage-level bands.
+         *
+         *     Only exists when the pairing is evidence-backed (see
+         *     `domain.models.Transformer`); an unpaired transformer raises a
+         *     ValidationIssue instead of a drawing.
+         */
+        TransformerLinkView: {
+            /** Bay Ids */
+            bay_ids: string[];
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
             /** X */
             x: number;
             /** Y */
@@ -720,6 +885,152 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthOut"];
+                };
+            };
+        };
+    };
+    projects_api_projects_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"][];
+                };
+            };
+        };
+    };
+    create_project_api_projects_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProjectCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectLoadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_project_api_projects__project_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_project_api_projects__project_id__open_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectLoadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_project_api_projects__project_id__refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectLoadOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

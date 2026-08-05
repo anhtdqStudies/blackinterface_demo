@@ -36,16 +36,17 @@ from blackinterface.domain.models import (
     SwitchState,
     ValidationIssue,
 )
-from blackinterface.errors import NotFoundError
+from blackinterface.errors import ConflictError, InvalidInputError, NotFoundError
 from blackinterface.logs import configure as configure_logging
 from blackinterface.logs import get_logger
 from blackinterface.store.db import Database
+from blackinterface.store.projects import ProjectRow
 
 log = get_logger(__name__)
 
 settings = get_settings()
-store = StationStore(settings)
 database = Database(settings.db_path)
+store = StationStore(settings, database)
 
 
 @asynccontextmanager
@@ -58,9 +59,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         frontend=str(settings.frontend_dir) if settings.frontend_dir else None,
     )
     database.migrate()
+    # Reopen the last project from its snapshot, else fall back to BI_SOURCE.
     # A failed load must not take the process down: /api/health has to stay
     # answerable so an operator can see *why* nothing is showing.
-    await store.try_reload()
+    await store.startup()
     yield
     database.close()
 
@@ -87,6 +89,39 @@ class HealthOut(BaseModel):
     source: str
     load_error: str | None = None
     load_seconds: float | None = None
+    project_id: int | None = None
+    project_name: str | None = None
+
+
+class ProjectOut(BaseModel):
+    id: int
+    name: str
+    opcua_url: str
+    created_at: str
+    updated_at: str
+    has_snapshot: bool
+    model_name: str | None
+    model_version: str | None
+    captured_at: str | None
+    snapshot_saved_at: str | None
+    active: bool
+
+
+class ProjectCreateIn(BaseModel):
+    name: str
+    opcua_url: str
+
+
+class ProjectLoadOut(BaseModel):
+    """Result of creating/opening/refreshing a project.
+
+    `ok=False` means the project exists but its source could not be read —
+    the row is kept so the operator can fix the URL or the network and retry.
+    """
+
+    project: ProjectOut
+    ok: bool
+    error: str | None = None
 
 
 class StationOut(BaseModel):
@@ -193,24 +228,114 @@ def _busbar_out(busbar: Busbar) -> BusbarOut:
     )
 
 
+def _project_out(row: ProjectRow) -> ProjectOut:
+    active = store.project is not None and store.project.id == row.id
+    return ProjectOut(
+        id=row.id,
+        name=row.name,
+        opcua_url=row.opcua_url,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        has_snapshot=row.has_snapshot,
+        model_name=row.model_name,
+        model_version=row.model_version,
+        captured_at=row.captured_at,
+        snapshot_saved_at=row.snapshot_saved_at,
+        active=active,
+    )
+
+
 # ------------------------------------------------------------------ endpoints
 @app.get("/api/health", response_model=HealthOut)
 async def health() -> HealthOut:
     return HealthOut(
         ok=store.loaded,
         loaded=store.loaded,
-        source=store.settings.source,
+        source=store.source_label,
         load_error=store.load_error,
         load_seconds=store.load_seconds,
+        project_id=store.project.id if store.project else None,
+        project_name=store.project.name if store.project else None,
     )
 
 
 @app.post("/api/reload", response_model=HealthOut)
 async def reload_station() -> HealthOut:
-    """Re-read the source. The only non-GET endpoint, and it writes nothing
-    to OneATS."""
+    """Re-read the current source: the active project's DataServer (updating
+    its snapshot), else BI_SOURCE. Writes nothing to OneATS (I1)."""
     await store.try_reload()
     return await health()
+
+
+# ------------------------------------------------------------------- projects
+# All POST/DELETE endpoints below write only to the local SQLite store.
+# Toward OneATS everything remains read-only (AGENTS.md I1) — enforced by
+# tools/check.py scanning for write calls, not by trusting this comment.
+@app.get("/api/projects", response_model=list[ProjectOut])
+async def projects() -> list[ProjectOut]:
+    return [_project_out(p) for p in store.projects.list()]
+
+
+@app.post("/api/projects", response_model=ProjectLoadOut)
+async def create_project(body: ProjectCreateIn) -> ProjectLoadOut:
+    """Create a project and immediately try to browse its DataServer.
+
+    Success stores a snapshot and makes the project active. Failure keeps the
+    project so the URL can be corrected and retried with /refresh.
+    """
+    name = body.name.strip()
+    url = body.opcua_url.strip()
+    if not name:
+        raise InvalidInputError("project name must not be empty")
+    if not url.startswith("opc.tcp://"):
+        raise InvalidInputError("the DataServer address must start with opc.tcp://", opcua_url=url)
+    if store.projects.get_by_name(name) is not None:
+        raise ConflictError(f"a project named {name!r} already exists", name=name)
+    row = store.projects.create(name, url)
+    return await _load_project(row.id, live=True)
+
+
+@app.post("/api/projects/{project_id}/open", response_model=ProjectLoadOut)
+async def open_project(project_id: int) -> ProjectLoadOut:
+    """Make this project current. Renders from its snapshot when one exists;
+    only its first-ever open touches the DataServer."""
+    return await _load_project(project_id, live=False)
+
+
+@app.post("/api/projects/{project_id}/refresh", response_model=ProjectLoadOut)
+async def refresh_project(project_id: int) -> ProjectLoadOut:
+    """Browse the project's DataServer live and replace its snapshot."""
+    return await _load_project(project_id, live=True)
+
+
+@app.delete("/api/projects/{project_id}", response_model=list[ProjectOut])
+async def delete_project(project_id: int) -> list[ProjectOut]:
+    """Remove a project and its snapshot. Returns the remaining projects."""
+    was_active = store.project is not None and store.project.id == project_id
+    if not store.projects.delete(project_id):
+        raise NotFoundError(f"no such project: {project_id}", project_id=project_id)
+    if was_active:
+        store.unload()
+    return await projects()
+
+
+async def _load_project(project_id: int, *, live: bool) -> ProjectLoadOut:
+    row = store.projects.get(project_id)
+    if row is None:
+        raise NotFoundError(f"no such project: {project_id}", project_id=project_id)
+    error: str | None = None
+    try:
+        if live:
+            await store.refresh_project(project_id)
+        else:
+            await store.open_project(project_id)
+    except NotFoundError:
+        raise
+    except Exception as exc:  # reported in the response body, not raised
+        error = f"{type(exc).__name__}: {exc}"
+        log.error("project load failed", project=row.name, error=error)
+    fresh = store.projects.get(project_id) or row
+    return ProjectLoadOut(project=_project_out(fresh), ok=error is None, error=error)
 
 
 @app.get("/api/station", response_model=StationOut)

@@ -24,14 +24,15 @@ function clearSelection(): void {
   selectedDevice.value = null
 }
 
-// The drawing shows every voltage level at once, so the tabs only move the eye
-// and re-aim the side panel.
+const canvas = ref<InstanceType<typeof SldCanvas> | null>(null)
+
+// The drawing shows every voltage level at once, so the tabs only aim the
+// camera at one band and re-aim the side panel.
 function goToLevel(level: string): void {
   store.selectVoltageLevel(level)
   clearSelection()
   const section = store.diagram?.sections.find((s) => s.voltage_level === level)
-  const canvas = document.querySelector('.canvas')
-  if (section && canvas) canvas.scrollTo({ top: section.top, behavior: 'smooth' })
+  if (section) canvas.value?.focusSection(section.top, section.bottom)
 }
 
 watch(() => store.voltageLevel, clearSelection)
@@ -53,6 +54,7 @@ watch(() => store.voltageLevel, clearSelection)
 
       <SldCanvas
         v-if="store.diagram"
+        ref="canvas"
         :diagram="store.diagram"
         :selected-device-id="selectedDevice?.id ?? null"
         @select="select"

@@ -20,15 +20,20 @@ const dash = computed(() => (isDegraded(props.symbol.quality) ? '3 2' : undefine
 const isEarth = computed(() => props.symbol.role === 'earth_switch')
 const isBreaker = computed(() => props.symbol.role === 'breaker')
 
-const half = computed(() => (isEarth.value ? 7 : 10))
+const half = computed(() => (isEarth.value ? 6 : 10))
 const diamond = computed(() => {
   const { x, y } = props.symbol
   const h = half.value
   return `${x},${y - h} ${x + h},${y} ${x},${y + h} ${x - h},${y}`
 })
 
-/** Ground hatch: three bars of decreasing width beyond an earth switch. */
-const groundBars = [9, 6, 3]
+/** Ground hatch: three bars of decreasing width beyond an earth switch.
+ *  Wider and further from the diamond than before — the hatch is the ONLY
+ *  thing separating "dao tiếp địa" from "dao cách ly", so it must be readable
+ *  at station zoom, not just bay zoom. */
+const groundBars = [11, 7, 3]
+const hatchGap = 6
+const hatchStep = 4
 
 /** In a mirrored band the ground points up, so earth is still away from the bay. */
 const dir = computed(() => (props.symbol.flipped ? -1 : 1))
@@ -38,7 +43,7 @@ const dir = computed(() => (props.symbol.flipped ? -1 : 1))
 const labelAnchor = computed(() => (props.symbol.role === 'earth_switch' ? 'middle' : 'start'))
 const labelX = computed(() => (isEarth.value ? props.symbol.x : props.symbol.x + 15))
 const labelY = computed(() =>
-  isEarth.value ? props.symbol.y - dir.value * 12 : props.symbol.y + 4,
+  isEarth.value ? props.symbol.y - dir.value * 14 : props.symbol.y + 4,
 )
 </script>
 
@@ -79,19 +84,19 @@ const labelY = computed(() =>
           :x1="symbol.x"
           :y1="symbol.y + dir * half"
           :x2="symbol.x"
-          :y2="symbol.y + dir * (half + 4)"
+          :y2="symbol.y + dir * (half + hatchGap)"
           :stroke="color"
-          stroke-width="1.6"
+          stroke-width="2"
         />
         <line
           v-for="(w, i) in groundBars"
           :key="i"
           :x1="symbol.x - w"
-          :y1="symbol.y + dir * (half + 4 + i * 3)"
+          :y1="symbol.y + dir * (half + hatchGap + i * hatchStep)"
           :x2="symbol.x + w"
-          :y2="symbol.y + dir * (half + 4 + i * 3)"
+          :y2="symbol.y + dir * (half + hatchGap + i * hatchStep)"
           :stroke="color"
-          stroke-width="1.6"
+          stroke-width="2"
         />
       </template>
     </template>

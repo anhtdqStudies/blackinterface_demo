@@ -3,7 +3,7 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-04 · phiên: module #1 + khung dự án (git, frontend, store)
+**Cập nhật lần cuối**: 2026-08-05 · phiên: project + kết nối DataServer từ UI (đã hiện thực)
 
 ---
 
@@ -69,7 +69,8 @@ cd backend  && uv run uvicorn blackinterface.api.app:app --port 8080
 - ✅ `integration/opcua/discovery.py` — browse live, **~1 s**
 - ✅ `integration/dump.py` — đọc fixture, chạy offline
 - ✅ `diagram/layout.py` — graph → toạ độ, deterministic
-- ✅ `api/app.py` — Domain API, **chỉ có 1 endpoint không-GET là `/api/reload`**
+- ✅ `api/app.py` — Domain API, mọi endpoint không-GET chỉ ghi SQLite local,
+     không bao giờ ghi OneATS (allowlist khoá trong `test_no_write_endpoint_exists`)
 - ✅ `frontend/dev/index.html` — viewer SVG 1 file, không cần Node
 - ✅ **96 test offline + 2 test live**, tất cả xanh
 - ✅ Fixture `backend/tests/fixtures/sas_tree.json` (617 node, có meta pin ModelVersion)
@@ -122,6 +123,34 @@ ba phát hiện của phiên trước (`get_children()` trùng, DBB/EBB, vị tr
 
 ---
 
+### Project + kết nối DataServer từ UI (2026-08-05) ✅
+
+Luồng mới: mở Black Interface → **Project** → nhập tên + `opc.tcp://…` →
+Kết nối → sơ đồ dựng từ nguồn đó. Kết nối thành công lưu **snapshot**
+(StationObs JSON trong SQLite): mở lại project là vẽ ngay, offline được;
+«Tải lại từ nguồn» mới đọc live. Khởi động lại process tự mở project gần nhất
+từ snapshot (`StationStore.startup()`).
+
+- ✅ Migration `002_projects.sql` — `projects` + `project_snapshots` (FK cascade)
+- ✅ `store/projects.py` — `ProjectRepository`, store chỉ nói SQL, không biết domain
+- ✅ `api/source.py` — `StationStore` theo project: `open_project` (snapshot) /
+     `refresh_project` (live + thay snapshot) / fallback `BI_SOURCE` khi không có project
+- ✅ `api/app.py` — `GET/POST /api/projects`, `/open`, `/refresh`, `DELETE`;
+     lỗi kết nối trả trong body (`ok=false`), project giữ lại để sửa URL thử lại
+- ✅ **Bỏ hardcode `SAS_PATH`**: `_find_station_root()` trong `discovery.py` —
+     thử path DEMO trước (nhanh), không có thì BFS tìm node có con dạng `\d+kV`.
+     Trạm mới trong DataServer giờ tìm được bất kể tên project trong cây
+- ✅ Frontend: view `ProjectsView` (tạo/nhập URL/kết nối/mở/tải lại/xoá),
+     nav «Project», lỗi `model_not_loaded` dẫn thẳng tới trang project
+- ✅ 2 lỗi mới trong bộ đóng: `invalid_input` (400), `conflict` (409)
+- ✅ 141 test offline (17 test mới: repository, luồng API project, reopen từ
+     snapshot qua "restart", auto-dò root trên cây giả), check.py xanh cả 7 mục
+- ⚠ Chưa kiểm chứng trên trạm thật thứ 2 (Q4): auto-dò root mới test bằng cây giả;
+     `tools/probe_dataserver.py`/`verify_dataserver.py` vẫn hardcode path DEMO
+- ⚠ Chưa có manual test cho luồng project (bổ sung vào `docs/40-testing/` khi chạy tay)
+
+---
+
 ## Việc kế tiếp (theo thứ tự)
 
 ### 0. Xem lại giao diện mới bằng mắt ← **LÀM TRƯỚC**
@@ -129,13 +158,14 @@ Chạy 7 test case trong `docs/40-testing/manual-test-01-topology.md`.
 Trọng tâm TC-03: **hai thanh cái phải tách bạch được bằng mắt** (làn riêng +
 chấm nối), và cả trạm phải nằm trong **một hình**, 220kV lật ngược ở trên.
 
-**Còn thiếu so với bản Grid Designer** (bảng so sánh, chưa làm):
+**Còn thiếu so với bản Grid Designer** (bảng so sánh):
 - [ ] Giá trị đo trên đầu mỗi ngăn (kV/kA/MW/MVar) — nguồn `MMXU1`, chưa vào model
 - [ ] Hz/kV cạnh mỗi thanh cái — nguồn `Subs.BB*`, đã browse được, chưa vào model
-- [ ] Ký hiệu MBA AT1 nối 220↔110 — **cần bằng chứng ghép ngăn**, DataServer
-      không có. Hiện mỗi ngăn MBA chỉ kết thúc bằng ký hiệu cuộn dây (I3)
-- [ ] Tên ngăn dạng chữ ("Ben Cat", "Hoc Mon") — chỉ có trong bản vẽ Grid
-      Designer, DataServer không mang
+- [x] ~~Ký hiệu MBA AT1 nối 220↔110~~ — **ĐÍNH CHÍNH 2026-08-05**: bằng chứng
+      ghép ngăn CÓ trong DataServer (`BAY/Name` = "AT1 Incoming" ở cả D01 lẫn
+      E07 + nhóm `/SAS/AT1` mang `YPTR`/`YLTC`). Đã vẽ, xem phiên 2026-08-05
+- [x] ~~Tên ngăn dạng chữ ("Ben Cat", "Hoc Mon")~~ — **ĐÍNH CHÍNH 2026-08-05**:
+      DataServer CÓ mang, ở `<bay>/BAY/Name`. Đã vào model và hiển thị
 
 ### 1. Energization solver ← **BẮT ĐẦU TỪ ĐÂY**
 Đây là thứ biến sơ đồ hiện tại thành sơ đồ *có nghĩa*: tô màu theo **mang điện**,
@@ -175,6 +205,87 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 - [ ] `LLMProvider` interface (OpenRouter dev → Ollama trạm)
 - [ ] Nuxt: chat shell, bay-card review, evidence panel
       *(tham chiếu hành vi: `frontend/dev/index.html`)*
+
+---
+
+### Diagram v2 theo góp ý người dùng (2026-08-05) ✅
+
+Người dùng đối chiếu với bản vẽ OneATS (`document/DEMO_SLD.pdf`) và nêu 3 điểm.
+
+1. **MBA nối 220↔110 — đã vẽ, có bằng chứng.** Phát hiện mới đo được
+   (2026-08-05, fixture + cấu trúc live):
+   - `/SAS/220kV/D01/BAY/Name` = `/SAS/110kV/E07/BAY/Name` = `"AT1 Incoming"`
+   - `/SAS/AT1` là nhóm ngang cấp điện áp, mang `YPTR` (MBA) + `YLTC` (OLTC)
+   → luật ghép: nhóm MBA + id xuất hiện trong tên ngăn ở ≥2 cấp điện áp.
+   Không đủ bằng chứng → `transformer_unpaired` warning, vẽ cuộn dây rời như cũ.
+   - `domain`: `Transformer` + `pair_transformers()`; importers đọc nhóm AT*
+   - `diagram`: ký hiệu 2 vòng tròn trong khe giữa 2 band, link chạy làn riêng
+     cạnh ngăn, cắt ngang thanh cái **không chấm** = không nối (I3 giữ nguyên)
+2. **Tên ngăn dạng chữ** — `BAY/Name` vào `Bay.name`: "Ben Cat", "Hoc Mon",
+   "Lai Uyen" hiện dưới mã ngăn, đúng như bản vẽ Grid Designer.
+3. **DS vs ES + giãn khoảng** — ES: thoi nhỏ hơn (6px vs 10px), gạch tiếp địa
+   to và xa thân hơn; `SIDE_OFFSET` 54→68; bỏ chữ loại ngăn thừa ở caption.
+4. **Thu phóng** — SVG thành camera: lăn chuột zoom quanh con trỏ, kéo để pan,
+   nút «Vừa màn hình» (phím `f`), tab cấp điện áp = focus camera vào band.
+   Toạ độ vẫn 100% từ backend; frontend chỉ đổi viewBox.
+
+147 test offline (6 test mới khoá pairing + hình học link), check.py xanh cả 7 mục.
+**Chưa xem bằng mắt trên trình duyệt** — việc #0 vẫn đứng.
+
+### Diagram v2.1 — cuộn thứ ba 22kV của AT1 (2026-08-05) ✅
+
+Người dùng hỏi: "còn 22kV thì sao, BB41 (suy ra) theo SLD phải nối vào AT1".
+Đo lại fixture → tìm được **nguồn bằng chứng thứ hai** (BAY/Name của J01 rỗng
+nên luật cũ không bắt được):
+
+- **Số hiệu máy cắt theo quy ước EVN (TT 44/2014/TT-BCT)**: ngăn MBA có số
+  `<mã cấp điện áp>3<số thứ tự MBA>` → AT1 sở hữu **231** (220kV), **131**
+  (110kV), **431** (22kV). Trong fixture chỉ đúng 3 ngăn này khớp `^\d31$`;
+  đường dây là x71/x72, liên lạc 112/212 — không đụng.
+- `pair_transformers()`: match theo `BAY/Name` **hoặc** số máy cắt; id MBA
+  không có đúng 1 chữ số cuối → không sinh luật số (thà không ghép còn hơn
+  ghép sai). AT1 giờ ghép `(D01, E07, J01)` — 3 cấp điện áp.
+- `layout` — qua 3 vòng góp ý cùng ngày, chốt ở **band 22kV nằm giữa**:
+  `_band_order()`: cấp điện áp mà *mọi* ngăn vẽ được đều là cuộn ≥3 của MBA
+  thì được nhấc lên ngay dưới band cao áp của MBA đó và **lật ngược**
+  (terminal chĩa lên MBA, BB41 suy ra chìm xuống đáy band) — đúng bố cục dải
+  giữa của tờ Grid Designer. Cấp 22kV có xuất tuyến thật thì giữ nguyên vị trí
+  → khi đó link dùng tuyến dự phòng `_free_lane` (đường dọc nửa-bước-cột,
+  giữa 2 cột luôn trống vì fitting rộng nhất vươn ±96 < ±105). Link ngắn:
+  terminal → làn cạnh ngăn → hành lang `TX_DROP=52` → đáy vòng tròn 3
+  (`TX_TAP=30`). Cắt ngang không chấm (I3).
+- **Bug sửa kèm**: band không có thanh cái vòng (22kV không BB49) đặt terminal
+  sai phía — `terminal_y` chỉ lấy `max(rail_y)` = thanh cái chính trên cùng,
+  terminal chui lên sát busbar thay vì nằm quá dãy thiết bị. Giờ
+  `max(spine_bottom, max(rail_y))`.
+- Frontend: MBA có ≥3 ngăn → thêm vòng tròn thứ ba (tâm `y+14`, r16 — phải
+  khớp `TX_TAP` backend), nhãn hạ xuống `y+52`.
+- BB41 vẫn «(suy ra)» — đo được `/SAS/Subs` chỉ có BB11/12/19, BB21/22/29;
+  nhãn phản ánh đúng nguồn, không sửa.
+
+148 test (1 test mới khoá hình học link cuộn 3), check.py xanh cả 7 mục,
+dist đã build lại. **Vẫn chưa xem bằng mắt trên trình duyệt** — việc #0.
+
+---
+
+## Nhật ký phiên gần nhất
+
+### 2026-08-05 — Làm rõ nguồn dữ liệu + chốt thiết kế project/connect
+- Người dùng đổi project trong DataServer nhưng sơ đồ không đổi → nguyên nhân:
+  `BI_SOURCE=fixture` là mặc định, backend vẽ từ `sas_tree.json`, không đụng
+  DataServer. Model chỉ dựng lại lúc khởi động hoặc `POST /api/reload`.
+- Chốt thiết kế "tạo project → nhập URL DataServer → tải và vẽ":
+  có lưu snapshot. Người dùng sau đó đổi thứ tự: **làm trước** energization.
+- Điểm gãy đã nhận diện cho trạm mới: `SAS_PATH` hardcode trong `discovery.py`.
+
+### 2026-08-05 — Hiện thực project + connect (xem mục Đã xong cùng tên)
+- Toàn bộ luồng tạo/mở/tải lại/xoá project chạy được, offline test bằng cách
+  patch `_observe_opcua` trả fixture — không cần DataServer.
+- `.env` của người dùng (`BI_SOURCE=opcua`) giờ chỉ còn là fallback khi
+  **chưa có** project nào active; có thể xoá sau khi tạo project đầu tiên.
+- **Chưa xem giao diện mới bằng mắt** — cả trang Project lẫn sơ đồ (việc #0
+  vẫn đứng nguyên). Người dùng nói sơ đồ "chưa ưng ý" → khi chạy tay, ghi cụ
+  thể chỗ chưa ưng vào status để sửa trong việc #5 (diagram engine).
 
 ---
 

@@ -125,13 +125,14 @@ backend/src/blackinterface/
   diagram/       # L6 graph → layout → ViewModel → SVG
     layout.py        StationGraph -> DiagramView (toạ độ, deterministic)
   api/           # L3 Typed Domain API (FastAPI, HTTP/SSE)
-    source.py        StationStore: fixture | opcua
+    source.py        StationStore: project (snapshot|live) hoặc fallback BI_SOURCE
     errors.py        exception -> JSON {"error": {code, message, detail}}
-    app.py           endpoint + serve frontend/dist
+    app.py           endpoint (kể cả /api/projects) + serve frontend/dist
   agent/         # L2 BlackCore (Pydantic AI: intent, tools, planner, evidence)
   store/         # SQLite (ADR-0006)
     db.py            connection, WAL, migration tiến-một-chiều
     meta.py          repository app_meta — mẫu cho các repository sau
+    projects.py      repository projects + snapshot (StationObs JSON, opaque)
     migrations/      NNN_name.sql, đánh số liên tục từ 001
 backend/openapi.json  # HỢP ĐỒNG API. Sinh ra, được check.py gác
 frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009), xem frontend/README.md
@@ -231,7 +232,7 @@ cd backend
 uv sync
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest                # 107 test, không cần DataServer
+uv run pytest                # 148 test, không cần DataServer
 uv run pytest -m live        # cần DataServer đang chạy
 uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
@@ -278,6 +279,8 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | Vẽ `-1` và `-2` trên cùng một đường thẳng đứng | **Sai và nguy hiểm.** Đường đó chạm cả hai thanh cái tại cùng một điểm → hình luôn trông như có đường dẫn xuyên qua cả hai, bất kể dao ở đâu. Mỗi dao nối thanh cái phải có **làn x riêng** + **chấm nối**; cắt ngang không chấm = không nối. `test_no_conductor_runs_through_another_devices_busbar_connection` khoá điều này. |
 | Mỗi cấp điện áp một hình riêng | SLD thật vẽ **cả trạm trong một hình**, cấp cao nhất trên cùng và **lật ngược** để hai nhóm thanh cái quay vào nhau. `layout_station()`; `/api/diagram`. |
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
+| Path `Objects/Root/EVN/RLDC/PROJECT/SAS` là cố định | **Sai.** Path chứa **tên project** — đổi project trong DataServer là path đổi. `discovery.py` auto-dò root theo *nội dung* (node có con dạng `\d+kV`), nhưng `tools/probe_dataserver.py` và `verify_dataserver.py` vẫn hardcode path DEMO. |
+| "DataServer không có bằng chứng ghép ngăn MBA / tên ngăn chữ" | **Sai** (đính chính 2026-08-05). `<bay>/BAY/Name` mang tên hiển thị ("Ben Cat", "AT1 Incoming"), và `/SAS/AT1` (ngang cấp điện áp, có `YPTR`/`YLTC`) là chính MBA. Ghép ngăn 220↔110: id nhóm MBA xuất hiện trong `BAY/Name` của cả hai ngăn. Cuộn 3 (22kV, J01) có `BAY/Name` rỗng nhưng ghép được qua số máy cắt EVN (TT 44/2014/TT-BCT): `<mã cấp áp>3<số MBA>` → 231/131/431 đều là AT1. Xem `topology.pair_transformers()`. |
 
 ---
 

@@ -55,6 +55,13 @@ export const useStationStore = defineStore('station', () => {
       if (wanted) selectVoltageLevel(wanted)
     } catch (cause) {
       capture(cause)
+      if (cause instanceof ApiError && cause.code === 'model_not_loaded') {
+        // No model server-side (e.g. the active project was deleted). Showing
+        // a stale drawing next to that error would be worse than showing none.
+        station.value = null
+        bays.value = []
+        diagram.value = null
+      }
     } finally {
       loading.value = false
     }

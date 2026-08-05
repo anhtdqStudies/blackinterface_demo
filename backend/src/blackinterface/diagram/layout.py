@@ -43,6 +43,7 @@ a YAML file, not a change here.
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Callable
 
@@ -71,9 +72,13 @@ TRANSFER_GAP = 74.0  # deepest spine node -> transfer busbar rail
 TERMINAL_DROP = 58.0  # transfer rail -> the external terminal
 STUB = 32.0  # how far from its rail a busbar selector sits
 LANE = 34.0  # x offset of a selector's private drop to its rail
-SIDE_OFFSET = 54.0  # x offset for a side-mounted earth switch
+SIDE_OFFSET = 68.0  # x offset for a side-mounted earth switch
 LABEL_BLOCK = 66.0  # room past the terminal for the bay caption
-SECTION_GAP = 104.0  # between two voltage levels in the station drawing
+SECTION_GAP = 150.0  # between two voltage levels; transformers live in it
+LINK_LANE = 96.0  # x offset of a transformer link's vertical run past its bay
+TX_REACH = 26.0  # link edge stops here short of the transformer centre
+TX_TAP = 30.0  # a tertiary link meets the symbol's bottom circle here
+TX_DROP = 52.0  # tertiary corridor below the symbol; must stay inside the gap
 
 #: EVN numbering: busbar index 9 is the transfer busbar.
 TRANSFER_INDEX = 9
@@ -141,6 +146,24 @@ class TerminalView(Frozen):
     y: float
     bay_type: str
     flipped: bool = False
+    #: True when a drawn transformer link continues from this terminal, so the
+    #: renderer must not cap it with its own winding symbol.
+    linked: bool = False
+
+
+class TransformerLinkView(Frozen):
+    """A power transformer drawn between two voltage-level bands.
+
+    Only exists when the pairing is evidence-backed (see
+    `domain.models.Transformer`); an unpaired transformer raises a
+    ValidationIssue instead of a drawing.
+    """
+
+    id: str
+    name: str
+    x: float
+    y: float
+    bay_ids: tuple[str, ...]  # HV first
 
 
 class ColumnView(Frozen):
@@ -193,6 +216,7 @@ class StationView(Frozen):
     edges: tuple[EdgeView, ...] = ()
     terminals: tuple[TerminalView, ...] = ()
     junctions: tuple[JunctionView, ...] = ()
+    transformers: tuple[TransformerLinkView, ...] = ()
 
 
 # ----------------------------------------------------------------- one level
@@ -224,7 +248,10 @@ def layout_voltage_level(
     spine_bottom = spine_top + (depth - 1) * ROW_HEIGHT
     if transfer is not None:
         rail_y[transfer.node_id] = spine_bottom + TRANSFER_GAP
-    terminal_y = max(rail_y.values(), default=spine_bottom) + TERMINAL_DROP
+    # Below the spine AND below every rail: without a transfer busbar the
+    # deepest rail is the main one at the top, and the terminal must still
+    # leave at the far end of the bay, past its switchgear.
+    terminal_y = max(spine_bottom, max(rail_y.values(), default=spine_bottom)) + TERMINAL_DROP
 
     symbols: list[SymbolView] = []
     edges: list[EdgeView] = []
@@ -497,14 +524,19 @@ def layout_station(
     point up and away. That is how the station's own Grid Designer sheet is
     drawn, and how a substation single-line diagram is normally read.
 
-    The transformer coupling two bands is deliberately NOT drawn as a conductor.
-    The DataServer carries no connectivity, so we have no evidence of which HV
-    bay pairs with which LV bay; drawing that line would be inventing a current
-    path (AGENTS.md I3). Each transformer bay ends in a transformer terminal
-    symbol instead.
+    A transformer coupling bands is drawn only when the pairing is
+    evidence-backed (`graph.transformers`, from `BAY/Name` and EVN breaker
+    numbering — see domain.topology.pair_transformers). The symbol sits in the
+    gap under its HV band; HV/LV links run beside their bays in private lanes,
+    a tertiary link drops down a free mid lane next to the symbol, all
+    crossing rails without junction dots — a crossing is not a connection
+    (AGENTS.md I3). An unpaired transformer bay keeps its plain winding
+    terminal.
     """
     registry = registry or default_registry()
-    levels = sorted(graph.voltage_levels, key=_kilovolts, reverse=True)
+    levels, tertiary_levels = _band_order(
+        graph, sorted(graph.voltage_levels, key=_kilovolts, reverse=True)
+    )
 
     sections: list[SectionView] = []
     rails: list[RailView] = []
@@ -521,7 +553,10 @@ def layout_station(
         view = layout_voltage_level(graph, level, registry)
         if not view.columns:
             continue
-        flip = drawn == 0 and len(levels) > 1
+        # The top band is mirrored so the busbar groups face each other; a
+        # tertiary band is mirrored so its terminal points up, at the
+        # transformer it belongs to.
+        flip = (drawn == 0 and len(levels) > 1) or (drawn > 0 and level in tertiary_levels)
         band = view.height
         place = _placer(top, band, flip)
 
@@ -562,9 +597,15 @@ def layout_station(
         top += band + SECTION_GAP
         drawn += 1
 
+    transformers, linked_bays, link_extent = _link_transformers(graph, sections, terminals, edges)
+    terminals = [
+        t.model_copy(update={"linked": True}) if t.node_id.split(".")[0] in linked_bays else t
+        for t in terminals
+    ]
+
     return StationView(
         name=graph.name,
-        width=width,
+        width=max(width, link_extent + MARGIN_X / 2.0),
         height=max(top - SECTION_GAP, 0.0),
         sections=tuple(sections),
         rails=tuple(rails),
@@ -573,7 +614,142 @@ def layout_station(
         edges=tuple(edges),
         terminals=tuple(terminals),
         junctions=tuple(junctions),
+        transformers=tuple(transformers),
     )
+
+
+def _link_transformers(
+    graph: StationGraph,
+    sections: list[SectionView],
+    terminals: list[TerminalView],
+    edges: list[EdgeView],
+) -> tuple[list[TransformerLinkView], set[str], float]:
+    """Place each paired transformer in the gap under its HV band and route a
+    link from every winding's terminal to it.
+
+    Every route runs in a private lane beside its bay (`LINK_LANE`), the same
+    idea that gives busbar selectors their own drops: a shared vertical would
+    be unreadable. A tertiary winding normally sits in the band right under
+    the symbol (`_band_order` moved it there), so its link is short: up its
+    lane into the corridor below the symbol, then into the bottom circle.
+    When its band could not move (the level has real feeders too), the link
+    instead drops down the free half-pitch mid lane next to the symbol
+    (`_free_lane`), crossing the intermediate bands. All lanes cross rails
+    without dots — a crossing is not a connection.
+
+    Returns the drawn transformers, the linked bay ids, and how far right the
+    lanes reached (0 when none), so the caller can widen the canvas if needed.
+    """
+    section_by_level = {s.voltage_level: s for s in sections}
+    section_rank = {s.voltage_level: i for i, s in enumerate(sections)}
+    terminal_by_bay = {t.node_id.split(".")[0]: t for t in terminals}
+    bay_level = {b.id: b.voltage_level for b in graph.bays}
+
+    result: list[TransformerLinkView] = []
+    linked: set[str] = set()
+    extent = 0.0
+    lanes_used = 0
+    for transformer in graph.transformers:
+        windings = [b for b in transformer.bay_ids if b in terminal_by_bay]
+        hv_section = section_by_level.get(bay_level.get(windings[0], "")) if windings else None
+        if len(windings) < 2 or hv_section is None:
+            continue  # already reported as transformer_unpaired by the builder
+        ends = [terminal_by_bay[b] for b in windings[:2]]
+        y = hv_section.bottom + SECTION_GAP / 2.0
+        x = sum(t.x for t in ends) / len(ends)
+        for side, terminal in zip(("hv", "lv"), ends, strict=True):
+            direction = 1.0 if x >= terminal.x else -1.0
+            lane = terminal.x + direction * LINK_LANE
+            reach = x - TX_REACH if lane <= x else x + TX_REACH
+            edges.append(
+                EdgeView(
+                    id=f"link.{transformer.id}.{side}",
+                    points=(
+                        Point(x=terminal.x, y=terminal.y),
+                        Point(x=lane, y=terminal.y),
+                        Point(x=lane, y=y),
+                        Point(x=reach, y=y),
+                    ),
+                )
+            )
+        hv_rank = section_rank.get(bay_level.get(windings[0], ""), -1)
+        for extra, bay_id in enumerate(windings[2:]):
+            terminal = terminal_by_bay[bay_id]
+            if section_rank.get(bay_level.get(bay_id, "")) == hv_rank + 1:
+                direction = 1.0 if x >= terminal.x else -1.0
+                lane = terminal.x + direction * LINK_LANE
+            else:
+                lane = _free_lane(x) + lanes_used * 24.0
+                lanes_used += 1
+            extent = max(extent, lane)
+            edges.append(
+                EdgeView(
+                    id=f"link.{transformer.id}.w{extra + 3}",
+                    points=(
+                        Point(x=terminal.x, y=terminal.y),
+                        Point(x=lane, y=terminal.y),
+                        Point(x=lane, y=y + TX_DROP),
+                        Point(x=x, y=y + TX_DROP),
+                        Point(x=x, y=y + TX_TAP),
+                    ),
+                )
+            )
+        linked.update(windings)
+        result.append(
+            TransformerLinkView(
+                id=transformer.id,
+                name=transformer.name,
+                x=x,
+                y=y,
+                bay_ids=tuple(windings),
+            )
+        )
+    return result, linked, extent
+
+
+def _band_order(graph: StationGraph, levels: list[str]) -> tuple[list[str], set[str]]:
+    """Move a tertiary-only level up, right under its transformer's HV band.
+
+    On the Grid Designer sheet AT1's 22kV branch lives in the middle strip
+    next to the symbol, not in a distant bottom band. A level qualifies when
+    every drawable bay in it is a third-or-later winding of some transformer;
+    a level that also has real feeders keeps its voltage-order place, because
+    its busbar serves more than the transformer.
+    """
+    tertiary_bays = {b for t in graph.transformers for b in t.bay_ids[2:]}
+    if not tertiary_bays:
+        return levels, set()
+
+    drawable: dict[str, list[str]] = {}
+    for bay in graph.bays:
+        if bay.template_id and graph.devices_of(bay.id):
+            drawable.setdefault(bay.voltage_level, []).append(bay.id)
+
+    bay_level = {b.id: b.voltage_level for b in graph.bays}
+    hv_level = {  # tertiary bay -> the voltage level of its transformer's HV bay
+        bay: bay_level.get(t.bay_ids[0], "") for t in graph.transformers for bay in t.bay_ids[2:]
+    }
+    tertiary = {level for level, bays in drawable.items() if all(b in tertiary_bays for b in bays)}
+
+    order = [level for level in levels if level not in tertiary]
+    for level in sorted(tertiary, key=_kilovolts, reverse=True):
+        anchor = next((hv_level[b] for b in drawable[level] if b in hv_level), None)
+        at = order.index(anchor) + 1 if anchor in order else len(order)
+        order.insert(at, level)
+    return order, tertiary
+
+
+def _free_lane(x: float) -> float:
+    """The half-pitch vertical nearest `x`, clear of everything in every band.
+
+    Bay columns sit at `MARGIN_X + k * COLUMN_PITCH`; their widest fittings
+    reach ±SIDE_OFFSET (68) and ±LINK_LANE (96), both short of the half-pitch
+    line at ±105. So the vertical midway between two columns is guaranteed
+    empty in every band, whatever templates they use — the safe corridor for
+    a tertiary link that has to cross a whole band.
+    """
+    k = math.floor((x - MARGIN_X) / COLUMN_PITCH)
+    return MARGIN_X + (k + 0.5) * COLUMN_PITCH
 
 
 def _placer(top: float, band: float, flip: bool) -> Callable[[float], float]:
@@ -602,6 +778,7 @@ __all__ = [
     "StationView",
     "SymbolView",
     "TerminalView",
+    "TransformerLinkView",
     "layout_station",
     "layout_voltage_level",
 ]

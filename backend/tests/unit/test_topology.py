@@ -233,3 +233,22 @@ def test_missing_required_slot_is_an_error() -> None:
     assert bay2 is not None
     assert bay2.bay_type is BayType.LINE
     assert [i.code for i in bay2.issues] == ["slot_missing"]  # XSWI1 is required
+
+
+# --------------------------------------------------------------- transformers
+def test_transformer_pairing_is_evidence_backed(station: StationGraph) -> None:
+    """Two evidence sources, measured 2026-08-05 on the DEMO_SAS fixture:
+    'AT1' in the BAY/Name of D01 and E07, and EVN breaker numbering for the
+    tertiary — J01's breaker is 431 (`<voltage 4=22kV>3<AT #1>`) while its
+    BAY/Name is empty. HV first; couplers (212) and lines (271) must not join.
+    """
+    assert [(t.id, t.bay_ids) for t in station.transformers] == [("AT1", ("D01", "E07", "J01"))]
+
+
+def test_bay_display_names_come_from_the_bay_logical_node(station: StationGraph) -> None:
+    names = {b.id: b.name for b in station.bays}
+    assert names["D01"] == "AT1 Incoming"
+    assert names["D03"] == "Ben Cat"
+    assert names["E07"] == "AT1 Incoming"
+    # A bay without a BAY/Name keeps its id — never an empty caption.
+    assert names["J01"] == "J01"

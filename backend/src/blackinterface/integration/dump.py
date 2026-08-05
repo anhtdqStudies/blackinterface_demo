@@ -26,10 +26,20 @@ from pathlib import Path
 from typing import Any
 
 from blackinterface.domain.models import PointSample, Quality
-from blackinterface.domain.observation import BayObs, BusbarObs, LogicalNodeObs, StationObs
+from blackinterface.domain.observation import (
+    BayObs,
+    BusbarObs,
+    LogicalNodeObs,
+    StationObs,
+    TransformerObs,
+)
 
 VOLTAGE_LEVEL_RE = re.compile(r"^\d+kV$")
 BUSBAR_RE = re.compile(r"^BB\d{2}$")
+
+#: A station-level group is a power transformer when it carries one of these
+#: logical nodes. Measured on DEMO_SAS (2026-08-05): /SAS/AT1/YPTR, .../YLTC.
+TRANSFORMER_LNS = ("YPTR", "YLTC")
 
 #: Data attributes we lift out of a logical node.
 POSITION_DA = "PosSt"
@@ -122,6 +132,15 @@ def parse_dump(
         for path, record in sorted(by_path.items())
         if _is_busbar(path)
     ]
+    transformers = [
+        TransformerObs(
+            id=path.rsplit("/", 1)[1],
+            name=path.rsplit("/", 1)[1],
+            source_ref=record.get("nodeid"),
+        )
+        for path, record in sorted(by_path.items())
+        if _is_transformer(path, children)
+    ]
     return StationObs(
         name=str(meta.get("ModelName") or ""),
         model_version=str(meta["ModelVersion"]) if meta.get("ModelVersion") else None,
@@ -129,6 +148,7 @@ def parse_dump(
         source=source,
         bays=tuple(bays),
         busbars=tuple(busbars),
+        transformers=tuple(transformers),
     )
 
 
@@ -140,6 +160,14 @@ def _is_bay(path: str) -> bool:
 def _is_busbar(path: str) -> bool:
     parts = path.split("/")
     return len(parts) == 4 and parts[1:3] == ["SAS", "Subs"] and bool(BUSBAR_RE.match(parts[3]))
+
+
+def _is_transformer(path: str, children: dict[str, dict[str, dict[str, Any]]]) -> bool:
+    """A station-level sibling of the voltage levels that carries YPTR/YLTC."""
+    parts = path.split("/")
+    if len(parts) != 3 or parts[1] != "SAS" or VOLTAGE_LEVEL_RE.match(parts[2]):
+        return False
+    return any(ln in children.get(path, {}) for ln in TRANSFORMER_LNS)
 
 
 def _build_bay(

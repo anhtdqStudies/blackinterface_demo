@@ -11,47 +11,135 @@
  * busbar. A conductor crossing a busbar WITHOUT a dot is not connected to it.
  * That is what lets you see that `-1` goes to busbar 1 and `-2` to busbar 2,
  * even though both drops pass the same rails.
+ *
+ * The view is a camera over that drawing: wheel zooms about the cursor, drag
+ * pans, «Vừa màn hình» resets. Zooming only changes the viewBox — geometry
+ * still comes from the backend untouched.
  */
-import type { Edge, StationDiagram, Terminal } from '@/api/client'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import type { Edge, StationDiagram } from '@/api/client'
 import DeviceSymbol from './DeviceSymbol.vue'
 import { railColor } from './state'
 
-defineProps<{ diagram: StationDiagram; selectedDeviceId: string | null }>()
+const props = defineProps<{ diagram: StationDiagram; selectedDeviceId: string | null }>()
 defineEmits<{ select: [deviceId: string] }>()
 
 function points(edge: Edge): string {
   return edge.points.map((p) => `${p.x},${p.y}`).join(' ')
 }
 
-/** Terminals point away from the busbars: down normally, up in a mirrored band. */
-function out(terminal: Terminal): number {
-  return terminal.flipped ? -1 : 1
+// ------------------------------------------------------------------- camera
+const PAD = 40
+const svgEl = ref<SVGSVGElement | null>(null)
+const viewBox = ref({ x: -PAD, y: -PAD, w: 100, h: 100 })
+
+function fit(): void {
+  viewBox.value = {
+    x: -PAD,
+    y: -PAD,
+    w: props.diagram.width + PAD * 2,
+    h: props.diagram.height + PAD * 2,
+  }
+}
+watch(() => props.diagram, fit, { immediate: true })
+
+/** Zoom the camera onto one voltage-level band. Called by the parent's tabs. */
+function focusSection(top: number, bottom: number): void {
+  viewBox.value = {
+    x: -PAD,
+    y: top - PAD,
+    w: props.diagram.width + PAD * 2,
+    h: bottom - top + PAD * 2,
+  }
+}
+defineExpose({ focusSection, fit })
+
+/** Client pixel -> drawing coordinates, honouring the letterboxing of `meet`. */
+function toDrawing(clientX: number, clientY: number): { x: number; y: number; scale: number } {
+  const rect = svgEl.value!.getBoundingClientRect()
+  const vb = viewBox.value
+  const scale = Math.min(rect.width / vb.w, rect.height / vb.h)
+  const offX = (rect.width - vb.w * scale) / 2
+  const offY = (rect.height - vb.h * scale) / 2
+  return {
+    x: vb.x + (clientX - rect.left - offX) / scale,
+    y: vb.y + (clientY - rect.top - offY) / scale,
+    scale,
+  }
 }
 
-function arrowHead(terminal: Terminal): string {
-  const { x, y } = terminal
-  const d = out(terminal)
-  const tip = y + d * 26
-  return `${x},${tip} ${x - 5},${tip - d * 10} ${x + 5},${tip - d * 10}`
+function onWheel(event: WheelEvent): void {
+  event.preventDefault()
+  const factor = event.deltaY > 0 ? 1.2 : 1 / 1.2
+  const vb = viewBox.value
+  const at = toDrawing(event.clientX, event.clientY)
+  viewBox.value = {
+    x: at.x - (at.x - vb.x) * factor,
+    y: at.y - (at.y - vb.y) * factor,
+    w: vb.w * factor,
+    h: vb.h * factor,
+  }
 }
+
+let panning = false
+let moved = false
+let lastClient = { x: 0, y: 0 }
+
+function onPointerDown(event: PointerEvent): void {
+  panning = true
+  moved = false
+  lastClient = { x: event.clientX, y: event.clientY }
+  svgEl.value?.setPointerCapture(event.pointerId)
+}
+
+function onPointerMove(event: PointerEvent): void {
+  if (!panning) return
+  const dx = event.clientX - lastClient.x
+  const dy = event.clientY - lastClient.y
+  if (Math.abs(dx) + Math.abs(dy) > 3) moved = true
+  const { scale } = toDrawing(event.clientX, event.clientY)
+  viewBox.value = {
+    ...viewBox.value,
+    x: viewBox.value.x - dx / scale,
+    y: viewBox.value.y - dy / scale,
+  }
+  lastClient = { x: event.clientX, y: event.clientY }
+}
+
+function onPointerUp(): void {
+  panning = false
+}
+
+/** A drag that ended on a symbol must not count as a click on it. */
+function swallowDragClick(event: MouseEvent): void {
+  if (moved) {
+    event.stopPropagation()
+    moved = false
+  }
+}
+
+function onKey(event: KeyboardEvent): void {
+  if (event.key === 'f' && !(event.target instanceof HTMLInputElement)) fit()
+}
+onMounted(() => window.addEventListener('keydown', onKey))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 </script>
 
 <template>
   <div class="canvas">
     <svg
-      :width="diagram.width"
-      :height="diagram.height"
-      :viewBox="`0 0 ${diagram.width} ${diagram.height}`"
+      ref="svgEl"
+      :viewBox="`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`"
+      preserveAspectRatio="xMidYMid meet"
+      @wheel="onWheel"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerUp"
+      @click.capture="swallowDragClick"
     >
       <!-- Voltage level bands, so it is obvious where one level ends. -->
       <g v-for="section in diagram.sections" :key="section.voltage_level">
-        <line
-          class="band"
-          :x1="0"
-          :y1="section.bottom"
-          :x2="diagram.width"
-          :y2="section.bottom"
-        />
         <text class="level" :x="8" :y="(section.top + section.bottom) / 2">
           {{ section.voltage_level }}
         </text>
@@ -99,12 +187,54 @@ function arrowHead(terminal: Terminal): string {
         fill="var(--line)"
       />
 
+      <!-- Power transformers coupling bands. Only drawn when the pairing is
+           evidence-backed (BAY/Name or EVN breaker numbering), never guessed.
+           A third winding (autotransformer tertiary) adds a bottom circle;
+           its centre/radius must agree with TX_TAP in the backend layout. -->
+      <g v-for="tx in diagram.transformers" :key="tx.id">
+        <circle
+          :cx="tx.x - 9"
+          :cy="tx.y"
+          r="16"
+          fill="var(--bg)"
+          stroke="var(--fg)"
+          stroke-width="2.5"
+        />
+        <circle
+          :cx="tx.x + 9"
+          :cy="tx.y"
+          r="16"
+          fill="none"
+          stroke="var(--fg)"
+          stroke-width="2.5"
+        />
+        <circle
+          v-if="tx.bay_ids.length > 2"
+          :cx="tx.x"
+          :cy="tx.y + 14"
+          r="16"
+          fill="none"
+          stroke="var(--fg)"
+          stroke-width="2.5"
+        />
+        <text
+          :x="tx.x"
+          :y="tx.y + (tx.bay_ids.length > 2 ? 52 : 36)"
+          text-anchor="middle"
+          class="tx"
+        >
+          {{ tx.name }}
+        </text>
+      </g>
+
       <g v-for="terminal in diagram.terminals" :key="terminal.node_id">
-        <!-- A transformer bay ends at a winding, not at open air. -->
-        <template v-if="terminal.bay_type === 'TRANSFORMER'">
+        <!-- A linked transformer bay continues into the drawn transformer;
+             an unpaired one still ends at its own winding symbol. -->
+        <template v-if="terminal.linked" />
+        <template v-else-if="terminal.bay_type === 'TRANSFORMER'">
           <circle
             :cx="terminal.x"
-            :cy="terminal.y + out(terminal) * 13"
+            :cy="terminal.y + (terminal.flipped ? -13 : 13)"
             r="13"
             fill="none"
             stroke="var(--dim)"
@@ -112,7 +242,7 @@ function arrowHead(terminal: Terminal): string {
           />
           <circle
             :cx="terminal.x"
-            :cy="terminal.y + out(terminal) * 27"
+            :cy="terminal.y + (terminal.flipped ? -27 : 27)"
             r="13"
             fill="none"
             stroke="var(--dim)"
@@ -124,21 +254,18 @@ function arrowHead(terminal: Terminal): string {
             :x1="terminal.x"
             :y1="terminal.y"
             :x2="terminal.x"
-            :y2="terminal.y + out(terminal) * 26"
+            :y2="terminal.y + (terminal.flipped ? -26 : 26)"
             stroke="var(--line)"
             stroke-width="2"
           />
-          <polygon :points="arrowHead(terminal)" fill="var(--dim)" />
+          <polygon
+            :points="`${terminal.x},${terminal.y + (terminal.flipped ? -26 : 26)} ${terminal.x - 5},${terminal.y + (terminal.flipped ? -16 : 16)} ${terminal.x + 5},${terminal.y + (terminal.flipped ? -16 : 16)}`"
+            fill="var(--dim)"
+          />
         </template>
-        <text
-          :x="terminal.x"
-          :y="terminal.y + out(terminal) * (terminal.bay_type === 'TRANSFORMER' ? 56 : 42)"
-          text-anchor="middle"
-        >
-          {{ terminal.label }}
-        </text>
       </g>
 
+      <!-- Bay captions: designation on top, the operator's name under it. -->
       <g v-for="column in diagram.columns" :key="column.bay_id">
         <text
           :x="column.x"
@@ -147,14 +274,15 @@ function arrowHead(terminal: Terminal): string {
           fill="var(--fg)"
           class="bay"
         >
-          {{ column.label }}
+          {{ column.bay_id }}
         </text>
         <text
+          v-if="column.label && column.label !== column.bay_id"
           :x="column.x"
           :y="column.label_y + (column.flipped ? -15 : 15)"
           text-anchor="middle"
         >
-          {{ column.bay_type }}
+          {{ column.label }}
         </text>
         <text
           v-if="column.error_count"
@@ -176,6 +304,8 @@ function arrowHead(terminal: Terminal): string {
       />
     </svg>
 
+    <button class="fit" title="Vừa màn hình (phím f)" @click="fit()">Vừa màn hình</button>
+
     <div class="legend">
       <span class="group">Thiết bị:</span>
       <span><i style="background: var(--closed)" />ĐÓNG</span>
@@ -185,20 +315,33 @@ function arrowHead(terminal: Terminal): string {
       <span class="group">Thanh cái:</span>
       <span><i style="background: var(--live)" />có điện</span>
       <span><i style="background: var(--dead)" />không điện</span>
-      <span class="group">▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa</span>
-      <span class="group">● có nối · dây cắt ngang thanh cái mà không có chấm = không nối</span>
+      <span class="group">▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa · ◯◯ máy biến áp</span>
+      <span class="group">● có nối · cắt ngang không chấm = không nối</span>
+      <span class="group">lăn chuột = thu phóng · kéo = di chuyển</span>
     </div>
   </div>
 </template>
 
 <style scoped>
 .canvas {
-  overflow: auto;
+  position: relative;
+  overflow: hidden;
   padding: 12px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 svg {
   display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  cursor: grab;
+  touch-action: none;
+}
+svg:active {
+  cursor: grabbing;
 }
 svg text {
   font: 11px var(--mono);
@@ -206,6 +349,12 @@ svg text {
 }
 svg text.bay {
   font-size: 12px;
+  font-weight: 600;
+}
+svg text.tx {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--fg);
 }
 svg text.level {
   font-size: 15px;
@@ -213,11 +362,10 @@ svg text.level {
   fill: var(--dim);
   opacity: 0.5;
 }
-.band {
-  stroke: var(--line);
-  stroke-width: 1;
-  stroke-dasharray: 2 8;
-  opacity: 0.6;
+.fit {
+  position: absolute;
+  top: 18px;
+  right: 18px;
 }
 .legend {
   display: flex;
@@ -225,7 +373,7 @@ svg text.level {
   flex-wrap: wrap;
   color: var(--dim);
   font-size: 11px;
-  padding: 6px 2px;
+  padding: 6px 2px 0;
 }
 .legend i {
   display: inline-block;

@@ -31,6 +31,7 @@ onMounted(() => store.load())
             {{ store.issues.length }}
           </span>
         </RouterLink>
+        <RouterLink to="/projects">Project</RouterLink>
       </nav>
 
       <button :disabled="store.reloading" @click="store.reload()">
@@ -40,6 +41,9 @@ onMounted(() => store.load())
 
     <p v-if="store.error" class="error">
       <b>{{ store.error.code }}</b> — {{ store.error.message }}
+      <template v-if="store.error.code === 'model_not_loaded'">
+        · <RouterLink to="/projects">mở hoặc tạo một project</RouterLink>
+      </template>
     </p>
 
     <RouterView />
