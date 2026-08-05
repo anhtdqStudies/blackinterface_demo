@@ -133,6 +133,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Live
+         * @description One poll of what `/api/stream` pushes. The fallback when SSE cannot get
+         *     through, and what the UI loads before the stream's first event arrives.
+         */
+        get: operations["live_api_live_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects": {
         parameters: {
             query?: never;
@@ -248,6 +269,30 @@ export interface paths {
         };
         /** Station */
         get: operations["station_api_station_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stream
+         * @description Push the live document whenever anything moves (Server-Sent Events).
+         *
+         *     The first event is the current state, so a client needs no separate initial
+         *     fetch. Read-only in both directions: SSE has no channel back, and the data
+         *     behind it is a subscription to OneATS, never a command to it (I1).
+         */
+        get: operations["stream_api_stream_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -378,6 +423,23 @@ export interface components {
             quality: components["schemas"]["Quality"];
             /** Reported */
             reported?: boolean | null;
+        };
+        /**
+         * DeviceLiveOut
+         * @description A switching device's position, and how much to trust it.
+         *
+         *     `value` is the raw Dbpos behind `state`, carried so a panel showing live
+         *     data can still show its provenance — an operator questioning a symbol
+         *     should not have to refetch the bay to see what the DataServer actually
+         *     said (I6).
+         */
+        DeviceLiveOut: {
+            quality: components["schemas"]["Quality"];
+            /** Source Timestamp */
+            source_timestamp?: string | null;
+            state: components["schemas"]["SwitchState"];
+            /** Value */
+            value?: number | boolean | string | null;
         };
         /** DeviceOut */
         DeviceOut: {
@@ -566,6 +628,74 @@ export interface components {
             x: number;
             /** Y */
             y: number;
+        };
+        /**
+         * LinkOut
+         * @description The state of the subscription itself.
+         *
+         *     `connected=False` does not mean the station is down — it means we have
+         *     stopped hearing about it. What is on screen is then the last thing we knew,
+         *     which is worth showing and worth labelling, but is not the present tense.
+         */
+        LinkOut: {
+            /** Connected */
+            connected: boolean;
+            /** Error */
+            error?: string | null;
+            /** Realtime */
+            realtime: boolean;
+            /**
+             * Rejected
+             * @default 0
+             */
+            rejected: number;
+            /** Since */
+            since?: string | null;
+            /**
+             * Watching
+             * @default 0
+             */
+            watching: number;
+        };
+        /**
+         * LiveOut
+         * @description Everything about the station that moves, in one document.
+         *
+         *     The split this expresses: `/api/diagram` is geometry and `/api/bays` is
+         *     structure — both change only when the station is browsed again. Everything
+         *     here changes constantly, and is exactly what `/api/stream` pushes. One
+         *     shape for the first load and for every update, so the client has a single
+         *     code path applying it.
+         *
+         *     `structure_revision` is the geometry's version. A client whose copy no
+         *     longer matches must refetch the drawing before trusting these keys to join
+         *     onto it.
+         */
+        LiveOut: {
+            /**
+             * Bay Is Live
+             * @default {}
+             */
+            bay_is_live: {
+                [key: string]: boolean | null;
+            };
+            /**
+             * Devices
+             * @default {}
+             */
+            devices: {
+                [key: string]: components["schemas"]["DeviceLiveOut"];
+            };
+            energization?: components["schemas"]["EnergizationOut"] | null;
+            link: components["schemas"]["LinkOut"];
+            /** Loaded */
+            loaded: boolean;
+            /** Revision */
+            revision: number;
+            /** Structure Revision */
+            structure_revision: number;
+            /** Updated At */
+            updated_at?: string | null;
         };
         /**
          * LiveState
@@ -1054,6 +1184,26 @@ export interface operations {
             };
         };
     };
+    live_api_live_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LiveOut"];
+                };
+            };
+        };
+    };
     projects_api_projects_get: {
         parameters: {
             query?: never;
@@ -1236,6 +1386,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StationOut"];
+                };
+            };
+        };
+    };
+    stream_api_stream_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Live state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
                 };
             };
         };

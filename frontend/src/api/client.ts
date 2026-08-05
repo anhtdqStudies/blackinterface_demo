@@ -33,6 +33,11 @@ export type Energization = components['schemas']['EnergizationOut']
 export type Island = components['schemas']['Island']
 export type LiveState = components['schemas']['LiveState']
 export type CrossCheck = components['schemas']['CrossCheck']
+/** Everything about the station that moves. What `/api/stream` pushes. */
+export type Live = components['schemas']['LiveOut']
+export type DeviceLive = components['schemas']['DeviceLiveOut']
+/** The state of the subscription itself — not of the station. */
+export type Link = components['schemas']['LinkOut']
 
 /** The backend's uniform error body. See backend/src/blackinterface/errors.py. */
 interface ErrorBody {
@@ -91,6 +96,9 @@ export const api = {
   /** Which sections are live, keyed by connectivity node. Joins onto the
    *  diagram through `RailView.node_id` / `EdgeView.node_id`. */
   energization: () => request<Energization>('/api/energization'),
+  /** One poll of the live document. The stream pushes this same shape, so
+   *  there is a single code path applying it — see stores/station.ts. */
+  live: () => request<Live>('/api/live'),
   /** One voltage level on its own. Kept for tooling and manual inspection. */
   diagram: (voltageLevel: string) =>
     request<Diagram>(`/api/diagram/${encodeURIComponent(voltageLevel)}`),

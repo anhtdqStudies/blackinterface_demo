@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Symbol_ } from '@/api/client'
+import type { DeviceLive, Symbol_ } from '@/api/client'
 import { isDegraded, stateColor } from './state'
 
 /**
@@ -11,12 +11,19 @@ import { isDegraded, stateColor } from './state'
  *
  * Quality that is not GOOD draws the outline dashed, so degraded data is
  * visible without reading the panel.
+ *
+ * `live` is the position as of the latest push; `symbol` carries the one the
+ * drawing was laid out with. The drawing is geometry and is refetched rarely,
+ * so `live` wins whenever it is there — falling back keeps the symbol readable
+ * in the moment before the first document arrives, never after it.
  */
-const props = defineProps<{ symbol: Symbol_; selected: boolean }>()
+const props = defineProps<{ symbol: Symbol_; live?: DeviceLive; selected: boolean }>()
 defineEmits<{ select: [deviceId: string] }>()
 
-const color = computed(() => stateColor(props.symbol.state))
-const dash = computed(() => (isDegraded(props.symbol.quality) ? '3 2' : undefined))
+const state = computed(() => props.live?.state ?? props.symbol.state)
+const quality = computed(() => props.live?.quality ?? props.symbol.quality)
+const color = computed(() => stateColor(state.value))
+const dash = computed(() => (isDegraded(quality.value) ? '3 2' : undefined))
 const isEarth = computed(() => props.symbol.role === 'earth_switch')
 const isBreaker = computed(() => props.symbol.role === 'breaker')
 

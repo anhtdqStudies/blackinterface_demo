@@ -20,7 +20,6 @@ from typing import Any
 
 from asyncua import Client, ua
 
-from blackinterface.domain.models import PointSample, Quality
 from blackinterface.domain.observation import (
     BayObs,
     BusbarObs,
@@ -28,6 +27,7 @@ from blackinterface.domain.observation import (
     StationObs,
     TransformerObs,
 )
+from blackinterface.integration.opcua.values import to_sample
 
 #: The DEMO_SAS station root. The path embeds the project name ("PROJECT"),
 #: so it is only a fast path — other projects are found by `_find_station_root`.
@@ -50,32 +50,6 @@ WANTED_BAY_DA = (POSITION_DA, NAME_DA, SHORT_NAME_DA)
 WANTED_BUSBAR_DA = (NAME_DA, LIVE_DA)
 
 
-def _quality(status: Any) -> Quality:
-    if status is None:
-        return Quality.MISSING
-    name = getattr(status, "name", str(status)).lower()
-    if name.startswith("good"):
-        return Quality.GOOD
-    if name.startswith("uncertain"):
-        return Quality.UNCERTAIN
-    return Quality.BAD
-
-
-def _sample(value: ua.DataValue | None, source_ref: str | None) -> PointSample:
-    if value is None:
-        return PointSample(source_ref=source_ref)
-    raw = value.Value.Value if value.Value is not None else None
-    quality = _quality(value.StatusCode)
-    if raw is None and quality is Quality.GOOD:
-        quality = Quality.BAD
-    return PointSample(
-        value=raw if isinstance(raw, bool | int | float | str) else None,
-        quality=quality,
-        source_timestamp=value.SourceTimestamp,
-        source_ref=source_ref,
-    )
-
-
 async def _children(node: Any) -> list[Any]:
     """Browse children, de-duplicated by NodeId.
 
@@ -89,12 +63,26 @@ async def _children(node: Any) -> list[Any]:
     return list(seen.values())
 
 
-async def _read_batch(client: Client, nodes: list[Any]) -> list[ua.DataValue]:
-    """Read many nodes in one service call, with status code and timestamp."""
+Key = tuple[str, ...]
+
+
+async def _read_batch(
+    client: Client, nodes: list[Any], keys: list[Key]
+) -> tuple[dict[Key, ua.DataValue], dict[Key, str]]:
+    """Read many nodes in one service call, keeping each one's NodeId.
+
+    The NodeId travels on into `PointSample.source_ref`, and it must be the
+    NodeId of the *variable* that produced the value — not of its parent
+    logical node. That is what makes the sample traceable, and it is also the
+    address the realtime subscription later monitors (see opcua/monitor.py).
+    """
     if not nodes:
-        return []
+        return {}, {}
     values: list[ua.DataValue] = await client.read_attributes(nodes, ua.AttributeIds.Value)
-    return values
+    return (
+        dict(zip(keys, values, strict=True)),
+        {key: node.nodeid.to_string() for key, node in zip(keys, nodes, strict=True)},
+    )
 
 
 async def discover_station(
@@ -184,7 +172,7 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
     """Two passes: browse the tree, then read every value in one batch."""
     layout: list[tuple[str, str, Any, dict[str, Any]]] = []  # vl, bay, bay node, ln nodes
     read_nodes: list[Any] = []
-    read_keys: list[tuple[str, ...]] = []
+    read_keys: list[Key] = []
 
     for level in await _children(sas):
         level_name = (await level.read_browse_name()).Name
@@ -210,21 +198,19 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                         read_keys.append((bay_name, child_name, attribute_name))
             layout.append((level_name, bay_name, bay, logical_nodes))
 
-    values = dict(zip(read_keys, await _read_batch(client, read_nodes), strict=True))
+    values, refs = await _read_batch(client, read_nodes, read_keys)
 
     result = []
     for level_name, bay_name, bay_node, logical_nodes in layout:
         observations = []
         for ln_name, ln_node in sorted(logical_nodes.items()):
-            position = values.get((bay_name, ln_name, POSITION_DA))
-            name = values.get((bay_name, ln_name, NAME_DA))
-            short = values.get((bay_name, ln_name, SHORT_NAME_DA))
+            position_key = (bay_name, ln_name, POSITION_DA)
             observations.append(
                 LogicalNodeObs(
                     ln=ln_name,
-                    name=_scalar(name),
-                    short_name=_scalar(short),
-                    position=_sample(position, ln_node.nodeid.to_string()),
+                    name=_scalar(values.get((bay_name, ln_name, NAME_DA))),
+                    short_name=_scalar(values.get((bay_name, ln_name, SHORT_NAME_DA))),
+                    position=to_sample(values.get(position_key), refs.get(position_key)),
                     source_ref=ln_node.nodeid.to_string(),
                 )
             )
@@ -234,7 +220,7 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                 name=bay_name,
                 voltage_level=level_name,
                 logical_nodes=tuple(observations),
-                is_live=_sample(values.get((bay_name, LIVE_DA)), None),
+                is_live=to_sample(values.get((bay_name, LIVE_DA)), refs.get((bay_name, LIVE_DA))),
                 source_ref=bay_node.nodeid.to_string(),
             )
         )
@@ -264,7 +250,7 @@ async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
 
     layout: list[tuple[str, Any]] = []
     read_nodes: list[Any] = []
-    read_keys: list[tuple[str, ...]] = []
+    read_keys: list[Key] = []
     for child in await _children(subs):
         name = (await child.read_browse_name()).Name
         if not BUSBAR_RE.match(name) or await child.read_node_class() != ua.NodeClass.Object:
@@ -276,12 +262,12 @@ async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
                 read_nodes.append(attribute)
                 read_keys.append((name, attribute_name))
 
-    values = dict(zip(read_keys, await _read_batch(client, read_nodes), strict=True))
+    values, refs = await _read_batch(client, read_nodes, read_keys)
     return [
         BusbarObs(
             id=name,
             name=_scalar(values.get((name, NAME_DA))) or name,
-            is_live=_sample(values.get((name, LIVE_DA)), node.nodeid.to_string()),
+            is_live=to_sample(values.get((name, LIVE_DA)), refs.get((name, LIVE_DA))),
             source_ref=node.nodeid.to_string(),
         )
         for name, node in layout

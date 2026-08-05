@@ -336,6 +336,54 @@
         "title": "CrossCheck",
         "type": "object"
       },
+      "DeviceLiveOut": {
+        "description": "A switching device's position, and how much to trust it.\n\n`value` is the raw Dbpos behind `state`, carried so a panel showing live\ndata can still show its provenance — an operator questioning a symbol\nshould not have to refetch the bay to see what the DataServer actually\nsaid (I6).",
+        "properties": {
+          "quality": {
+            "$ref": "#/components/schemas/Quality"
+          },
+          "source_timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Timestamp"
+          },
+          "state": {
+            "$ref": "#/components/schemas/SwitchState"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "state",
+          "quality"
+        ],
+        "title": "DeviceLiveOut",
+        "type": "object"
+      },
       "DeviceOut": {
         "properties": {
           "id": {
@@ -785,6 +833,129 @@
           "y"
         ],
         "title": "JunctionView",
+        "type": "object"
+      },
+      "LinkOut": {
+        "description": "The state of the subscription itself.\n\n`connected=False` does not mean the station is down — it means we have\nstopped hearing about it. What is on screen is then the last thing we knew,\nwhich is worth showing and worth labelling, but is not the present tense.",
+        "properties": {
+          "connected": {
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "realtime": {
+            "title": "Realtime",
+            "type": "boolean"
+          },
+          "rejected": {
+            "default": 0,
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "since": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Since"
+          },
+          "watching": {
+            "default": 0,
+            "title": "Watching",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "realtime",
+          "connected"
+        ],
+        "title": "LinkOut",
+        "type": "object"
+      },
+      "LiveOut": {
+        "description": "Everything about the station that moves, in one document.\n\nThe split this expresses: `/api/diagram` is geometry and `/api/bays` is\nstructure — both change only when the station is browsed again. Everything\nhere changes constantly, and is exactly what `/api/stream` pushes. One\nshape for the first load and for every update, so the client has a single\ncode path applying it.\n\n`structure_revision` is the geometry's version. A client whose copy no\nlonger matches must refetch the drawing before trusting these keys to join\nonto it.",
+        "properties": {
+          "bay_is_live": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Bay Is Live",
+            "type": "object"
+          },
+          "devices": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeviceLiveOut"
+            },
+            "default": {},
+            "title": "Devices",
+            "type": "object"
+          },
+          "energization": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnergizationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "link": {
+            "$ref": "#/components/schemas/LinkOut"
+          },
+          "loaded": {
+            "title": "Loaded",
+            "type": "boolean"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "structure_revision": {
+            "title": "Structure Revision",
+            "type": "integer"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "loaded",
+          "revision",
+          "structure_revision",
+          "link"
+        ],
+        "title": "LiveOut",
         "type": "object"
       },
       "LiveState": {
@@ -1679,6 +1850,25 @@
         "summary": "Health"
       }
     },
+    "/api/live": {
+      "get": {
+        "description": "One poll of what `/api/stream` pushes. The fallback when SSE cannot get\nthrough, and what the UI loads before the stream's first event arrives.",
+        "operationId": "live_api_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Live"
+      }
+    },
     "/api/projects": {
       "get": {
         "operationId": "projects_api_projects_get",
@@ -1897,6 +2087,21 @@
           }
         },
         "summary": "Station"
+      }
+    },
+    "/api/stream": {
+      "get": {
+        "description": "Push the live document whenever anything moves (Server-Sent Events).\n\nThe first event is the current state, so a client needs no separate initial\nfetch. Read-only in both directions: SSE has no channel back, and the data\nbehind it is a subscription to OneATS, never a command to it (I1).",
+        "operationId": "stream_api_stream_get",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {}
+            },
+            "description": "Live state"
+          }
+        },
+        "summary": "Stream"
       }
     }
   }

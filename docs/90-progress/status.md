@@ -3,7 +3,7 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-05 · phiên: project + kết nối DataServer từ UI (đã hiện thực)
+**Cập nhật lần cuối**: 2026-08-05 · phiên: energization solver + realtime (subscription + SSE)
 
 ---
 
@@ -169,13 +169,9 @@ chấm nối), và cả trạm phải nằm trong **một hình**, 220kV lật n
 
 ### 1. ~~Energization solver~~ ✅ **XONG 2026-08-05** — xem mục riêng bên dưới
 
-### 2. Realtime (subscription + SSE) ← **BẮT ĐẦU TỪ ĐÂY**
-Hiện tại giá trị là **snapshot lúc dựng model**. Cần biến thành sống.
-- [ ] Một subscription phía server → fan-out SSE cho N client (bẫy đã biết)
-- [ ] Ngưỡng staleness → đánh dấu `STALE` kèm tuổi dữ liệu (I2)
-- [ ] Frontend: cập nhật tại chỗ, không vẽ lại toàn bộ
+### 2. ~~Realtime (subscription + SSE)~~ ✅ **XONG 2026-08-05** — xem mục riêng bên dưới
 
-### 3. Event store + SOE
+### 3. Event store + SOE ← **BẮT ĐẦU TỪ ĐÂY**
 Không có cái này thì mục tiêu M2 không tồn tại.
 - [ ] Schema SQLite cho event (dedupe theo `event_id`, retention, ack state)
 - [ ] Poll/subscribe `GetActiveAlarm` → ghi store
@@ -308,6 +304,61 @@ trạng thái + dòng "Khớp OneATS 7/7".
 luôn đi xuống, nên ở band 220kV lật ngược nó chĩa ngược hướng bãi tiếp địa.
 
 168 test (20 test mới), check.py xanh cả 7 mục.
+
+---
+
+### Realtime — subscription + SSE (2026-08-05) ✅ — việc #2
+
+Trước đó model là **ảnh chụp lúc dựng**: đổi dao ở FEP thì màn hình không đổi cho
+tới khi bấm «Tải lại từ nguồn». Giờ màn hình bám theo trạm.
+
+**Chia hai pha, đúng như bản chất bài toán:**
+
+| Pha | Làm gì | Tần suất |
+|---|---|---|
+| Khám phá — `discovery.py` | duyệt cây → cấu trúc, template, graph, hình học | hiếm (mở/tải lại project) |
+| Theo dõi — `monitor.py` | subscribe đúng các điểm đã biết địa chỉ | server **đẩy** khi có đổi |
+
+**Danh sách theo dõi tự sinh từ chính observation** — `watch_points(obs)` gom mọi
+`PointSample.source_ref` của `PosSt` và `IsLive` (DEMO_SAS: **97 điểm**). Không có
+registry song song nào phải giữ đồng bộ; thêm một ngăn vào trạm là tự động được
+theo dõi. Để làm được thế phải sửa `discovery.py`: trước đây nó ghi NodeId của
+*logical node* vào `source_ref` thay vì của **biến** sinh ra giá trị (dump đã đúng
+sẵn) — vừa là lỗi truy vết, vừa là thứ chặn subscription.
+
+**Vá rồi dựng lại, không sửa tại chỗ.** `apply_samples` (thuần) thay đúng những
+điểm có `source_ref` trong lô, rồi `build_station` chạy lại toàn bộ. Đo được:
+`build_station` 0.71 ms + `solve_energization` 0.21 ms → ~1 ms mỗi lô. Trả 1 ms để
+đổi lấy bảo đảm graph sau khi cập nhật **giống hệt** graph dựng mới — thứ mà sửa
+tại chỗ không hứa được.
+
+**Hai hành vi an toàn, có test:**
+- **Mất kết nối ≠ tin tức về trạm.** Rớt link → `connected=false`, giá trị cũ giữ
+  nguyên, header hiện chấm đỏ «Mất kết nối». Không bịa vị trí, cũng không xoá
+  trắng sơ đồ (trạm rỗng trông như trạm cắt hết điện).
+- **Gộp lô, không lấy mẫu.** Mọi thay đổi đều được áp; chỉ hoãn dựng lại 200 ms để
+  một thao tác ngăn (máy cắt + vài dao trong vài trăm ms) vẽ lại **một lần**, ở
+  trạng thái nhất quán, thay vì 5 lần qua các tổ hợp chưa từng tồn tại.
+- Điểm server từ chối (snapshot cũ hơn model đang chạy) → đếm vào `rejected`, hiện
+  «Trực tuyến (thiếu điểm)» màu vàng. Tươi chỗ này đứng chỗ kia còn tệ hơn cũ đều.
+
+**API**: `GET /api/live` (poll) và `GET /api/stream` (SSE) trả **cùng một tài liệu
+`LiveOut`** → frontend chỉ có một đường code áp dụng, không có nhánh riêng cho lần
+đầu. `structure_revision` tách khỏi `revision`: đổi hình học mới phải tải lại bản
+vẽ, đổi trạng thái thì chỉ tô lại.
+
+**Đo thật trên DataServer (2026-08-05, DEMO_SAS v654):**
+- duyệt cây 0.70 s → 97 điểm → subscribe **97/97 nhận, 0 từ chối**
+- `/api/live`: `connected=true`, 8 đảo, **0 sai lệch** với OneATS (như bản fixture)
+- SSE qua HTTP thật: `text/event-stream`, sự kiện đầu 12.7 KB, đủ trạng thái
+
+Vòng thông báo được chứng minh bằng `tests/integration/test_monitor_roundtrip.py`:
+dựng **server OPC UA cục bộ**, tự ghi giá trị, khẳng định lô về tới callback. Dùng
+server riêng chính vì test này **ghi** — OneATS chỉ đọc (I1), không được chọc.
+
+Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (mặc định 500).
+
+**197 test** (29 test mới), check.py xanh cả 7 mục.
 
 ---
 

@@ -23,7 +23,10 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     data_dir = tmp_path_factory.mktemp("data")
     app_module.database = app_module.Database(data_dir / "test.sqlite")
     app_module.store = StationStore(
-        Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir),
+        # realtime off: the project tests below use made-up DataServer URLs, and
+        # a subscription would be the one thing in this module actually dialling
+        # the network. Realtime wiring has its own tests in test_realtime.py.
+        Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
         app_module.database,
     )
     with TestClient(app_module.app) as test_client:

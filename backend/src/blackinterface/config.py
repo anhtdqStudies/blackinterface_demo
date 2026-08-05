@@ -36,6 +36,15 @@ class Settings(BaseSettings):
     opcua_password: str | None = None
     opcua_timeout: float = 30.0
 
+    # ---- realtime
+    #: Hold a subscription open on the active source's measured points, so the
+    #: screen follows the station instead of the last browse. Off makes every
+    #: model a still photograph refreshed only by /api/reload.
+    realtime: bool = True
+    #: OPC UA publishing interval. The floor on how stale a position can be;
+    #: the server batches its notifications into this window.
+    opcua_publish_ms: float = 500.0
+
     # ---- local storage
     data_dir: Path = REPO_ROOT / "data"
     db_name: str = "blackinterface.sqlite"

@@ -1,10 +1,32 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import type { BayDetail, Device } from '@/api/client'
+import type { BayDetail, Device, Quality, SwitchState } from '@/api/client'
 import { STATE_LABEL, stateColor } from '@/components/diagram/state'
+import { useStationStore } from '@/stores/station'
 
-defineProps<{ bay: BayDetail; device: Device }>()
+/**
+ * `bay` was fetched once, when the device was clicked. Its positions are
+ * therefore as old as that click, so every field that can move is read back
+ * from the live store instead — otherwise the panel would quietly contradict
+ * the diagram right next to it.
+ */
+const props = defineProps<{ bay: BayDetail; device: Device }>()
 defineEmits<{ select: [deviceId: string] }>()
+
+const store = useStationStore()
+
+function stateOf(device: Device): SwitchState {
+  return store.deviceLive(device.id)?.state ?? device.state
+}
+function qualityOf(device: Device): Quality {
+  return store.deviceLive(device.id)?.quality ?? device.quality
+}
+const current = computed(() => store.deviceLive(props.device.id))
+const timestamp = computed(
+  () => current.value?.source_timestamp ?? props.device.source_timestamp,
+)
+const raw = computed(() => current.value?.value ?? props.device.value)
 </script>
 
 <template>
@@ -35,22 +57,22 @@ defineEmits<{ select: [deviceId: string] }>()
         <tr>
           <td>Trạng thái</td>
           <td>
-            <b :style="{ color: stateColor(device.state) }">
-              {{ STATE_LABEL[device.state] }}
+            <b :style="{ color: stateColor(stateOf(device)) }">
+              {{ STATE_LABEL[stateOf(device)] }}
             </b>
           </td>
         </tr>
         <tr>
           <td>Dbpos thô</td>
-          <td>{{ device.value ?? '—' }}</td>
+          <td>{{ raw ?? '—' }}</td>
         </tr>
         <tr>
           <td>Quality</td>
-          <td>{{ device.quality }}</td>
+          <td>{{ qualityOf(device) }}</td>
         </tr>
         <tr>
           <td>Timestamp</td>
-          <td>{{ device.source_timestamp ?? '—' }}</td>
+          <td>{{ timestamp ?? '—' }}</td>
         </tr>
         <tr>
           <td>Nối tới</td>
@@ -78,7 +100,9 @@ defineEmits<{ select: [deviceId: string] }>()
       <span
         >{{ other.name }} <small class="dim">{{ other.ln }}</small></span
       >
-      <span :style="{ color: stateColor(other.state) }">{{ STATE_LABEL[other.state] }}</span>
+      <span :style="{ color: stateColor(stateOf(other)) }">{{
+        STATE_LABEL[stateOf(other)]
+      }}</span>
     </button>
   </section>
 </template>

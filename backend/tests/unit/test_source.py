@@ -29,7 +29,11 @@ def db(tmp_path: Path) -> Database:
 
 
 def _store(db: Database, tmp_path: Path) -> StationStore:
-    return StationStore(Settings(source="fixture", fixture=SAS_TREE, data_dir=tmp_path), db)
+    # realtime off: these tests use invented DataServer URLs, and a
+    # subscription would be the one thing here actually dialling the network.
+    return StationStore(
+        Settings(source="fixture", fixture=SAS_TREE, data_dir=tmp_path, realtime=False), db
+    )
 
 
 def _serving_fixture(store: StationStore) -> None:

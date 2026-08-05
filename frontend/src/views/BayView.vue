@@ -1,13 +1,37 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-import { ApiError, api, type BayDetail } from '@/api/client'
+import { computed, ref, watch } from 'vue'
+import {
+  ApiError,
+  api,
+  type BayDetail,
+  type Device,
+  type Quality,
+  type SwitchState,
+} from '@/api/client'
 import IssueList from '@/components/panels/IssueList.vue'
 import { STATE_LABEL, stateColor } from '@/components/diagram/state'
+import { useStationStore } from '@/stores/station'
 
 const props = defineProps<{ bayId: string }>()
 
 const bay = ref<BayDetail | null>(null)
 const error = ref<string | null>(null)
+const store = useStationStore()
+
+// The bay was fetched once; anything that moves is read back from the live
+// store, so this page does not drift away from the diagram behind it.
+function stateOf(device: Device): SwitchState {
+  return store.deviceLive(device.id)?.state ?? device.state
+}
+function qualityOf(device: Device): Quality {
+  return store.deviceLive(device.id)?.quality ?? device.quality
+}
+function timestampOf(device: Device): string | null | undefined {
+  return store.deviceLive(device.id)?.source_timestamp ?? device.source_timestamp
+}
+const isLive = computed(() =>
+  bay.value ? (store.live?.bay_is_live[bay.value.id] ?? bay.value.is_live) : null,
+)
 
 watch(
   () => props.bayId,
@@ -45,8 +69,8 @@ watch(
           <tr>
             <td>IsLive</td>
             <td>
-              <template v-if="bay.is_live_quality === 'GOOD'">
-                {{ bay.is_live ? 'có điện' : 'không điện' }}
+              <template v-if="isLive !== null">
+                {{ isLive ? 'có điện' : 'không điện' }}
               </template>
               <template v-else>
                 <span class="dim">không xác định (quality {{ bay.is_live_quality }})</span>
@@ -81,11 +105,11 @@ watch(
             </td>
             <td>{{ device.ln }}</td>
             <td>{{ device.role }}</td>
-            <td :style="{ color: stateColor(device.state) }">
-              {{ STATE_LABEL[device.state] }}
+            <td :style="{ color: stateColor(stateOf(device)) }">
+              {{ STATE_LABEL[stateOf(device)] }}
             </td>
-            <td>{{ device.quality }}</td>
-            <td>{{ device.source_timestamp ?? '—' }}</td>
+            <td>{{ qualityOf(device) }}</td>
+            <td>{{ timestampOf(device) ?? '—' }}</td>
           </tr>
         </tbody>
       </table>

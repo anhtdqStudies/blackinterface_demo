@@ -114,7 +114,8 @@ backend/src/blackinterface/
   logs.py        # structlog; gọi configure() một lần lúc khởi động
   domain/        # L4 Neutral Station Model — contract hợp nhất, immutable
     models.py        Bay/Device/Busbar/ConnectivityNode/PointSample/ValidationIssue
-    observation.py   StationObs — đầu vào trung tính cho mọi importer
+    observation.py   StationObs — đầu vào trung tính cho mọi importer;
+                     watch_points/apply_samples = nền của realtime (thuần)
     bay_types.py     suy loại ngăn từ thành phần LN
     templates.py     loader + registry cho templates/*.yaml
     templates/       6 bay template (ADR-0008)
@@ -123,11 +124,14 @@ backend/src/blackinterface/
                      đối chiếu với <bay>.IsLive của OneATS (thuần, không I/O)
   integration/   # L5 importers + adapters — CHỈ ĐÂY được biết NodeId
     dump.py          đọc dump JSON -> StationObs (offline, dùng cho test/demo)
-    opcua/discovery.py  browse DataServer live -> StationObs
+    opcua/discovery.py  browse DataServer live -> StationObs (hiếm: cấu trúc)
+    opcua/monitor.py    subscription có giám sát -> lô PointSample (liên tục)
+    opcua/values.py     DataValue -> PointSample, dùng chung cho cả hai trên
   diagram/       # L6 graph → layout → ViewModel → SVG
     layout.py        StationGraph -> DiagramView (toạ độ, deterministic)
   api/           # L3 Typed Domain API (FastAPI, HTTP/SSE)
-    source.py        StationStore: project (snapshot|live) hoặc fallback BI_SOURCE
+    source.py        StationStore: project (snapshot|live) hoặc fallback
+                     BI_SOURCE; giữ obs, vá theo lô, phát revision cho SSE
     errors.py        exception -> JSON {"error": {code, message, detail}}
     app.py           endpoint (kể cả /api/projects) + serve frontend/dist
   agent/         # L2 BlackCore (Pydantic AI: intent, tools, planner, evidence)
@@ -234,7 +238,7 @@ cd backend
 uv sync
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest                # 168 test, không cần DataServer
+uv run pytest                # 197 test, không cần DataServer
 uv run pytest -m live        # cần DataServer đang chạy
 uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
@@ -286,6 +290,10 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | Dùng `<bay>.IsLive` làm nguồn để tô màu mang điện | **Đừng.** OneATS **suy** nó ra *từ* `Subs.BB*.IsLive` bằng Lua `CheckLiveState`. Lấy nó làm mầm thì kết quả của ta chỉ là chép lại của họ và mất luôn khả năng phát hiện template sai. Gieo mầm **chỉ từ thanh cái**, tự giải, rồi dùng `<bay>.IsLive` để **đối chiếu** (`domain/energization.py`). Hiện 7/7 khớp trên DEMO_SAS. |
 | Không đọc được vị trí dao → coi như mở | **Sai và nguy hiểm.** `UNDETERMINED`/`INTERMEDIATE` không nối đảo, nhưng phải **lan nghi ngờ**: đoạn bên kia thành `UNKNOWN` (xám), không bao giờ `DEAD`. Thiếu dữ liệu không bao giờ được suy ra "hết điện" — đó là câu khiến người ta chạm tay vào. |
 | Node `EARTH` gộp vào phân hoạch đảo được | **Không.** Mọi đoạn đang tiếp địa sẽ dính thành một đảo khổng lồ và phán quyết nhảy từ ngăn này sang ngăn khác. Earth đứng ngoài union-find; dao tiếp địa đóng chỉ *đánh dấu* đảo là `EARTHED`. |
+| Muốn cập nhật liên tục thì duyệt lại cây | **Không.** Duyệt ~6000 node để biết một dao vừa mở là vô lý. Cấu trúc gần như đứng yên lúc vận hành, chỉ *vị trí* chạy → `discovery` duyệt một lần, `monitor` subscribe đúng các điểm đã có địa chỉ (DEMO_SAS: 97). Danh sách theo dõi **sinh từ chính observation** (`watch_points`), không có registry song song. |
+| `PointSample.source_ref` là NodeId của logical node | **Sai** (đã sửa 2026-08-05). Phải là NodeId của **biến** sinh ra giá trị (`...XCBR1.PosSt`), không phải của LN cha. `dump.py` vốn đã đúng; `discovery.py` thì không — vừa hỏng truy vết, vừa khiến subscribe sai node. |
+| Mất kết nối thì xoá sơ đồ / coi là mất điện | **Sai và nguy hiểm.** Rớt link là tin về *ta*, không phải về trạm. Giữ nguyên giá trị cuối, đặt `connected=false`, nói rõ trên header. Trạm rỗng trông y hệt trạm cắt hết điện. |
+| Vá `StationGraph` tại chỗ cho nhanh | Không cần. Đo 2026-08-05: `build_station` 0.71 ms + `solve_energization` 0.21 ms. Dựng lại toàn bộ mỗi lô ~1 ms và **bảo đảm** kết quả giống hệt duyệt mới — sửa tại chỗ không hứa được điều đó. |
 
 ---
 

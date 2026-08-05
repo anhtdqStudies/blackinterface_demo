@@ -17,7 +17,7 @@
  * still comes from the backend untouched.
  */
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { Edge, LiveState, StationDiagram } from '@/api/client'
+import type { DeviceLive, Edge, LiveState, StationDiagram } from '@/api/client'
 import DeviceSymbol from './DeviceSymbol.vue'
 import { liveColor } from './state'
 
@@ -25,6 +25,8 @@ const props = defineProps<{
   diagram: StationDiagram
   /** Live/dead verdict per connectivity node, solved in the backend. */
   nodeState: Record<string, LiveState>
+  /** Latest position per device. Keyed by `SymbolView.device_id`. */
+  deviceState: Record<string, DeviceLive>
   selectedDeviceId: string | null
 }>()
 defineEmits<{ select: [deviceId: string] }>()
@@ -318,6 +320,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         v-for="symbol in diagram.symbols"
         :key="symbol.device_id"
         :symbol="symbol"
+        :live="deviceState[symbol.device_id]"
         :selected="symbol.device_id === selectedDeviceId"
         @select="$emit('select', $event)"
       />

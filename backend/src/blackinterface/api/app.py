@@ -9,12 +9,14 @@ and no place to add one without also changing the invariants (I1).
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -70,6 +72,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # answerable so an operator can see *why* nothing is showing.
     await store.startup()
     yield
+    await store.shutdown()
     database.close()
 
 
@@ -200,6 +203,61 @@ class EnergizationOut(BaseModel):
     checks: list[CrossCheck]
     issues: list[ValidationIssue]
     summary: dict[str, int]
+
+
+class DeviceLiveOut(BaseModel):
+    """A switching device's position, and how much to trust it.
+
+    `value` is the raw Dbpos behind `state`, carried so a panel showing live
+    data can still show its provenance — an operator questioning a symbol
+    should not have to refetch the bay to see what the DataServer actually
+    said (I6).
+    """
+
+    state: SwitchState
+    quality: Quality
+    value: float | int | bool | str | None = None
+    source_timestamp: str | None = None
+
+
+class LinkOut(BaseModel):
+    """The state of the subscription itself.
+
+    `connected=False` does not mean the station is down — it means we have
+    stopped hearing about it. What is on screen is then the last thing we knew,
+    which is worth showing and worth labelling, but is not the present tense.
+    """
+
+    realtime: bool  # a subscription is configured for this source at all
+    connected: bool
+    watching: int = 0
+    rejected: int = 0
+    error: str | None = None
+    since: str | None = None
+
+
+class LiveOut(BaseModel):
+    """Everything about the station that moves, in one document.
+
+    The split this expresses: `/api/diagram` is geometry and `/api/bays` is
+    structure — both change only when the station is browsed again. Everything
+    here changes constantly, and is exactly what `/api/stream` pushes. One
+    shape for the first load and for every update, so the client has a single
+    code path applying it.
+
+    `structure_revision` is the geometry's version. A client whose copy no
+    longer matches must refetch the drawing before trusting these keys to join
+    onto it.
+    """
+
+    loaded: bool
+    revision: int
+    structure_revision: int
+    updated_at: str | None = None
+    link: LinkOut
+    devices: dict[str, DeviceLiveOut] = {}
+    bay_is_live: dict[str, bool | None] = {}
+    energization: EnergizationOut | None = None
 
 
 # ------------------------------------------------------------------- mappers
@@ -337,7 +395,7 @@ async def delete_project(project_id: int) -> list[ProjectOut]:
     if not store.projects.delete(project_id):
         raise NotFoundError(f"no such project: {project_id}", project_id=project_id)
     if was_active:
-        store.unload()
+        await store.unload()
     return await projects()
 
 
@@ -408,15 +466,8 @@ async def busbars() -> list[BusbarOut]:
     return [_busbar_out(b) for b in store.graph.busbars]
 
 
-@app.get("/api/energization", response_model=EnergizationOut)
-async def energization() -> EnergizationOut:
-    """Solve which sections are live from the switch positions we can read.
-
-    Seeded from the busbars the station measures, spread across closed devices
-    and through paired transformers, then compared against the bay-level
-    `IsLive` OneATS publishes. Disagreements are returned, not hidden (I7).
-    """
-    result = solve_energization(store.graph)
+def _energization_out(graph: StationGraph) -> EnergizationOut:
+    result = solve_energization(graph)
     states = [island.state for island in result.islands]
     return EnergizationOut(
         islands=list(result.islands),
@@ -430,6 +481,142 @@ async def energization() -> EnergizationOut:
             "mismatched": len(result.mismatches),
         },
     )
+
+
+@app.get("/api/energization", response_model=EnergizationOut)
+async def energization() -> EnergizationOut:
+    """Solve which sections are live from the switch positions we can read.
+
+    Seeded from the busbars the station measures, spread across closed devices
+    and through paired transformers, then compared against the bay-level
+    `IsLive` OneATS publishes. Disagreements are returned, not hidden (I7).
+    """
+    return _energization_out(store.graph)
+
+
+# ------------------------------------------------------------------- realtime
+def _link_out() -> LinkOut:
+    status = store.monitor_status
+    if status is None:
+        # Either realtime is switched off, or this source has no server behind
+        # it (a fixture, or a project whose model has no watchable points).
+        return LinkOut(realtime=False, connected=False)
+    return LinkOut(
+        realtime=True,
+        connected=status.connected,
+        watching=status.watching,
+        rejected=status.rejected,
+        error=status.error,
+        since=status.since.isoformat() if status.since else None,
+    )
+
+
+def _live_out() -> LiveOut:
+    """The current state of everything that moves.
+
+    Never raises when no model is loaded: this is the document a stream is
+    holding open, and a client that loses its station should be told so rather
+    than have its connection dropped.
+    """
+    base = LiveOut(
+        loaded=store.loaded,
+        revision=store.revision,
+        structure_revision=store.structure_revision,
+        updated_at=(
+            datetime.fromtimestamp(store.updated_at, UTC).isoformat() if store.updated_at else None
+        ),
+        link=_link_out(),
+    )
+    if not store.loaded:
+        return base
+    graph = store.graph
+    return base.model_copy(
+        update={
+            "devices": {
+                device.id: DeviceLiveOut(
+                    state=device.state,
+                    quality=device.position.quality,
+                    value=device.position.value,
+                    source_timestamp=(
+                        device.position.source_timestamp.isoformat()
+                        if device.position.source_timestamp
+                        else None
+                    ),
+                )
+                for device in graph.devices
+            },
+            # null means "not readable", never "false": a bay whose IsLive
+            # cannot be trusted must not be published as de-energised (I2).
+            "bay_is_live": {
+                bay.id: (
+                    bay.is_live.value
+                    if bay.is_live.usable and isinstance(bay.is_live.value, bool)
+                    else None
+                )
+                for bay in graph.bays
+            },
+            "energization": _energization_out(graph),
+        }
+    )
+
+
+@app.get("/api/live", response_model=LiveOut)
+async def live() -> LiveOut:
+    """One poll of what `/api/stream` pushes. The fallback when SSE cannot get
+    through, and what the UI loads before the stream's first event arrives."""
+    return _live_out()
+
+
+#: Sent when nothing has changed, to keep proxies from closing an idle stream.
+_HEARTBEAT_SECONDS = 20.0
+
+
+async def live_events() -> AsyncIterator[str]:
+    """The SSE body: the current state, then a fresh one on every revision.
+
+    Separate from the endpoint so it can be driven directly in tests — an
+    infinite generator behind a TestClient is a hang waiting to happen, and
+    this is where all the behaviour worth asserting on lives anyway.
+    """
+    async with store.listen() as revisions:
+        yield _event(_live_out())
+        while True:
+            try:
+                await asyncio.wait_for(revisions.get(), timeout=_HEARTBEAT_SECONDS)
+            except TimeoutError:
+                yield ": keepalive\n\n"
+                continue
+            # Always serialise the state as it is *now*, not as it was at the
+            # revision that woke us: a client is entitled to the present, and
+            # coalescing here costs it nothing.
+            yield _event(_live_out())
+
+
+@app.get(
+    "/api/stream",
+    responses={200: {"content": {"text/event-stream": {}}, "description": "Live state"}},
+    response_class=StreamingResponse,
+)
+async def stream() -> StreamingResponse:
+    """Push the live document whenever anything moves (Server-Sent Events).
+
+    The first event is the current state, so a client needs no separate initial
+    fetch. Read-only in both directions: SSE has no channel back, and the data
+    behind it is a subscription to OneATS, never a command to it (I1).
+    """
+    return StreamingResponse(
+        live_events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",  # nginx would otherwise sit on each event
+            "Connection": "keep-alive",
+        },
+    )
+
+
+def _event(payload: LiveOut) -> str:
+    return f"event: live\ndata: {payload.model_dump_json()}\n\n"
 
 
 @app.get("/api/diagram", response_model=StationView)

@@ -58,6 +58,7 @@ watch(() => store.voltageLevel, clearSelection)
         ref="canvas"
         :diagram="store.diagram"
         :node-state="store.energization?.node_state ?? {}"
+        :device-state="store.live?.devices ?? {}"
         :selected-device-id="selectedDevice?.id ?? null"
         @select="select"
       />
