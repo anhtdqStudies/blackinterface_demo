@@ -153,10 +153,16 @@ từ snapshot (`StationStore.startup()`).
 
 ## Việc kế tiếp (theo thứ tự)
 
-### 0. Xem lại giao diện mới bằng mắt ← **LÀM TRƯỚC**
-Chạy 7 test case trong `docs/40-testing/manual-test-01-topology.md`.
-Trọng tâm TC-03: **hai thanh cái phải tách bạch được bằng mắt** (làn riêng +
-chấm nối), và cả trạm phải nằm trong **một hình**, 220kV lật ngược ở trên.
+### 0. Xem lại giao diện mới bằng mắt — ✅ **ĐÃ CHẠY TAY 2026-08-05**
+Người dùng xác nhận: **energization và realtime chạy đúng trên trình duyệt**,
+"về cơ bản khá ổn". Đổi trạng thái ở FEP → màn hình đổi theo, không cần bấm gì.
+Còn tồn đọng là **UI/UX**, người dùng sẽ nêu cụ thể ở phiên tiếp → gom vào việc
+#5 (diagram engine), đừng tự đoán rồi sửa trước.
+
+Kịch bản `docs/40-testing/manual-test-01-topology.md` vẫn là chuẩn để chạy lại
+sau mỗi thay đổi hình học. Trọng tâm TC-03: **hai thanh cái phải tách bạch được
+bằng mắt** (làn riêng + chấm nối), và cả trạm nằm trong **một hình**, 220kV lật
+ngược ở trên.
 
 **Còn thiếu so với bản Grid Designer** (bảng so sánh):
 - [ ] Giá trị đo trên đầu mỗi ngăn (kV/kA/MW/MVar) — nguồn `MMXU1`, chưa vào model
@@ -184,6 +190,8 @@ Không có cái này thì mục tiêu M2 không tồn tại.
 - [ ] Phát hiện drift: NodeId không resolve được → nổi lên UI, cấm im lặng
 
 ### 5. Diagram engine — hoàn thiện
+- [ ] **UI/UX người dùng sẽ nêu ở phiên tới** — chưa ghi được vì chưa nghe.
+      Ghi nguyên văn góp ý vào đây khi nhận, đừng diễn giải lại.
 - [ ] Sparse patch layer cho override của engineer
 - [ ] Bố cục ngăn nối thanh cái (D17/E05) chưa chuẩn thẩm mỹ SLD
 - [ ] Export SVG tĩnh
