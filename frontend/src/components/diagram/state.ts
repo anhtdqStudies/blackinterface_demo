@@ -1,4 +1,4 @@
-import type { Quality, SwitchState } from '@/api/client'
+import type { LiveState, Quality, SwitchState } from '@/api/client'
 
 /**
  * EVN/IEC convention: red = closed/energised, green = open/de-energised.
@@ -44,4 +44,41 @@ export function isDegraded(quality: Quality): boolean {
 export function railColor(isLive: boolean | null | undefined, quality: Quality): string {
   if (quality !== 'GOOD' || isLive == null) return 'var(--undetermined)'
   return isLive ? 'var(--live)' : 'var(--dead)'
+}
+
+/**
+ * Conductor colour from the backend's energisation verdict.
+ *
+ * UNKNOWN is grey and must stay grey. It is what the solver says when a switch
+ * position is unreadable or a measurement is missing, and the whole point of
+ * having that state is that it does not quietly become green.
+ */
+export const LIVE_COLOR: Record<LiveState, string> = {
+  LIVE: 'var(--live)',
+  DEAD: 'var(--dead)',
+  EARTHED: 'var(--earthed)',
+  UNKNOWN: 'var(--undetermined)',
+}
+
+export const LIVE_LABEL: Record<LiveState, string> = {
+  LIVE: 'CÓ ĐIỆN',
+  DEAD: 'KHÔNG ĐIỆN',
+  EARTHED: 'ĐÃ TIẾP ĐỊA',
+  UNKNOWN: 'KHÔNG XÁC ĐỊNH',
+}
+
+/** Why the solver reached its verdict. Codes come from `domain.energization`. */
+export const REASON_LABEL: Record<string, string> = {
+  seeded_live: 'thanh cái ở đây đo được có điện',
+  seeded_dead: 'thanh cái ở đây đo được không điện',
+  through_transformer: 'lấy điện qua máy biến áp',
+  possible_via_uncertain:
+    'có thiết bị không đọc được vị trí — có thể đang nối vào vùng có điện',
+  earthed: 'có dao tiếp địa đang đóng',
+  no_measurement: 'thanh cái ở đây không đọc được IsLive',
+  isolated: 'mọi đường tới nguồn đều đang mở',
+}
+
+export function liveColor(state: LiveState): string {
+  return LIVE_COLOR[state] ?? 'var(--undetermined)'
 }

@@ -17,15 +17,30 @@
  * still comes from the backend untouched.
  */
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import type { Edge, StationDiagram } from '@/api/client'
+import type { Edge, LiveState, StationDiagram } from '@/api/client'
 import DeviceSymbol from './DeviceSymbol.vue'
-import { railColor } from './state'
+import { liveColor } from './state'
 
-const props = defineProps<{ diagram: StationDiagram; selectedDeviceId: string | null }>()
+const props = defineProps<{
+  diagram: StationDiagram
+  /** Live/dead verdict per connectivity node, solved in the backend. */
+  nodeState: Record<string, LiveState>
+  selectedDeviceId: string | null
+}>()
 defineEmits<{ select: [deviceId: string] }>()
 
 function points(edge: Edge): string {
   return edge.points.map((p) => `${p.x},${p.y}`).join(' ')
+}
+
+/** Anything the backend did not rule on is UNKNOWN — grey, never green. */
+function stateOf(nodeId: string | null | undefined): LiveState {
+  if (!nodeId) return 'UNKNOWN'
+  return props.nodeState[nodeId] ?? 'UNKNOWN'
+}
+
+function conductor(nodeId: string | null | undefined): string {
+  return liveColor(stateOf(nodeId))
 }
 
 // ------------------------------------------------------------------- camera
@@ -145,23 +160,26 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         </text>
       </g>
 
-      <!-- Busbars first: everything else hangs off them. -->
+      <!-- Busbars first: everything else hangs off them. Colour is the solved
+           energisation of the conductor, not the raw IsLive point: a busbar
+           whose own measurement is broken can still be known live through a
+           closed coupler, and one that reads live must never be drawn dead. -->
       <g v-for="rail in diagram.rails" :key="rail.busbar_id">
         <line
           :x1="rail.x1"
           :y1="rail.y"
           :x2="rail.x2"
           :y2="rail.y"
-          :stroke="railColor(rail.is_live, rail.quality)"
+          :stroke="conductor(rail.node_id)"
           :stroke-width="rail.transfer ? 4 : 5"
           stroke-linecap="round"
-          :stroke-dasharray="rail.quality === 'GOOD' ? undefined : '6 5'"
+          :stroke-dasharray="stateOf(rail.node_id) === 'UNKNOWN' ? '6 5' : undefined"
         />
         <text
           :x="rail.x1 - 6"
           :y="rail.y + 4"
           text-anchor="end"
-          :fill="railColor(rail.is_live, rail.quality)"
+          :fill="conductor(rail.node_id)"
         >
           {{ rail.label }}
           <template v-if="rail.inferred">(suy ra)</template>
@@ -173,7 +191,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :key="edge.id"
         :points="points(edge)"
         fill="none"
-        stroke="var(--line)"
+        :stroke="conductor(edge.node_id)"
+        :stroke-dasharray="stateOf(edge.node_id) === 'UNKNOWN' ? '6 5' : undefined"
         stroke-width="2"
       />
 
@@ -184,7 +203,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         :cx="junction.x"
         :cy="junction.y"
         r="4"
-        fill="var(--line)"
+        :fill="conductor(junction.node_id)"
       />
 
       <!-- Power transformers coupling bands. Only drawn when the pairing is
@@ -255,12 +274,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             :y1="terminal.y"
             :x2="terminal.x"
             :y2="terminal.y + (terminal.flipped ? -26 : 26)"
-            stroke="var(--line)"
+            :stroke="conductor(terminal.node_id)"
             stroke-width="2"
           />
           <polygon
             :points="`${terminal.x},${terminal.y + (terminal.flipped ? -26 : 26)} ${terminal.x - 5},${terminal.y + (terminal.flipped ? -16 : 16)} ${terminal.x + 5},${terminal.y + (terminal.flipped ? -16 : 16)}`"
-            fill="var(--dim)"
+            :fill="conductor(terminal.node_id)"
           />
         </template>
       </g>
@@ -312,9 +331,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       <span><i style="background: var(--open)" />MỞ</span>
       <span><i style="background: var(--intermediate)" />TRUNG GIAN</span>
       <span><i style="background: var(--undetermined)" />KHÔNG XÁC ĐỊNH</span>
-      <span class="group">Thanh cái:</span>
+      <span class="group">Dây dẫn:</span>
       <span><i style="background: var(--live)" />có điện</span>
       <span><i style="background: var(--dead)" />không điện</span>
+      <span><i style="background: var(--earthed)" />đã tiếp địa</span>
+      <span><i style="background: var(--undetermined)" />chưa xác định</span>
       <span class="group">▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa · ◯◯ máy biến áp</span>
       <span class="group">● có nối · cắt ngang không chấm = không nối</span>
       <span class="group">lăn chuột = thu phóng · kéo = di chuyển</span>

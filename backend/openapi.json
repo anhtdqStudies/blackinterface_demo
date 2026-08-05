@@ -287,6 +287,55 @@
         "title": "ColumnView",
         "type": "object"
       },
+      "CrossCheck": {
+        "description": "Our verdict for a bay against the one OneATS publishes for it.\n\n`agrees is None` means the comparison could not be made — either we say\n`UNKNOWN` or OneATS's `IsLive` is not readable. Not comparable is not the\nsame as agreeing, and is never counted as one.",
+        "properties": {
+          "agrees": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agrees"
+          },
+          "bay_id": {
+            "title": "Bay Id",
+            "type": "string"
+          },
+          "computed": {
+            "$ref": "#/components/schemas/LiveState"
+          },
+          "node_id": {
+            "title": "Node Id",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/Quality",
+            "default": "MISSING"
+          },
+          "reported": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported"
+          }
+        },
+        "required": [
+          "bay_id",
+          "node_id",
+          "computed"
+        ],
+        "title": "CrossCheck",
+        "type": "object"
+      },
       "DeviceOut": {
         "properties": {
           "id": {
@@ -482,6 +531,17 @@
             "title": "Id",
             "type": "string"
           },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
           "points": {
             "items": {
               "$ref": "#/components/schemas/Point"
@@ -495,6 +555,55 @@
           "points"
         ],
         "title": "EdgeView",
+        "type": "object"
+      },
+      "EnergizationOut": {
+        "description": "Which conductors are live, why, and whether OneATS agrees.\n\n`node_state` is keyed by connectivity node so the drawing can be coloured by\njoining on `RailView.node_id` / `EdgeView.node_id` — geometry and\nenergisation stay separate, which is what will let the realtime module push\na new verdict without re-laying-out the station.",
+        "properties": {
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CrossCheck"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "islands": {
+            "items": {
+              "$ref": "#/components/schemas/Island"
+            },
+            "title": "Islands",
+            "type": "array"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssue"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "node_state": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LiveState"
+            },
+            "title": "Node State",
+            "type": "object"
+          },
+          "summary": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Summary",
+            "type": "object"
+          }
+        },
+        "required": [
+          "islands",
+          "node_state",
+          "checks",
+          "issues",
+          "summary"
+        ],
+        "title": "EnergizationOut",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -577,11 +686,88 @@
         "title": "HealthOut",
         "type": "object"
       },
+      "Island": {
+        "description": "A set of nodes that are one conductor, with one verdict for all of them.",
+        "properties": {
+          "bay_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Bay Ids",
+            "type": "array"
+          },
+          "busbar_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Busbar Ids",
+            "type": "array"
+          },
+          "earthed_by": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Earthed By",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "node_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Node Ids",
+            "type": "array"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/Reason"
+          },
+          "seeds": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Seeds",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/LiveState"
+          },
+          "via": {
+            "default": "",
+            "title": "Via",
+            "type": "string"
+          },
+          "voltage_level": {
+            "default": "",
+            "title": "Voltage Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "reason"
+        ],
+        "title": "Island",
+        "type": "object"
+      },
       "JunctionView": {
         "description": "A real connection to a busbar. Drawn as a dot; a crossing has none.",
         "properties": {
           "id": {
             "title": "Id",
+            "type": "string"
+          },
+          "node_id": {
+            "default": "",
+            "title": "Node Id",
             "type": "string"
           },
           "x": {
@@ -600,6 +786,17 @@
         ],
         "title": "JunctionView",
         "type": "object"
+      },
+      "LiveState": {
+        "description": "Energisation verdict for one island.\n\n`UNKNOWN` is a first-class answer, not a failure: it is what an honest\nsystem says when the data cannot support `LIVE` or `DEAD`.",
+        "enum": [
+          "LIVE",
+          "DEAD",
+          "EARTHED",
+          "UNKNOWN"
+        ],
+        "title": "LiveState",
+        "type": "string"
       },
       "Point": {
         "properties": {
@@ -794,6 +991,11 @@
             "title": "Label",
             "type": "string"
           },
+          "node_id": {
+            "default": "",
+            "title": "Node Id",
+            "type": "string"
+          },
           "quality": {
             "$ref": "#/components/schemas/Quality",
             "default": "MISSING"
@@ -825,6 +1027,20 @@
         ],
         "title": "RailView",
         "type": "object"
+      },
+      "Reason": {
+        "description": "Why an island got its state.\n\nA code, not a sentence. Operators read Vietnamese and the wording belongs to\nthe UI; the API must not freeze it.",
+        "enum": [
+          "seeded_live",
+          "seeded_dead",
+          "through_transformer",
+          "possible_via_uncertain",
+          "earthed",
+          "no_measurement",
+          "isolated"
+        ],
+        "title": "Reason",
+        "type": "string"
       },
       "SectionView": {
         "description": "One voltage level's band inside the station drawing.",
@@ -1424,6 +1640,25 @@
           }
         },
         "summary": "Diagram"
+      }
+    },
+    "/api/energization": {
+      "get": {
+        "description": "Solve which sections are live from the switch positions we can read.\n\nSeeded from the busbars the station measures, spread across closed devices\nand through paired transformers, then compared against the bay-level\n`IsLive` OneATS publishes. Disagreements are returned, not hidden (I7).",
+        "operationId": "energization_api_energization_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnergizationOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Energization"
       }
     },
     "/api/health": {

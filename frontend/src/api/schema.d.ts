@@ -92,6 +92,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/energization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Energization
+         * @description Solve which sections are live from the switch positions we can read.
+         *
+         *     Seeded from the busbars the station measures, spread across closed devices
+         *     and through paired transformers, then compared against the bay-level
+         *     `IsLive` OneATS publishes. Disagreements are returned, not hidden (I7).
+         */
+        get: operations["energization_api_energization_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -334,6 +358,27 @@ export interface components {
             /** X */
             x: number;
         };
+        /**
+         * CrossCheck
+         * @description Our verdict for a bay against the one OneATS publishes for it.
+         *
+         *     `agrees is None` means the comparison could not be made — either we say
+         *     `UNKNOWN` or OneATS's `IsLive` is not readable. Not comparable is not the
+         *     same as agreeing, and is never counted as one.
+         */
+        CrossCheck: {
+            /** Agrees */
+            agrees?: boolean | null;
+            /** Bay Id */
+            bay_id: string;
+            computed: components["schemas"]["LiveState"];
+            /** Node Id */
+            node_id: string;
+            /** @default MISSING */
+            quality: components["schemas"]["Quality"];
+            /** Reported */
+            reported?: boolean | null;
+        };
         /** DeviceOut */
         DeviceOut: {
             /** Id */
@@ -408,8 +453,35 @@ export interface components {
             device_id?: string | null;
             /** Id */
             id: string;
+            /** Node Id */
+            node_id?: string | null;
             /** Points */
             points: components["schemas"]["Point"][];
+        };
+        /**
+         * EnergizationOut
+         * @description Which conductors are live, why, and whether OneATS agrees.
+         *
+         *     `node_state` is keyed by connectivity node so the drawing can be coloured by
+         *     joining on `RailView.node_id` / `EdgeView.node_id` — geometry and
+         *     energisation stay separate, which is what will let the realtime module push
+         *     a new verdict without re-laying-out the station.
+         */
+        EnergizationOut: {
+            /** Checks */
+            checks: components["schemas"]["CrossCheck"][];
+            /** Islands */
+            islands: components["schemas"]["Island"][];
+            /** Issues */
+            issues: components["schemas"]["ValidationIssue"][];
+            /** Node State */
+            node_state: {
+                [key: string]: components["schemas"]["LiveState"];
+            };
+            /** Summary */
+            summary: {
+                [key: string]: number;
+            };
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -434,17 +506,76 @@ export interface components {
             source: string;
         };
         /**
+         * Island
+         * @description A set of nodes that are one conductor, with one verdict for all of them.
+         */
+        Island: {
+            /**
+             * Bay Ids
+             * @default []
+             */
+            bay_ids: string[];
+            /**
+             * Busbar Ids
+             * @default []
+             */
+            busbar_ids: string[];
+            /**
+             * Earthed By
+             * @default []
+             */
+            earthed_by: string[];
+            /** Id */
+            id: string;
+            /**
+             * Node Ids
+             * @default []
+             */
+            node_ids: string[];
+            reason: components["schemas"]["Reason"];
+            /**
+             * Seeds
+             * @default []
+             */
+            seeds: string[];
+            state: components["schemas"]["LiveState"];
+            /**
+             * Via
+             * @default
+             */
+            via: string;
+            /**
+             * Voltage Level
+             * @default
+             */
+            voltage_level: string;
+        };
+        /**
          * JunctionView
          * @description A real connection to a busbar. Drawn as a dot; a crossing has none.
          */
         JunctionView: {
             /** Id */
             id: string;
+            /**
+             * Node Id
+             * @default
+             */
+            node_id: string;
             /** X */
             x: number;
             /** Y */
             y: number;
         };
+        /**
+         * LiveState
+         * @description Energisation verdict for one island.
+         *
+         *     `UNKNOWN` is a first-class answer, not a failure: it is what an honest
+         *     system says when the data cannot support `LIVE` or `DEAD`.
+         * @enum {string}
+         */
+        LiveState: "LIVE" | "DEAD" | "EARTHED" | "UNKNOWN";
         /** Point */
         Point: {
             /** X */
@@ -517,6 +648,11 @@ export interface components {
             is_live?: boolean | null;
             /** Label */
             label: string;
+            /**
+             * Node Id
+             * @default
+             */
+            node_id: string;
             /** @default MISSING */
             quality: components["schemas"]["Quality"];
             /**
@@ -531,6 +667,15 @@ export interface components {
             /** Y */
             y: number;
         };
+        /**
+         * Reason
+         * @description Why an island got its state.
+         *
+         *     A code, not a sentence. Operators read Vietnamese and the wording belongs to
+         *     the UI; the API must not freeze it.
+         * @enum {string}
+         */
+        Reason: "seeded_live" | "seeded_dead" | "through_transformer" | "possible_via_uncertain" | "earthed" | "no_measurement" | "isolated";
         /**
          * SectionView
          * @description One voltage level's band inside the station drawing.
@@ -865,6 +1010,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    energization_api_energization_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnergizationOut"];
                 };
             };
         };

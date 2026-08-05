@@ -11,7 +11,15 @@
  */
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { ApiError, api, type Bay, type Station, type StationDiagram } from '@/api/client'
+import {
+  ApiError,
+  api,
+  type Bay,
+  type Energization,
+  type LiveState,
+  type Station,
+  type StationDiagram,
+} from '@/api/client'
 
 export const useStationStore = defineStore('station', () => {
   const station = ref<Station | null>(null)
@@ -20,11 +28,21 @@ export const useStationStore = defineStore('station', () => {
   const diagram = ref<StationDiagram | null>(null)
   /** Which level the side panel is describing. The drawing always shows all. */
   const voltageLevel = ref<string | null>(null)
+  /** Live/dead verdict per connectivity node, solved in the backend. */
+  const energization = ref<Energization | null>(null)
 
   const loading = ref(false)
   const reloading = ref(false)
   const error = ref<ApiError | null>(null)
 
+  /** Verdict for one conductor. UNKNOWN when the backend did not say — the
+   *  frontend never fills a gap with a guess (AGENTS.md I2, I4). */
+  function liveStateOf(nodeId: string | null | undefined): LiveState {
+    if (!nodeId) return 'UNKNOWN'
+    return energization.value?.node_state[nodeId] ?? 'UNKNOWN'
+  }
+
+  const mismatchCount = computed(() => energization.value?.summary.mismatched ?? 0)
   const voltageLevels = computed(() => station.value?.voltage_levels ?? [])
   const issues = computed(() => station.value?.issues ?? [])
   const errorCount = computed(() => issues.value.filter((i) => i.severity === 'error').length)
@@ -40,14 +58,16 @@ export const useStationStore = defineStore('station', () => {
     loading.value = true
     error.value = null
     try {
-      const [summary, bayList, drawing] = await Promise.all([
+      const [summary, bayList, drawing, live] = await Promise.all([
         api.station(),
         api.bays(),
         api.stationDiagram(),
+        api.energization(),
       ])
       station.value = summary
       bays.value = bayList
       diagram.value = drawing
+      energization.value = live
       const wanted =
         voltageLevel.value && summary.voltage_levels.includes(voltageLevel.value)
           ? voltageLevel.value
@@ -61,6 +81,7 @@ export const useStationStore = defineStore('station', () => {
         station.value = null
         bays.value = []
         diagram.value = null
+        energization.value = null
       }
     } finally {
       loading.value = false
@@ -89,6 +110,7 @@ export const useStationStore = defineStore('station', () => {
     station,
     bays,
     diagram,
+    energization,
     voltageLevel,
     loading,
     reloading,
@@ -96,7 +118,9 @@ export const useStationStore = defineStore('station', () => {
     voltageLevels,
     issues,
     errorCount,
+    mismatchCount,
     baysHere,
+    liveStateOf,
     load,
     selectVoltageLevel,
     reload,

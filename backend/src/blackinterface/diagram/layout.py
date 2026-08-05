@@ -99,6 +99,9 @@ class Point(Frozen):
 
 class RailView(Frozen):
     busbar_id: str
+    #: Connectivity node this rail is, so an energisation verdict can be joined
+    #: onto the drawing without the geometry knowing anything about it.
+    node_id: str = ""
     label: str
     y: float
     x1: float
@@ -127,6 +130,8 @@ class EdgeView(Frozen):
     id: str
     points: tuple[Point, ...]
     device_id: str | None = None  # edge belongs to this device's terminal
+    #: The conductor this polyline is part of. Same purpose as `RailView.node_id`.
+    node_id: str | None = None
 
 
 class JunctionView(Frozen):
@@ -135,6 +140,7 @@ class JunctionView(Frozen):
     id: str
     x: float
     y: float
+    node_id: str = ""  # the busbar node it lands on, so the dot matches its colour
 
 
 class TerminalView(Frozen):
@@ -283,6 +289,7 @@ def layout_voltage_level(
     rails = tuple(
         RailView(
             busbar_id=b.id,
+            node_id=b.node_id,
             label=b.name,
             y=rail_y[b.node_id],
             x1=MARGIN_X - RAIL_MARGIN,
@@ -373,7 +380,7 @@ def _layout_bay(
         lowest = max(lowest, y)
         edges.extend(_edges_for(device, x, y, column_x, node_y, node_kind))
         junctions.extend(
-            JunctionView(id=f"{device.id}.{t.seq}", x=x, y=rail_y[t.node_id])
+            JunctionView(id=f"{device.id}.{t.seq}", x=x, y=rail_y[t.node_id], node_id=t.node_id)
             for t in device.terminals
             if t.node_id in rail_y
         )
@@ -387,6 +394,7 @@ def _layout_bay(
         edges.append(
             EdgeView(
                 id=f"{node_id}.tail",
+                node_id=node_id,
                 points=(Point(x=column_x, y=y), Point(x=column_x, y=terminal_y)),
             )
         )
@@ -485,18 +493,17 @@ def _edges_for(
     node_y: dict[str, float],
     node_kind: dict[str, NodeKind],
 ) -> list[EdgeView]:
-    """One polyline per terminal, from the symbol to the node it attaches to."""
+    """One polyline per terminal, from the symbol to the node it attaches to.
+
+    Except the earth terminal: the earth-switch symbol draws its own stub and
+    ground hatch, on the correct side for a mirrored band. An edge here would
+    duplicate it — and always downward, so in the mirrored band it drew a spur
+    pointing away from its own hatch.
+    """
     result = []
     for terminal in device.terminals:
         kind = node_kind.get(terminal.node_id)
         if kind is NodeKind.EARTH:
-            result.append(
-                EdgeView(
-                    id=f"{device.id}.{terminal.seq}",
-                    device_id=device.id,
-                    points=(Point(x=x, y=y), Point(x=x, y=y + 24.0)),
-                )
-            )
             continue
         target = node_y.get(terminal.node_id)
         if target is None:
@@ -507,7 +514,12 @@ def _edges_for(
             else (Point(x=x, y=y), Point(x=x, y=target), Point(x=column_x, y=target))
         )
         result.append(
-            EdgeView(id=f"{device.id}.{terminal.seq}", device_id=device.id, points=points)
+            EdgeView(
+                id=f"{device.id}.{terminal.seq}",
+                device_id=device.id,
+                node_id=terminal.node_id,
+                points=points,
+            )
         )
     return result
 
@@ -664,6 +676,7 @@ def _link_transformers(
             edges.append(
                 EdgeView(
                     id=f"link.{transformer.id}.{side}",
+                    node_id=terminal.node_id,
                     points=(
                         Point(x=terminal.x, y=terminal.y),
                         Point(x=lane, y=terminal.y),
@@ -685,6 +698,7 @@ def _link_transformers(
             edges.append(
                 EdgeView(
                     id=f"link.{transformer.id}.w{extra + 3}",
+                    node_id=terminal.node_id,
                     points=(
                         Point(x=terminal.x, y=terminal.y),
                         Point(x=lane, y=terminal.y),

@@ -167,17 +167,9 @@ chấm nối), và cả trạm phải nằm trong **một hình**, 220kV lật n
 - [x] ~~Tên ngăn dạng chữ ("Ben Cat", "Hoc Mon")~~ — **ĐÍNH CHÍNH 2026-08-05**:
       DataServer CÓ mang, ở `<bay>/BAY/Name`. Đã vào model và hiển thị
 
-### 1. Energization solver ← **BẮT ĐẦU TỪ ĐÂY**
-Đây là thứ biến sơ đồ hiện tại thành sơ đồ *có nghĩa*: tô màu theo **mang điện**,
-không phải theo từng dao.
-- [ ] ⚠ **Làm trước tiên**: đối chiếu `Subs.BB*.IsLive`, `<bay>.IsLive` và
-      `SAS_SIM.CheckLiveState` — OneATS đã tính sẵn. Đừng tính lại mù (Q3)
-- [ ] Lan truyền từ nguồn qua graph + `PosSt`, dùng connectivity node đã có
-- [ ] Dbpos 0/3 → `UNDETERMINED` lan truyền ra cả vùng, không đoán
-- [ ] Đối chiếu kết quả tự tính vs `IsLive` của OneATS → lệch thì báo, đừng giấu
-- [ ] Frontend: tô rail + nhánh theo vùng mang điện
+### 1. ~~Energization solver~~ ✅ **XONG 2026-08-05** — xem mục riêng bên dưới
 
-### 2. Realtime (subscription + SSE)
+### 2. Realtime (subscription + SSE) ← **BẮT ĐẦU TỪ ĐÂY**
 Hiện tại giá trị là **snapshot lúc dựng model**. Cần biến thành sống.
 - [ ] Một subscription phía server → fan-out SSE cho N client (bẫy đã biết)
 - [ ] Ngưỡng staleness → đánh dấu `STALE` kèm tuổi dữ liệu (I2)
@@ -268,6 +260,57 @@ dist đã build lại. **Vẫn chưa xem bằng mắt trên trình duyệt** —
 
 ---
 
+### Energization solver (2026-08-05) ✅ — việc #1, và **câu trả lời cho Q3**
+
+Hướng đã chốt với người dùng: **tự giải từ topology, rồi đối chiếu với `IsLive`
+của OneATS** — không đọc lại kết quả của OneATS rồi gọi là của mình.
+
+**Cách làm** (`domain/energization.py`, thuần, không I/O):
+
+1. **Chia đảo (island)**: union-find, chỉ thiết bị `CLOSED` mới nối 2 node.
+   `UNDETERMINED`/`INTERMEDIATE` **không** nối. Node `EARTH` bị loại khỏi phân
+   hoạch — hai đoạn cùng tiếp địa không phải một dây dẫn.
+2. **Gieo mầm CHỈ từ thanh cái** (`Subs.BB*.IsLive`, quality GOOD). **Cố ý
+   không** dùng `<bay>.IsLive` làm mầm: OneATS suy ngăn *từ* thanh cái, dùng nó
+   thì kết quả của ta chỉ là chép lại của họ, mất luôn giá trị đối chiếu.
+3. **Lan truyền**: qua MBA thì mang *nguyên trạng thái* (đóng điện một cuộn là
+   đóng điện cả máy — không có dao ở giữa); qua thiết bị không đọc được vị trí
+   thì **chỉ mang nghi ngờ** → `UNKNOWN`, không bao giờ `LIVE`, càng không `DEAD`.
+4. **Còn lại**: `DEAD` (mọi đường tới nguồn đều mở) — trừ khi đảo có thanh cái mà
+   `IsLive` hỏng thì `UNKNOWN`. **Không bao giờ suy ra "hết điện"** từ thiếu dữ liệu.
+
+Trạng thái: `LIVE` / `DEAD` / `EARTHED` / `UNKNOWN`, kèm `reason` (mã, không phải
+câu chữ — UI tự dịch) và `via` (MBA/thiết bị nào mang phán quyết vào).
+
+**Kết quả đối chiếu trên DEMO_SAS: 7/7 ngăn khớp `IsLive` của OneATS.**
+Đây là bằng chứng mạnh nhất tới giờ rằng bộ template ngăn của ta đúng — hai
+đường tính hoàn toàn độc lập ra cùng đáp số. Ca đắt nhất: **E02** mọi dao đều mở
+trừ `-9`, nên đường dây có điện *vòng qua* ngăn từ thanh cái vòng BB19, trong khi
+chính ngăn thì chết — đúng vế 2 của Lua `(C19L and 171-9C)`, và là lý do
+`T1_LINE` v2 chuyển `XSWI9` sang phía đường dây.
+
+Các ca khác đo được:
+- **BB29** (`BadWaitingForInitialData`) → `UNKNOWN`, xám nét đứt. Đúng yêu cầu
+  an toàn ở manual-test-01 ca 6.
+- **D12** mọi dao mở → 2 đoạn `DEAD` riêng biệt, lý do `isolated`.
+- **22kV** không có điểm đo nào → `LIVE` qua AT1 (`via=AT1`), và OneATS cũng nói
+  `J01.IsLive=True` → khớp. Node cuộn hạ áp lấy theo luật template: đầu của dao
+  `TRANSFORMER_DISCONNECTOR` không phải node nội bộ — với T2 là `n_tr`, với T5 là
+  `BB41`. Tức **BB41 "suy ra" chính là cuộn 22kV của AT1**, không phải thanh cái ma.
+
+**API/Frontend**: `GET /api/energization` trả `node_state` theo connectivity node;
+`RailView`/`EdgeView`/`JunctionView` giờ mang `node_id` để frontend **ghép** màu.
+Hình học và trạng thái điện tách rời — chính là thứ cho phép module realtime sau
+này đẩy phán quyết mới mà không cần layout lại. Panel bên phải hiện số đảo theo
+trạng thái + dòng "Khớp OneATS 7/7".
+
+**Sửa kèm**: bỏ cạnh stub tiếp địa trong layout — nó trùng với ký hiệu tự vẽ và
+luôn đi xuống, nên ở band 220kV lật ngược nó chĩa ngược hướng bãi tiếp địa.
+
+168 test (20 test mới), check.py xanh cả 7 mục.
+
+---
+
 ## Nhật ký phiên gần nhất
 
 ### 2026-08-05 — Làm rõ nguồn dữ liệu + chốt thiết kế project/connect
@@ -295,7 +338,7 @@ dist đã build lại. **Vẫn chưa xem bằng mắt trên trình duyệt** —
 |---|---|---|---|
 | Q1 | **Định nghĩa struct chính thức của alarm ExtensionObject** (ns=2, TypeId 5803) | Team DataServer, ATS | Việc #3 — hiện đang reverse-engineer, field cuối còn lệch |
 | Q2 | ATS đã có thư viện bay template chuẩn EVN chưa? | Nội bộ ATS | ~~Việc #1~~ — đã tự dựng 6 template. Vẫn hữu ích để đối chiếu ở trạm khác |
-| Q3 | `IsLive` (thanh cái + ngăn) và `SAS_SIM.CheckLiveState`: OneATS tính thế nào? Vì sao `BB29`/`D12` trả `BadWaitingForInitialData`? | Team DataServer | **Việc kế tiếp #1** |
+| Q3 | `IsLive` (thanh cái + ngăn) và `SAS_SIM.CheckLiveState`: OneATS tính thế nào? Vì sao `BB29`/`D12` trả `BadWaitingForInitialData`? | Team DataServer | **Đã tự trả lời phần chính (2026-08-05)**: OneATS suy `<bay>.IsLive` **từ** `Subs.BB*.IsLive` qua Lua `CheckLiveState`. Ta gieo mầm từ thanh cái, tự giải, đối chiếu → **7/7 khớp**. Còn hỏi: vì sao 2 điểm kia hỏng, và mầm của chính thanh cái từ đâu ra |
 | Q4 | Có trạm thật thứ 2–3 để verify ADR-0002 + ADR-0008 không? | Nội bộ ATS | **Cao** — mã thanh cái theo cấp điện áp và quy ước LN mới đo trên 1 trạm |
 | Q5 | Account read-only trên DataServer: xin ở đâu? | Team vận hành | Invariant I1 khi triển khai thật |
 | Q6 | **Dao tiếp địa nối vào node nào?** `-75/-76` quanh `-7`, `-35/-38` quanh `-3`, `-94/-95` quanh `-9` | Team thiết kế / bản vẽ Grid Designer | Đang đọc từ ảnh chụp SLD, **chưa chứng minh**. Không ảnh hưởng energization, nhưng ảnh hưởng câu hỏi an toàn ("đoạn này đã tiếp địa chưa") ở module #2+ |

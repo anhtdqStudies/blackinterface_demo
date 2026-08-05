@@ -119,6 +119,8 @@ backend/src/blackinterface/
     templates.py     loader + registry cho templates/*.yaml
     templates/       6 bay template (ADR-0008)
     topology.py      observation + template -> StationGraph  (thuần, không I/O)
+    energization.py  StationGraph -> vùng mang điện; gieo mầm từ thanh cái,
+                     đối chiếu với <bay>.IsLive của OneATS (thuần, không I/O)
   integration/   # L5 importers + adapters — CHỈ ĐÂY được biết NodeId
     dump.py          đọc dump JSON -> StationObs (offline, dùng cho test/demo)
     opcua/discovery.py  browse DataServer live -> StationObs
@@ -232,7 +234,7 @@ cd backend
 uv sync
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest                # 148 test, không cần DataServer
+uv run pytest                # 168 test, không cần DataServer
 uv run pytest -m live        # cần DataServer đang chạy
 uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
@@ -281,6 +283,9 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
 | Path `Objects/Root/EVN/RLDC/PROJECT/SAS` là cố định | **Sai.** Path chứa **tên project** — đổi project trong DataServer là path đổi. `discovery.py` auto-dò root theo *nội dung* (node có con dạng `\d+kV`), nhưng `tools/probe_dataserver.py` và `verify_dataserver.py` vẫn hardcode path DEMO. |
 | "DataServer không có bằng chứng ghép ngăn MBA / tên ngăn chữ" | **Sai** (đính chính 2026-08-05). `<bay>/BAY/Name` mang tên hiển thị ("Ben Cat", "AT1 Incoming"), và `/SAS/AT1` (ngang cấp điện áp, có `YPTR`/`YLTC`) là chính MBA. Ghép ngăn 220↔110: id nhóm MBA xuất hiện trong `BAY/Name` của cả hai ngăn. Cuộn 3 (22kV, J01) có `BAY/Name` rỗng nhưng ghép được qua số máy cắt EVN (TT 44/2014/TT-BCT): `<mã cấp áp>3<số MBA>` → 231/131/431 đều là AT1. Xem `topology.pair_transformers()`. |
+| Dùng `<bay>.IsLive` làm nguồn để tô màu mang điện | **Đừng.** OneATS **suy** nó ra *từ* `Subs.BB*.IsLive` bằng Lua `CheckLiveState`. Lấy nó làm mầm thì kết quả của ta chỉ là chép lại của họ và mất luôn khả năng phát hiện template sai. Gieo mầm **chỉ từ thanh cái**, tự giải, rồi dùng `<bay>.IsLive` để **đối chiếu** (`domain/energization.py`). Hiện 7/7 khớp trên DEMO_SAS. |
+| Không đọc được vị trí dao → coi như mở | **Sai và nguy hiểm.** `UNDETERMINED`/`INTERMEDIATE` không nối đảo, nhưng phải **lan nghi ngờ**: đoạn bên kia thành `UNKNOWN` (xám), không bao giờ `DEAD`. Thiếu dữ liệu không bao giờ được suy ra "hết điện" — đó là câu khiến người ta chạm tay vào. |
+| Node `EARTH` gộp vào phân hoạch đảo được | **Không.** Mọi đoạn đang tiếp địa sẽ dính thành một đảo khổng lồ và phán quyết nhảy từ ngăn này sang ngăn khác. Earth đứng ngoài union-find; dao tiếp địa đóng chỉ *đánh dấu* đảo là `EARTHED`. |
 
 ---
 

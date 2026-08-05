@@ -28,6 +28,11 @@ export type Junction = components['schemas']['JunctionView']
 export type Issue = components['schemas']['ValidationIssue']
 export type SwitchState = components['schemas']['SwitchState']
 export type Quality = components['schemas']['Quality']
+/** Which conductors are live, solved in the backend. Never recomputed here. */
+export type Energization = components['schemas']['EnergizationOut']
+export type Island = components['schemas']['Island']
+export type LiveState = components['schemas']['LiveState']
+export type CrossCheck = components['schemas']['CrossCheck']
 
 /** The backend's uniform error body. See backend/src/blackinterface/errors.py. */
 interface ErrorBody {
@@ -83,6 +88,9 @@ export const api = {
   busbars: () => request<Busbar[]>('/api/busbars'),
   /** The whole station, all voltage levels stacked. */
   stationDiagram: () => request<StationDiagram>('/api/diagram'),
+  /** Which sections are live, keyed by connectivity node. Joins onto the
+   *  diagram through `RailView.node_id` / `EdgeView.node_id`. */
+  energization: () => request<Energization>('/api/energization'),
   /** One voltage level on its own. Kept for tooling and manual inspection. */
   diagram: (voltageLevel: string) =>
     request<Diagram>(`/api/diagram/${encodeURIComponent(voltageLevel)}`),

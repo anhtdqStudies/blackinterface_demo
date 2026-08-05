@@ -32,6 +32,10 @@
   /* conductor energisation */
   --live: #4aa3ff;
   --dead: #24c07a;
+  /* Earthed: a closed earth switch is bonded to this section. Deliberately not
+     the same green as "de-energised" — one is a measured bond to earth, the
+     other is an absence of voltage, and only the first is a reason to relax. */
+  --earthed: #b48ce8;
 
   --radius: 6px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;

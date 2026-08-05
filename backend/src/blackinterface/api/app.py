@@ -27,6 +27,12 @@ from blackinterface.diagram.layout import (
     layout_station,
     layout_voltage_level,
 )
+from blackinterface.domain.energization import (
+    CrossCheck,
+    Island,
+    LiveState,
+    solve_energization,
+)
 from blackinterface.domain.models import (
     Bay,
     Busbar,
@@ -178,6 +184,22 @@ class BusbarOut(BaseModel):
     is_live: bool | None
     quality: Quality
     inferred: bool
+
+
+class EnergizationOut(BaseModel):
+    """Which conductors are live, why, and whether OneATS agrees.
+
+    `node_state` is keyed by connectivity node so the drawing can be coloured by
+    joining on `RailView.node_id` / `EdgeView.node_id` — geometry and
+    energisation stay separate, which is what will let the realtime module push
+    a new verdict without re-laying-out the station.
+    """
+
+    islands: list[Island]
+    node_state: dict[str, LiveState]
+    checks: list[CrossCheck]
+    issues: list[ValidationIssue]
+    summary: dict[str, int]
 
 
 # ------------------------------------------------------------------- mappers
@@ -384,6 +406,30 @@ async def bay_detail(bay_id: str) -> BayDetailOut:
 @app.get("/api/busbars", response_model=list[BusbarOut])
 async def busbars() -> list[BusbarOut]:
     return [_busbar_out(b) for b in store.graph.busbars]
+
+
+@app.get("/api/energization", response_model=EnergizationOut)
+async def energization() -> EnergizationOut:
+    """Solve which sections are live from the switch positions we can read.
+
+    Seeded from the busbars the station measures, spread across closed devices
+    and through paired transformers, then compared against the bay-level
+    `IsLive` OneATS publishes. Disagreements are returned, not hidden (I7).
+    """
+    result = solve_energization(store.graph)
+    states = [island.state for island in result.islands]
+    return EnergizationOut(
+        islands=list(result.islands),
+        node_state={n.node_id: n.state for n in result.nodes},
+        checks=list(result.checks),
+        issues=list(result.issues),
+        summary={
+            "islands": len(result.islands),
+            **{state.lower(): states.count(state) for state in LiveState},
+            "compared": sum(1 for c in result.checks if c.agrees is not None),
+            "mismatched": len(result.mismatches),
+        },
+    )
 
 
 @app.get("/api/diagram", response_model=StationView)

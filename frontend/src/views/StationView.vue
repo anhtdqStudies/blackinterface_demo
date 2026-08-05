@@ -4,6 +4,7 @@ import { api, type BayDetail, type Device } from '@/api/client'
 import SldCanvas from '@/components/diagram/SldCanvas.vue'
 import CoveragePanel from '@/components/panels/CoveragePanel.vue'
 import DevicePanel from '@/components/panels/DevicePanel.vue'
+import EnergizationPanel from '@/components/panels/EnergizationPanel.vue'
 import IssueList from '@/components/panels/IssueList.vue'
 import { useStationStore } from '@/stores/station'
 
@@ -56,6 +57,7 @@ watch(() => store.voltageLevel, clearSelection)
         v-if="store.diagram"
         ref="canvas"
         :diagram="store.diagram"
+        :node-state="store.energization?.node_state ?? {}"
         :selected-device-id="selectedDevice?.id ?? null"
         @select="select"
       />
@@ -74,6 +76,7 @@ watch(() => store.voltageLevel, clearSelection)
           :bays="store.baysHere"
           :voltage-level="store.voltageLevel"
         />
+        <EnergizationPanel v-if="store.energization" :energization="store.energization" />
         <h2>Cảnh báo dựng model ({{ store.issues.length }})</h2>
         <IssueList :issues="store.issues" empty="Không có. Mọi ngăn khớp template." />
       </template>

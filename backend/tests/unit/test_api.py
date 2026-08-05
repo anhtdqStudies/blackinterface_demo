@@ -76,6 +76,36 @@ def test_unknown_voltage_level_is_404(client: TestClient) -> None:
     assert client.get("/api/diagram/999kV").status_code == 404
 
 
+def test_energization_endpoint_can_be_joined_onto_the_diagram(
+    client: TestClient,
+) -> None:
+    """The contract the drawing depends on: every rail and conductor names a
+    node, and every named node has a verdict. A missing join shows up as an
+    uncoloured conductor, which is precisely the thing an operator must not see.
+    """
+    energized = client.get("/api/energization").json()
+    diagram = client.get("/api/diagram").json()
+    states = energized["node_state"]
+
+    assert energized["summary"]["mismatched"] == 0
+    assert energized["summary"]["compared"] >= 7
+
+    for rail in diagram["rails"]:
+        assert rail["node_id"] in states, rail["busbar_id"]
+    for edge in diagram["edges"]:
+        assert edge["node_id"] in states, edge["id"]
+    for junction in diagram["junctions"]:
+        assert junction["node_id"] in states, junction["id"]
+
+
+def test_energization_reports_the_unreadable_busbar_as_unknown(
+    client: TestClient,
+) -> None:
+    """BB29 has no usable IsLive, so it must not be coloured dead (I2)."""
+    body = client.get("/api/energization").json()
+    assert body["node_state"]["NODE.BB29"] == "UNKNOWN"
+
+
 def test_no_write_endpoint_exists(client: TestClient) -> None:
     """AGENTS.md I1 enforced structurally: every non-GET endpoint is on this
     allowlist, and each one writes only to the local SQLite store — nothing
