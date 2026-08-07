@@ -257,6 +257,23 @@ export default {
     no_history: 'Khoảng thời gian hỏi nằm ngoài dữ liệu đang lưu',
     unit_unverified: 'Số đúng nhưng thang đo chưa xác minh — không in đơn vị',
   },
+  /**
+   * Câu trả lời **tính được** của trợ lý, dùng khi không có mô hình ngôn ngữ
+   * (`BI_LLM=off`, hoặc mô hình chết). Backend gửi khoá + tham số chứ không gửi
+   * câu — nó không biết người đọc muốn tiếng Việt hay tiếng Anh. Khoá sinh ở
+   * `agent/brief.py`; `check.py` mục 5 so hai danh sách, thiếu là đỏ.
+   */
+  agent: {
+    answer: {
+      summary:
+        '{label} — {devices} thiết bị: {closed} đóng, {opened} mở, {undetermined} không xác định. ' +
+        '{live} đoạn mang điện, {dead} mất điện, {unknown} chưa rõ. ' +
+        '{measurements} số đo, {issues} vấn đề.',
+      ambiguous: '«{query}» ứng với {count} thứ: {options}. Bạn hỏi cái nào?',
+      unknown: 'Trạm này không có gì tên «{query}».',
+      denied: 'Tài khoản của bạn không có quyền «{missing}» nên câu này chưa trả lời được.',
+    },
+  },
   common: {
     empty: 'Không có.',
     dash: '—',

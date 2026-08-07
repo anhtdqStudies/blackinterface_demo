@@ -1,6 +1,154 @@
 {
   "components": {
     "schemas": {
+      "AnswerOut": {
+        "description": "One turn of conversation, with everything behind it.\n\nThe same object arrives two ways: whole from `POST /api/ask`, and in pieces\nfrom `POST /api/ask/stream`. Same schema either way, so a client applies an\nanswer with one code path whichever it used — the reasoning behind\n`/api/live` and `/api/stream` (ADR-0012), for the same reason.\n\nProse and facts are separate fields on purpose (I3). `text` is what a\nlanguage model wrote and is labelled as interpretation; `summary`,\n`resolution` and `evidence` are computed and are what the interface may\nshow as fact. When `generated` is false there is no model in the loop at\nall and `key`/`params` carry a computed statement for the frontend to\nrender in its own language.",
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EvidenceRecord"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "generated": {
+            "title": "Generated",
+            "type": "boolean"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key"
+          },
+          "llm_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Error"
+          },
+          "params": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Params",
+            "type": "object"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResolveOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SummaryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
+          },
+          "turn_id": {
+            "title": "Turn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "turn_id",
+          "question",
+          "scope",
+          "provider",
+          "generated"
+        ],
+        "title": "AnswerOut",
+        "type": "object"
+      },
+      "AskIn": {
+        "description": "A question, and where the person asking was looking when they asked it.\n\n`scope` is the fallback subject, used when the question names nothing —\n\"còn số đo thì sao?\" means *this* bay, and the pane knows which one.\n`conversation_id` continues an existing thread; omit it to start one.",
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "scope": {
+            "default": "station",
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "title": "AskIn",
+        "type": "object"
+      },
       "BayDetailOut": {
         "properties": {
           "bay_type": {
@@ -1660,6 +1808,83 @@
         "title": "Reason",
         "type": "string"
       },
+      "ResolveOut": {
+        "description": "What a name refers to — the deterministic half of every question (I8).\n\n`scope` is non-null only when exactly one thing matched. Several matches is\na normal answer, not an error: \"Lai Uyen\" is the name of two bays on\nDEMO_SAS, and the right response is to ask which, never to pick one.",
+        "properties": {
+          "ambiguous": {
+            "default": false,
+            "title": "Ambiguous",
+            "type": "boolean"
+          },
+          "candidates": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ScopeCandidateOut"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "label": {
+            "default": "",
+            "title": "Label",
+            "type": "string"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "ResolveOut",
+        "type": "object"
+      },
+      "ScopeCandidateOut": {
+        "description": "One thing a piece of text could have named.",
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "matched": {
+            "title": "Matched",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "tier": {
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "kind",
+          "label",
+          "tier",
+          "matched"
+        ],
+        "title": "ScopeCandidateOut",
+        "type": "object"
+      },
       "SectionView": {
         "description": "One voltage level's band inside the station drawing.",
         "properties": {
@@ -2331,6 +2556,80 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/ask": {
+      "post": {
+        "description": "Answer one question, whole.",
+        "operationId": "ask_api_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ask"
+      }
+    },
+    "/api/ask/stream": {
+      "post": {
+        "description": "The same answer, as it is produced (Server-Sent Events).\n\nFrame types are `turn`, `tool`, `evidence`, `token` and `answer`; the last\ncarries the complete `AnswerOut` and supersedes anything accumulated from\n`token`. See `agent/core.py` for why that replacement matters.",
+        "operationId": "ask_stream_api_ask_stream_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {}
+            },
+            "description": "Answer frames"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Ask Stream"
+      }
+    },
     "/api/bays": {
       "get": {
         "operationId": "bays_api_bays_get",

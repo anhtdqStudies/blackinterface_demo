@@ -17,11 +17,9 @@ dependencies = [
     # Password hashing (ADR-0016, ADR-0017). Argon2id is the current
     # recommendation and this is its reference binding; never hand-roll this.
     "argon2-cffi>=23.1",
-]
-
-[project.optional-dependencies]
-agent = [
-    "pydantic-ai-slim[openai]>=0.0.20",
+    # The agent's only outbound call: a streaming POST to an OpenAI-compatible
+    # chat endpoint (ADR-0019). No model SDK — see `agent/provider.py`.
+    "httpx>=0.27",
 ]
 
 [dependency-groups]

@@ -187,7 +187,7 @@ def _evidence(
         TOOL,
         ref,
         source=Source(
-            kind=_source_kind(graph.source),
+            kind=source_kind(graph.source),
             endpoint=graph.source or None,
             node_ids=tuple(
                 sorted(
@@ -226,8 +226,13 @@ def _evidence(
     return builder.build()
 
 
-def _source_kind(source: str) -> SourceKind:
-    """Read provenance off the label the loader already stamped on the graph."""
+def source_kind(source: str) -> SourceKind:
+    """Read provenance off the label the loader already stamped on the graph.
+
+    Public because every facet needs it and there is only one right answer:
+    an agent tool that decided provenance for itself could report a snapshot as
+    live, which is the one caveat an operator most needs to see (ADR-0013).
+    """
     if source.startswith("snapshot:"):
         return SourceKind.SNAPSHOT
     if source.startswith("fixture:"):

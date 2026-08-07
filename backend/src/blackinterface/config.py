@@ -84,6 +84,25 @@ class Settings(BaseSettings):
     #: says so at startup for every account that still has it.
     seed_password: str = "blackinterface"
 
+    # ---- the language model (ADR-0019)
+    #: `off`    — no model at all. Questions are still answered, deterministically
+    #:            and from the same tools; only the phrasing is a template. This
+    #:            is the default because I4 requires the product to work without
+    #:            a model, and a default that needs a key would make that claim
+    #:            untested on every machine that has one.
+    #: `openai` — any endpoint speaking the OpenAI chat-completions API. That is
+    #:            OpenRouter while developing and Ollama at the station, which is
+    #:            the whole reason this is one setting rather than two backends.
+    llm: Literal["off", "openai"] = "off"
+    llm_base_url: str = "https://openrouter.ai/api/v1"
+    #: No default. A model name is installation-specific, and guessing one turns
+    #: "you did not configure this" into a 404 from someone else's server.
+    llm_model: str = ""
+    llm_api_key: str | None = None
+    #: Generous: a local model on station hardware is slow to first token, and
+    #: the stream is already showing progress by then.
+    llm_timeout: float = 120.0
+
     # ---- local storage
     data_dir: Path = REPO_ROOT / "data"
     db_name: str = "blackinterface.sqlite"

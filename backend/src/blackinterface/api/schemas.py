@@ -310,3 +310,114 @@ class SummaryOut(BaseModel):
     measurements: list[ReadingOut]
     issues: list[ValidationIssueOut]
     evidence: EvidenceRecord
+
+
+class ScopeCandidateOut(BaseModel):
+    """One thing a piece of text could have named."""
+
+    scope: str
+    kind: str
+    label: str
+    #: How strong the match was: `ref` | `id` | `designation` | `name`.
+    #: Carried so a client can say *why* it thinks the operator meant this.
+    tier: str
+    matched: str  # the text that matched, as the model spells it
+
+
+class ResolveOut(BaseModel):
+    """What a name refers to — the deterministic half of every question (I8).
+
+    `scope` is non-null only when exactly one thing matched. Several matches is
+    a normal answer, not an error: "Lai Uyen" is the name of two bays on
+    DEMO_SAS, and the right response is to ask which, never to pick one.
+    """
+
+    query: str
+    scope: str | None = None
+    label: str = ""
+    ambiguous: bool = False
+    candidates: list[ScopeCandidateOut] = []
+
+
+class AskIn(BaseModel):
+    """A question, and where the person asking was looking when they asked it.
+
+    `scope` is the fallback subject, used when the question names nothing —
+    "còn số đo thì sao?" means *this* bay, and the pane knows which one.
+    `conversation_id` continues an existing thread; omit it to start one.
+    """
+
+    question: str
+    scope: str = "station"
+    conversation_id: str | None = None
+
+
+class TurnStartOut(BaseModel):
+    """First frame of `POST /api/ask/stream`: what is about to happen.
+
+    Sent before any tool runs so the interface can show the conversation
+    advancing, and can say up front whether a language model is involved at all.
+    """
+
+    conversation_id: str
+    turn_id: str
+    provider: str
+    generated: bool
+
+
+class ToolCallOut(BaseModel):
+    """A frame announcing one tool, before it runs.
+
+    Emitted rather than merely logged because "reading bay:D03" is the honest
+    account of what the assistant is doing, and the alternative — a spinner — is
+    where a system stops being inspectable.
+    """
+
+    tool: str
+    args: dict[str, str | int | float | bool | None] = {}
+
+
+class TokenOut(BaseModel):
+    """One piece of generated prose. Only ever a fragment of `AnswerOut.text`."""
+
+    text: str
+
+
+class AnswerOut(BaseModel):
+    """One turn of conversation, with everything behind it.
+
+    The same object arrives two ways: whole from `POST /api/ask`, and in pieces
+    from `POST /api/ask/stream`. Same schema either way, so a client applies an
+    answer with one code path whichever it used — the reasoning behind
+    `/api/live` and `/api/stream` (ADR-0012), for the same reason.
+
+    Prose and facts are separate fields on purpose (I3). `text` is what a
+    language model wrote and is labelled as interpretation; `summary`,
+    `resolution` and `evidence` are computed and are what the interface may
+    show as fact. When `generated` is false there is no model in the loop at
+    all and `key`/`params` carry a computed statement for the frontend to
+    render in its own language.
+    """
+
+    conversation_id: str
+    turn_id: str
+    question: str
+    scope: str  # the scope actually answered about, after resolution
+    provider: str  # "offline" | "openai:<model>"
+    generated: bool  # a language model wrote `text`
+    text: str = ""
+    #: i18n key + arguments for the computed statement. Present whenever the
+    #: answer could be computed, including alongside generated prose, so the UI
+    #: still has something correct to show if it chooses not to trust the model.
+    key: str | None = None
+    params: dict[str, str | int | float | bool | None] = {}
+    resolution: ResolveOut | None = None
+    summary: SummaryOut | None = None
+    #: Every record produced by this turn, one per tool that ran. The canonical
+    #: place a client looks for evidence — a tool added later shows up here
+    #: without the interface learning its payload shape (ADR-0013).
+    evidence: list[EvidenceRecord] = []
+    #: Set when the model was configured, was asked, and failed. The answer is
+    #: still here and still correct; only the wording is the computed one. A
+    #: silent downgrade would make an outage invisible (I4).
+    llm_error: str | None = None

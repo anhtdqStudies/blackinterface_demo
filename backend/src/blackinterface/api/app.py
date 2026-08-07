@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from blackinterface.api import accounts, deps
 from blackinterface.api import errors as error_handlers
 from blackinterface.api.routers import (
+    agent,
     auth,
     diagram,
     health,
@@ -93,6 +94,7 @@ app.include_router(issues.router)
 app.include_router(live.router)
 app.include_router(summary.router)
 app.include_router(diagram.router)
+app.include_router(agent.router)
 
 
 # ------------------------------------------------------------------- frontend

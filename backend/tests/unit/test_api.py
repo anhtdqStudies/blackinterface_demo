@@ -145,6 +145,13 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         "POST /api/login",
         "POST /api/logout",
         "POST /api/password",
+        # Asking a question (ADR-0019). POST because the question is arbitrary
+        # text and belongs in a body rather than in an access log, not because
+        # anything is written: the agent's whole tool registry is read-only, and
+        # `agent/` cannot import `control/` or `integration/` to make it
+        # otherwise (tools/check.py section 2, test_agent.py).
+        "POST /api/ask",
+        "POST /api/ask/stream",
     }
 
 

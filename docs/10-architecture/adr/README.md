@@ -47,3 +47,4 @@ Mỗi quyết định kiến trúc = một file `NNNN-<slug>.md`.
 | [0016](0016-roles-and-capabilities.md) | Vai và quyền: quyền là đơn vị, vai chỉ là gói; kiểm ở tầng facet | Accepted |
 | [0017](0017-local-accounts-and-sessions.md) | Tài khoản cục bộ, Argon2id, phiên phía máy chủ bằng cookie | Accepted |
 | [0018](0018-conversation-first-workspace.md) | Hội thoại là bố cục, không phải một chế độ — một bố cục + tab, bỏ ba preset | Accepted |
+| [0019](0019-agent-shape.md) | Agent: quyết định trước, hỏi mô hình sau; `LLMProvider` tự viết, mặc định không mô hình | Accepted |

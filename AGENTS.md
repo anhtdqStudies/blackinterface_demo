@@ -122,8 +122,8 @@ mỗi phạm vi.
 | API | **FastAPI** + SSE | |
 | OPC UA | **asyncua** | client-server, KHÔNG phải PubSub |
 | Store | **SQLite** | config, release, topology, event store. **Không dùng MongoDB** |
-| Agent | **Pydantic AI** | |
-| LLM | OpenRouter (dev) → Ollama (trạm) | qua interface `LLMProvider`, đổi bằng config |
+| Agent | **`LLMProvider` tự viết** (ADR-0019) | một phương thức, không SDK mô hình. Pydantic AI đã bác — xem ADR-0019 phương án A, kèm đường lui |
+| LLM | OpenRouter (dev) → Ollama (trạm) | cùng một hiện thực: endpoint OpenAI-compatible qua `httpx`. **Mặc định `BI_LLM=off`** — không mô hình, câu trả lời vẫn đúng và vẫn có bằng chứng (I4) |
 | Frontend | **Vite + Vue 3 + TypeScript** (ADR-0009) | build tĩnh → FastAPI serve → 1 process, không cần Node runtime |
 | UI kit | **shadcn-vue** + Tailwind v4 + reka-ui (ADR-0014) | cài theo đường **Vite**, KHÔNG dùng Nuxt. MCP: `npx shadcn-vue@latest mcp init --client claude` |
 | i18n | **vue-i18n** — `vi` mặc định + `en` | ngôn ngữ UI ≠ ngôn ngữ câu trả lời của LLM |
@@ -174,7 +174,7 @@ backend/src/blackinterface/
                      get_store() — test đổi bằng deps.use()
     schemas.py       MỌI response model. Tên = tên schema trong openapi.json
     mappers.py       domain -> schema, hàm thuần, không đọc state toàn cục
-    routers/         health · projects · station · live · summary · diagram
+    routers/         health · projects · station · live · summary · diagram · agent
     summary.py       facet `summary`: một scope -> câu trả lời + EvidenceRecord.
                      Khuôn mẫu cho mọi facet sau
     source.py        StationStore: model nào đang hiện hành và đổi lúc nào
@@ -185,11 +185,18 @@ backend/src/blackinterface/
     throttle.py      giảm nhịp `measurement`, có sườn xuống nên số đo cuối của
                      một chùm không bao giờ mất
     errors.py        exception -> JSON {"error": {code, message, detail}}
-  agent/         # L2 BlackCore (Pydantic AI) — CHƯA CÓ, kế hoạch ở docs/90-progress/status.md
-    provider.py      LLMProvider: OpenRouter (dev) -> local GPU tại trạm
-    session.py       lịch sử hội thoại (nhiều phiên), nạp từ store/sessions
-    resolve.py       "271" -> device:D03.XCBR1 — DETERMINISTIC, không qua LLM
-    tools/           registry CHỈ ĐỌC, mỗi tool trả (payload, EvidenceRecord)
+  agent/         # L2 BlackCore (ADR-0019) — lập kế hoạch → đọc → diễn đạt
+    core.py          một lượt hội thoại; MỘT generator phục vụ cả hai endpoint
+    plan.py          chọn scope nào để đọc. DETERMINISTIC — đây là chỗ I4 đứng
+    resolve.py       "271" -> device:D03.XCBR1; nhiều kết quả thì HỎI LẠI, cấm đoán
+    brief.py         cái tool tìm được, nói hai lần: `facts` cho mô hình, khoá
+                     i18n + tham số cho người (backend không viết câu)
+    provider.py      LLMProvider: `off` (mặc định) | endpoint OpenAI-compatible
+    session.py       lịch sử hội thoại; protocol + bản trong-tiến-trình. agent/
+                     KHÔNG import được store/, bản SQLite sẽ do api/ tiêm vào
+    tools/           registry CHỈ ĐỌC, mỗi tool trả (payload, EvidenceRecord).
+                     Capability của mọi tool phải nằm trong READ_ONLY — check.py
+                     mục 3 đọc bằng ast, không tin `register()` lúc chạy
   control/       # đường ghi DUY NHẤT (I1, ADR-0011) — hình dạng đã có, cửa đóng
     registry.py      lệnh được phép — `COMMANDS = {}`, check.py parse bằng ast
     guard.py         tiền điều kiện; đồng thời là hiện thực C-01 (đọc thuần).

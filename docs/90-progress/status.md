@@ -3,22 +3,39 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-07 · phiên: **soát lại lô 0–3 trước khi mở GĐ 2** —
-bịt rò định danh thô sang bề mặt operator, vá một test xanh rỗng, commit toàn bộ
-GĐ 0 + 1 + 1.5, và **ADR-0018: bỏ ba preset, hội thoại thành bố cục**.
+**Cập nhật lần cuối**: 2026-08-07 · phiên: **GĐ 2 bước 1 — lát cắt dọc của agent**.
+`agent/` chạy đầu-cuối với 2 tool, `POST /api/ask` + stream, bằng chứng đi kèm,
+**không cần mô hình ngôn ngữ nào**. ADR-0019 chốt hình dạng và bác Pydantic AI.
 
 ---
 
 ## Đang ở đâu
 
-**GĐ 1.5 xong (lô 0–3), đã soát lại và đã commit.** Kế tiếp: **GĐ 2** —
-BlackCore (agent), pane `chat`, alarm.
+**GĐ 2 bước 1 XONG.** Kế tiếp: **bước 2 — `ChatPane` thật**.
 
 > **Thứ tự GĐ 2 đã chốt** (người dùng, 2026-08-07):
-> 1. `agent/` + 2 tool (`resolve`, `summary`) + `LLMProvider` + streaming
-> 2. `ChatPane` thật, cắm vào `PANE_COMPONENTS.chat` (đã có chỗ, không đụng hợp đồng)
+> 1. ✅ `agent/` + 2 tool (`resolve`, `summary`) + `LLMProvider` + streaming
+> 2. ⬅ **ĐANG Ở ĐÂY** — `ChatPane` thật, cắm vào `PANE_COMPONENTS.chat`
+>    (đã có chỗ, không đụng hợp đồng). Backend đã sẵn: `POST /api/ask` trả nguyên
+>    khối, `POST /api/ask/stream` trả từng khung, cùng một `AnswerOut`
 > 3. **Nhìn nó chạy**, rồi mới bỏ ba preset và dựng vỏ mới theo
 >    [ADR-0018](../10-architecture/adr/0018-conversation-first-workspace.md)
+
+**Thử agent bằng curl** (không cần key, không cần mô hình):
+```bash
+curl -X POST http://127.0.0.1:8080/api/ask -H 'Content-Type: application/json' \
+  -d '{"question":"271 đang thế nào?"}'
+```
+→ `scope: device:D03.XCBR1`, `key: agent.answer.summary`, hai `EvidenceRecord`.
+Hỏi `"Lai Uyen thế nào?"` → `agent.answer.ambiguous`, **không đọc gì cả**, hỏi
+lại E01 hay E02. Hỏi `"trạng thái 999"` → `agent.answer.unknown`, **không** âm
+thầm trả lời về toàn trạm.
+
+**Bật mô hình thật** (tuỳ chọn — mọi thứ trên chạy được khi không bật):
+```bash
+BI_LLM=openai BI_LLM_MODEL=<tên model> BI_LLM_API_KEY=<key> \
+BI_LLM_BASE_URL=https://openrouter.ai/api/v1   # tại trạm: http://127.0.0.1:11434/v1 (Ollama)
+```
 
 > **Việc rẻ nhất và quyết định nhất hiện nay không phải viết code**: xin một dump
 > của **trạm thứ hai** (Q4) và chạy `tools/probe_dataserver.py --dump` lên nó.
@@ -247,6 +264,7 @@ MW, MVAR`), không phải câu văn → chính tác giả nghiệp vụ đã t�
 | [0015](../10-architecture/adr/0015-engineer-authored-templates.md) | **thêm 2026-08-06** — template do engineer soạn, có phiên bản, phải chứng minh trước khi dùng | chặn GĐ 2.5; làm sống lại «chốt bản»; nâng **Q4** lên chặn |
 | [0016](../10-architecture/adr/0016-roles-and-capabilities.md) | **thêm 2026-08-06** — vai và quyền: quyền là đơn vị, vai chỉ là gói; kiểm ở tầng facet; agent mượn quyền người hỏi | chạm **mọi** route, agent, evidence, giao diện → phải cắm chỗ ngay ở GĐ 1.5; **đổi cửa vào mặc định** từ SLD sang tóm tắt AI |
 | [0018](../10-architecture/adr/0018-conversation-first-workspace.md) | **thêm 2026-08-07** — hội thoại là bố cục, không phải một chế độ: bỏ ba preset, còn một bố cục (chat thường trực + sơ đồ trên + tab dưới) | thay **ADR-0014 §3 phần preset**; thi công ở **đầu GĐ 2**, sau khi `ChatPane` chạy thật |
+| [0019](../10-architecture/adr/0019-agent-shape.md) | **thêm 2026-08-07** — agent: lập kế hoạch (deterministic) → đọc → diễn đạt; `LLMProvider` tự viết, mặc định không mô hình; registry tool chỉ-đọc gác bằng `ast` | **thay dòng «Agent = Pydantic AI»** ở `AGENTS.md` §3; chốt hợp đồng cho `ChatPane` |
 
 ### Thứ tự thi công
 
@@ -705,6 +723,72 @@ Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (m
 ---
 
 ## Nhật ký phiên gần nhất
+
+### 2026-08-07 — GĐ 2 bước 1: lát cắt dọc của agent ✅
+
+Hình dạng viết thành [ADR-0019](../10-architecture/adr/0019-agent-shape.md).
+Ba bước, đúng thứ tự: **lập kế hoạch (deterministic) → đọc → diễn đạt**.
+
+**Bảy module mới trong `agent/`**, không cái nào quá 260 dòng:
+
+| File | Việc |
+|---|---|
+| `resolve.py` | `"271"` → `device:D03.XCBR1`. Bốn tầng mạnh dần (name → designation → id → ref), **dừng ở tầng đầu tiên tìm thấy**. Bỏ dấu hai chiều: OneATS lưu `Ben Cat`, người trực gõ `Bến Cát` |
+| `plan.py` | Chọn scope nào để đọc. **Đây là chỗ I4 đứng** |
+| `tools/registry.py` | Hợp đồng tool + cổng quyền. `READ_ONLY` là danh sách trắng |
+| `tools/station.py` | Hai tool: `resolve`, `summary` |
+| `brief.py` | Cái tool tìm được, nói hai lần: `facts` cho mô hình, khoá i18n + tham số cho người |
+| `provider.py` | `LLMProvider` một phương thức. `OfflineProvider` + `OpenAIProvider` |
+| `session.py` | Bộ nhớ hội thoại. Protocol + bản trong-tiến-trình |
+| `core.py` | Một lượt. **Một generator phục vụ cả hai endpoint** |
+
+**Hai quyết định đáng đọc lại nếu sau này thấy lạ:**
+
+1. **Mô hình không chọn tool.** Với 2 tool và một resolver deterministic, để nó
+   chọn chỉ thêm một kiểu hỏng. Điều kiện xét lại ghi ở ADR-0019 §2 — quanh
+   module B, khi danh mục tool đủ lớn để "chọn cái nào" là phán đoán thật.
+2. **Pydantic AI bị bác** (ADR-0019 phương án A), dù `AGENTS.md` §3 đã ghi nó từ
+   2026-08-04. Nó giải bài toán vòng lặp gọi tool do mô hình điều khiển — đúng
+   bài toán (1) nói chưa nên có. Đường lui còn nguyên: `LLMProvider` một phương
+   thức, bọc lại là chuyện một file.
+
+**Ba chỗ cố ý không đoán** — cả ba đều có test khoá:
+
+- `Lai Uyen` là tên của **cả E01 lẫn E02** trên DEMO_SAS → trả về hai, **không
+  đọc gì cả**, hỏi lại. Đây là lý do `resolve` là một tool riêng chứ không phải
+  một hàm tiện ích: nhập nhằng là một *câu trả lời*, không phải một lỗi.
+- Hỏi `"trạng thái 999"` → *"trạm này không có gì tên 999"*, **không** âm thầm
+  trả lời về scope đang mở. Trả lời về chỗ khác trông y hệt một câu trả lời.
+- Mô hình chết giữa chừng → **bỏ phần chữ đã gửi**. Nửa câu về việc dao nào đang
+  mở tệ hơn không có câu nào.
+
+**Bốn lớp cưỡng chế I1 phía agent** (ADR-0019 §4). Lớp 2–4 thừa so với lớp 1
+*hôm nay*; ngày module C mở, `control.draft` thành quyền hợp pháp của một số tài
+khoản, mà agent thì mượn quyền người hỏi — không có ba lớp kia, đúng ngày đó mô
+hình phân quyền chạy đúng thiết kế sẽ lặng lẽ trao cho agent một tool ghi.
+
+**Hai máy dò mới trong `check.py`, cả hai đã bẻ thử và xác nhận đỏ rồi phục hồi:**
+
+| Mục | Luật | Bẻ bằng cách |
+|---|---|---|
+| 3 | mọi `Tool(...)` dưới `agent/tools/` khai `requires=` và không khai capability ghi | đổi `summary` sang `CONTROL_DRAFT` → đỏ |
+| 5 | mọi khoá `KEY_*` trong `brief.py` có trong **cả** `vi.ts` và `en.ts` | đổi tên khoá ở cả hai file → đỏ |
+
+Máy dò mục 3 đọc bằng `ast`, **không tin `register()` lúc chạy**: guard lúc chạy
+chỉ thấy file có ai đó import, còn một tool thêm vào mà chưa nối dây thì qua được
+mọi test — cho tới lúc lệnh import xuất hiện.
+
+**Trạng thái**: `check.py` xanh 9/9 · **393 test** (348 + 45 mới) · mypy strict
+sạch 69 file. Toàn bộ 45 test agent chạy **không có mô hình nào** — đó là lập
+luận, không phải tiện lợi.
+
+**Còn nợ, cố ý** (ghi ở ADR-0019 §8 + Hệ quả):
+- Hội thoại **mất khi khởi động lại** — protocol đã có, bản SQLite làm cùng
+  module B khi transcript trở thành thứ để soát lại
+- Chưa có endpoint liệt kê hội thoại; client giữ id
+- `AnswerOut.text` chỉ có chữ khi `BI_LLM=openai`. Chưa ai chạy thử với mô hình
+  thật — `OpenAIProvider` mới có test bằng `ScriptedProvider`, **chưa gọi mạng
+  lần nào**. Đây là thứ đầu tiên nên thử tay khi có key.
 
 ### 2026-08-06 — Tài khoản trong SQLite + màn hình đăng nhập ✅
 

@@ -253,6 +253,19 @@ export default {
     no_history: 'The window asked for predates what is stored',
     unit_unverified: 'The number is real, its scale is not measured — no unit is printed',
   },
+  /** The assistant's **computed** answers — see the note in `vi.ts`. */
+  agent: {
+    answer: {
+      summary:
+        '{label} — {devices} devices: {closed} closed, {opened} open, {undetermined} undetermined. ' +
+        '{live} sections live, {dead} dead, {unknown} not known. ' +
+        '{measurements} readings, {issues} issues.',
+      ambiguous: '“{query}” matches {count} things: {options}. Which one do you mean?',
+      unknown: 'Nothing in this station is called “{query}”.',
+      denied:
+        'This account lacks the “{missing}” permission, so that question cannot be answered.',
+    },
+  },
   common: {
     empty: 'None.',
     dash: '—',

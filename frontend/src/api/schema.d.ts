@@ -4,6 +4,50 @@
  */
 
 export interface paths {
+    "/api/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask
+         * @description Answer one question, whole.
+         */
+        post: operations["ask_api_ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ask/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask Stream
+         * @description The same answer, as it is produced (Server-Sent Events).
+         *
+         *     Frame types are `turn`, `tool`, `evidence`, `token` and `answer`; the last
+         *     carries the complete `AnswerOut` and supersedes anything accumulated from
+         *     `token`. See `agent/core.py` for why that replacement matters.
+         */
+        post: operations["ask_stream_api_ask_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/bays": {
         parameters: {
             query?: never;
@@ -435,6 +479,78 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AnswerOut
+         * @description One turn of conversation, with everything behind it.
+         *
+         *     The same object arrives two ways: whole from `POST /api/ask`, and in pieces
+         *     from `POST /api/ask/stream`. Same schema either way, so a client applies an
+         *     answer with one code path whichever it used — the reasoning behind
+         *     `/api/live` and `/api/stream` (ADR-0012), for the same reason.
+         *
+         *     Prose and facts are separate fields on purpose (I3). `text` is what a
+         *     language model wrote and is labelled as interpretation; `summary`,
+         *     `resolution` and `evidence` are computed and are what the interface may
+         *     show as fact. When `generated` is false there is no model in the loop at
+         *     all and `key`/`params` carry a computed statement for the frontend to
+         *     render in its own language.
+         */
+        AnswerOut: {
+            /** Conversation Id */
+            conversation_id: string;
+            /**
+             * Evidence
+             * @default []
+             */
+            evidence: components["schemas"]["EvidenceRecord"][];
+            /** Generated */
+            generated: boolean;
+            /** Key */
+            key?: string | null;
+            /** Llm Error */
+            llm_error?: string | null;
+            /**
+             * Params
+             * @default {}
+             */
+            params: {
+                [key: string]: string | number | boolean | null;
+            };
+            /** Provider */
+            provider: string;
+            /** Question */
+            question: string;
+            resolution?: components["schemas"]["ResolveOut"] | null;
+            /** Scope */
+            scope: string;
+            summary?: components["schemas"]["SummaryOut"] | null;
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+            /** Turn Id */
+            turn_id: string;
+        };
+        /**
+         * AskIn
+         * @description A question, and where the person asking was looking when they asked it.
+         *
+         *     `scope` is the fallback subject, used when the question names nothing —
+         *     "còn số đo thì sao?" means *this* bay, and the pane knows which one.
+         *     `conversation_id` continues an existing thread; omit it to start one.
+         */
+        AskIn: {
+            /** Conversation Id */
+            conversation_id?: string | null;
+            /** Question */
+            question: string;
+            /**
+             * Scope
+             * @default station
+             */
+            scope: string;
+        };
         /** BayDetailOut */
         BayDetailOut: {
             /** Bay Type */
@@ -1150,6 +1266,51 @@ export interface components {
          */
         Reason: "seeded_live" | "seeded_dead" | "through_transformer" | "possible_via_uncertain" | "earthed" | "no_measurement" | "isolated";
         /**
+         * ResolveOut
+         * @description What a name refers to — the deterministic half of every question (I8).
+         *
+         *     `scope` is non-null only when exactly one thing matched. Several matches is
+         *     a normal answer, not an error: "Lai Uyen" is the name of two bays on
+         *     DEMO_SAS, and the right response is to ask which, never to pick one.
+         */
+        ResolveOut: {
+            /**
+             * Ambiguous
+             * @default false
+             */
+            ambiguous: boolean;
+            /**
+             * Candidates
+             * @default []
+             */
+            candidates: components["schemas"]["ScopeCandidateOut"][];
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+            /** Query */
+            query: string;
+            /** Scope */
+            scope?: string | null;
+        };
+        /**
+         * ScopeCandidateOut
+         * @description One thing a piece of text could have named.
+         */
+        ScopeCandidateOut: {
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /** Matched */
+            matched: string;
+            /** Scope */
+            scope: string;
+            /** Tier */
+            tier: string;
+        };
+        /**
          * SectionView
          * @description One voltage level's band inside the station drawing.
          */
@@ -1472,6 +1633,72 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ask_api_ask_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ask_stream_api_ask_stream_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskIn"];
+            };
+        };
+        responses: {
+            /** @description Answer frames */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     bays_api_bays_get: {
         parameters: {
             query?: never;

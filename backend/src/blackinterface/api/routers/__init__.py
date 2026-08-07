@@ -6,6 +6,7 @@ order paths appear in `backend/openapi.json`, and therefore in the generated
 """
 
 from blackinterface.api.routers import (
+    agent,
     auth,
     diagram,
     health,
@@ -18,6 +19,7 @@ from blackinterface.api.routers import (
 )
 
 __all__ = [
+    "agent",
     "auth",
     "diagram",
     "health",
