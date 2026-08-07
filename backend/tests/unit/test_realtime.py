@@ -2,7 +2,7 @@
 
 The chain under test, end to end and offline:
 
-    OPC UA notification -> PointSample -> apply_samples(StationObs)
+    OPC UA notification -> PointSample -> apply_state_samples(StationObs)
       -> build_station -> solve_energization -> /api/live -> SSE event
 
 No DataServer is contacted anywhere in this module. The notification is
@@ -24,11 +24,20 @@ from asyncua import ua
 from fastapi.testclient import TestClient
 
 from blackinterface.api import app as app_module
+from blackinterface.api import deps
+from blackinterface.api.broadcast import Cadence
+from blackinterface.api.routers.live import live_events
 from blackinterface.api.source import StationStore
 from blackinterface.config import Settings
 from blackinterface.domain.energization import LiveState, solve_energization
 from blackinterface.domain.models import PointSample, Quality, SwitchState
-from blackinterface.domain.observation import StationObs, apply_samples, watch_points
+from blackinterface.domain.observation import (
+    StationObs,
+    apply_state_samples,
+    measurement_points,
+    state_points,
+    watch_points,
+)
 from blackinterface.domain.topology import build_station
 from blackinterface.integration.opcua.monitor import (
     MonitorStatus,
@@ -63,15 +72,26 @@ def _closed(value: object) -> PointSample:
 
 
 # ------------------------------------------------------- what can be watched
-def test_watch_points_are_the_positions_and_the_live_flags(observation: StationObs) -> None:
+def test_state_points_are_the_positions_and_the_live_flags(observation: StationObs) -> None:
     """Only what moves. Names and the tree shape are not subscribed to — if
     those changed, the station would need browsing again, not patching."""
-    points = watch_points(observation)
+    points = state_points(observation)
     assert points == tuple(sorted(points)), "must be deterministic, order included"
     assert len(points) == len(set(points))
     assert _ref(observation, "D01", "XCBR1") in points
     assert _busbar_ref(observation, "BB21") in points
     assert all(p.endswith((".PosSt", ".IsLive")) for p in points)
+
+
+def test_the_two_cadences_never_share_a_point(observation: StationObs) -> None:
+    """ADR-0012 rule 1 at its root. A point in both lists would be routed to
+    both handlers, and an analog value would end up rebuilding the graph — the
+    exact thing the split exists to prevent."""
+    state = set(state_points(observation))
+    measured = set(measurement_points(observation))
+    assert state and measured
+    assert not (state & measured)
+    assert set(watch_points(observation)) == state | measured
 
 
 def test_a_point_with_no_address_is_not_watchable(observation: StationObs) -> None:
@@ -90,16 +110,16 @@ def test_a_point_with_no_address_is_not_watchable(observation: StationObs) -> No
 # ------------------------------------------------------------ applying a batch
 def test_a_batch_about_another_station_changes_nothing(observation: StationObs) -> None:
     """Identity, not just equality: the caller uses it to skip the rebuild."""
-    patched = apply_samples(observation, {"ns=2;s=SOMEWHERE.ELSE.PosSt": _closed(1)})
+    patched = apply_state_samples(observation, {"ns=2;s=SOMEWHERE.ELSE.PosSt": _closed(1)})
     assert patched is observation
-    assert apply_samples(observation, {}) is observation
+    assert apply_state_samples(observation, {}) is observation
 
 
 def test_a_new_position_reaches_the_graph(observation: StationObs) -> None:
     ref = _ref(observation, "D01", "XCBR1")
     assert build_station(observation).device("D01.XCBR1").state is SwitchState.CLOSED
 
-    patched = apply_samples(observation, {ref: _closed(1)})  # Dbpos 1 = OPEN
+    patched = apply_state_samples(observation, {ref: _closed(1)})  # Dbpos 1 = OPEN
     device = build_station(patched).device("D01.XCBR1")
     assert device is not None
     assert device.state is SwitchState.OPEN
@@ -112,7 +132,7 @@ def test_the_patched_point_keeps_its_own_address(observation: StationObs) -> Non
     source_ref would let a mis-routed sample rewrite where a point came from,
     and the provenance trail (I6) is the thing that has to stay true."""
     ref = _ref(observation, "D01", "XCBR1")
-    patched = apply_samples(observation, {ref: PointSample(value=1, quality=Quality.GOOD)})
+    patched = apply_state_samples(observation, {ref: PointSample(value=1, quality=Quality.GOOD)})
     device = build_station(patched).device("D01.XCBR1")
     assert device is not None
     assert device.position.source_ref == ref
@@ -123,7 +143,7 @@ def test_an_unreadable_position_arriving_live_degrades_to_undetermined(
 ) -> None:
     """Doubt must survive the trip (I2). A BAD notification is not a position."""
     ref = _ref(observation, "D01", "XCBR1")
-    patched = apply_samples(observation, {ref: PointSample(value=2, quality=Quality.BAD)})
+    patched = apply_state_samples(observation, {ref: PointSample(value=2, quality=Quality.BAD)})
     device = build_station(patched).device("D01.XCBR1")
     assert device is not None
     assert device.state is SwitchState.UNDETERMINED
@@ -139,7 +159,7 @@ def test_a_busbar_going_dead_reaches_the_colouring(observation: StationObs) -> N
         _busbar_ref(observation, "BB21"): _closed(False),
         _busbar_ref(observation, "BB22"): _closed(False),
     }
-    after = solve_energization(build_station(apply_samples(observation, dead)))
+    after = solve_energization(build_station(apply_state_samples(observation, dead)))
     assert after.state_of("NODE.BB21") is LiveState.DEAD
 
 
@@ -257,40 +277,40 @@ async def store(tmp_path: Path) -> StationStore:
 async def test_a_pushed_reading_changes_the_model_and_the_revision(
     store: StationStore,
 ) -> None:
-    before = store.revision
+    before = store.state_revision
     structure = store.structure_revision
     assert store.graph.device("D01.XCBR1").state is SwitchState.CLOSED
 
     await store.apply_live({D01_BREAKER: _closed(1)})
 
     assert store.graph.device("D01.XCBR1").state is SwitchState.OPEN
-    assert store.revision > before
+    assert store.state_revision > before
     assert store.structure_revision == structure, "no re-browse, so no new geometry"
 
 
 async def test_a_reading_that_matches_nothing_is_not_announced(store: StationStore) -> None:
     """A stale NodeId must not make every client redraw for no reason."""
-    before = store.revision
+    before = store.state_revision
     await store.apply_live({"ns=2;s=GONE.PosSt": _closed(1)})
-    assert store.revision == before
+    assert store.state_revision == before
 
 
 async def test_listeners_are_woken_and_then_forgotten(store: StationStore) -> None:
-    async with store.listen() as revisions:
+    async with store.listen() as listener:
         await store.apply_live({D01_BREAKER: _closed(1)})
-        assert await asyncio.wait_for(revisions.get(), timeout=1) == store.revision
-    assert not store._listeners, "leaving the block must unsubscribe"
+        assert await listener.take(timeout=1) == (Cadence.STATE,)
+    assert not store._broadcast.listeners, "leaving the block must unsubscribe"
 
 
 async def test_a_slow_listener_loses_intermediate_revisions_not_the_latest(
     store: StationStore,
 ) -> None:
-    """The queue holds one slot on purpose: a client renders the present, so
+    """One slot per cadence on purpose: a client renders the present, so
     falling behind should cost it history, never currency."""
-    async with store.listen() as revisions:
+    async with store.listen() as listener:
         await store.apply_live({D01_BREAKER: _closed(1)})
         await store.apply_live({D01_BREAKER: _closed(2)})
-        assert revisions.qsize() == 1
+        assert listener.pending == {Cadence.STATE}
     assert store.graph.device("D01.XCBR1").state is SwitchState.CLOSED
 
 
@@ -352,7 +372,7 @@ async def test_opening_a_project_starts_watching_its_own_dataserver(
     await store.refresh_project(row.id)
 
     assert fake_monitor.log == [("start", "opc.tcp://10.0.0.5:48050")]
-    watcher = store._monitor
+    watcher = store._watch.monitor
     assert watcher.points == watch_points(observation)
 
     # And the callback it was handed is really this store's, so a notification
@@ -377,7 +397,7 @@ async def test_a_snapshot_is_watched_too_so_it_stops_being_a_snapshot(
     # Same URL and same points, so the existing link is kept rather than torn
     # down and rebuilt for nothing.
     assert fake_monitor.log == []
-    assert store._monitor is not None
+    assert store._watch.monitor is not None
     await store.shutdown()
 
 
@@ -385,7 +405,7 @@ async def test_a_fixture_is_never_watched(tmp_path: Path, fake_monitor: type[_Fa
     store = _watching_store(tmp_path)
     await store.startup()
     assert store.loaded
-    assert store._monitor is None
+    assert store._watch.monitor is None
     assert store.monitor_status is None
     assert fake_monitor.log == []
 
@@ -398,7 +418,7 @@ async def test_deleting_the_project_lets_go_of_its_dataserver(
     await store.refresh_project(row.id)
     await store.unload()
     assert fake_monitor.log[-1] == ("stop", "opc.tcp://10.0.0.5:48050")
-    assert store._monitor is None
+    assert store._watch.monitor is None
 
 
 # --------------------------------------------------------------- the endpoints
@@ -406,12 +426,12 @@ async def test_deleting_the_project_lets_go_of_its_dataserver(
 def served(store: StationStore) -> Iterator[StationStore]:
     """Make `store` the one the endpoint module reads, and put back what was
     there — the module-level store is shared with the other API tests."""
-    original = app_module.store
-    app_module.store = store
+    original = deps.get_store()
+    deps.use(store)
     try:
         yield store
     finally:
-        app_module.store = original
+        deps.use(original)
 
 
 @pytest.fixture
@@ -419,10 +439,13 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     if not SAS_TREE.exists():
         pytest.skip(f"fixture missing: {SAS_TREE}")
     data_dir = tmp_path_factory.mktemp("live")
-    app_module.database = app_module.Database(data_dir / "test.sqlite")
-    app_module.store = StationStore(
-        Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
-        app_module.database,
+    database = Database(data_dir / "test.sqlite")
+    deps.use(
+        StationStore(
+            Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
+            database,
+        ),
+        database,
     )
     with TestClient(app_module.app) as test_client:
         yield test_client
@@ -431,22 +454,22 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
 def test_the_live_document_covers_every_drawn_device(client: TestClient) -> None:
     """The join the UI performs: a symbol without a live entry would keep
     rendering its position from the moment the drawing was made."""
-    live = client.get("/api/live").json()
+    state = client.get("/api/live").json()["state"]
     diagram = client.get("/api/diagram").json()
-    assert live["loaded"] is True
+    assert state["loaded"] is True
     for symbol in diagram["symbols"]:
-        assert symbol["device_id"] in live["devices"], symbol["device_id"]
-    assert live["energization"]["summary"]["mismatched"] == 0
-    assert set(live["bay_is_live"]) == {b["id"] for b in client.get("/api/bays").json()}
+        assert symbol["device_id"] in state["devices"], symbol["device_id"]
+    assert state["energization"]["summary"]["mismatched"] == 0
+    assert set(state["bay_is_live"]) == {b["id"] for b in client.get("/api/bays").json()}
 
 
 def test_an_unreadable_is_live_is_published_as_null_not_false(client: TestClient) -> None:
     """`false` is a claim that the bay is dead. Only a GOOD reading may make
     it (I2) — everything else is an absence, and must look like one."""
-    live = client.get("/api/live").json()
+    state = client.get("/api/live").json()["state"]
     for bay in client.get("/api/bays").json():
         if bay["is_live_quality"] != "GOOD":
-            assert live["bay_is_live"][bay["id"]] is None, bay["id"]
+            assert state["bay_is_live"][bay["id"]] is None, bay["id"]
 
 
 def test_a_source_with_no_server_behind_it_says_so(client: TestClient) -> None:
@@ -457,6 +480,17 @@ def test_a_source_with_no_server_behind_it_says_so(client: TestClient) -> None:
     assert link["connected"] is False
 
 
+def test_the_measurements_arrive_with_the_first_poll(client: TestClient) -> None:
+    """A number the operator can read is part of the present tense, not an
+    extra request they have to know to make."""
+    measurement = client.get("/api/live").json()["measurement"]
+    assert measurement["readings"]["bay:D03"], "D03 carries an MMXU1"
+    reading = next(r for r in measurement["readings"]["bay:D03"] if r["measurand"] == "MMXU1.Hz")
+    assert reading["unit"] == "Hz"
+    assert reading["quality"] == "GOOD"
+    assert isinstance(reading["value"], float)
+
+
 def test_the_stream_route_is_a_readable_event_stream(client: TestClient) -> None:
     """Only the framing: the endpoint's body is `live_events`, driven directly
     in the two tests below. Iterating an endless stream through TestClient
@@ -465,17 +499,21 @@ def test_the_stream_route_is_a_readable_event_stream(client: TestClient) -> None
     assert "text/event-stream" in schema["responses"]["200"]["content"]
 
 
-async def test_the_stream_opens_with_the_current_state(served: StationStore) -> None:
-    """No separate initial fetch: connecting is enough to know where you are."""
+async def test_the_stream_opens_with_every_cadence(served: StationStore) -> None:
+    """No separate initial fetch: connecting is enough to know where you are —
+    and that means all three cadences, not just the one that moves most."""
     store = served
-    events = app_module.live_events()
+    events = live_events()
     try:
-        payload = _parse(await anext(events))
+        opening = [_parse(await anext(events)) for _ in range(3)]
     finally:
         await events.aclose()
-    assert payload["loaded"] is True
-    assert payload["revision"] == store.revision
-    assert payload["devices"]["D01.XCBR1"]["state"] == "CLOSED"
+
+    assert [cadence for cadence, _ in opening] == ["state", "measurement", "link"]
+    state = dict(opening)["state"]
+    assert state["loaded"] is True
+    assert state["revision"] == store.state_revision
+    assert state["devices"]["D01.XCBR1"]["state"] == "CLOSED"
 
 
 async def test_the_stream_pushes_the_new_state_when_a_switch_moves(
@@ -483,14 +521,15 @@ async def test_the_stream_pushes_the_new_state_when_a_switch_moves(
 ) -> None:
     """The assertion realtime exists for."""
     store = served
-    events = app_module.live_events()
+    events = live_events()
     try:
-        first = _parse(await anext(events))
+        first = dict([_parse(await anext(events)) for _ in range(3)])["state"]
         await store.apply_live({D01_BREAKER: _closed(1)})
-        second = _parse(await asyncio.wait_for(anext(events), timeout=2))
+        cadence, second = _parse(await asyncio.wait_for(anext(events), timeout=2))
     finally:
         await events.aclose()
 
+    assert cadence == "state", "a position moving is not a measurement"
     assert first["devices"]["D01.XCBR1"]["state"] == "CLOSED"
     assert second["devices"]["D01.XCBR1"]["state"] == "OPEN"
     assert second["revision"] > first["revision"]
@@ -498,7 +537,7 @@ async def test_the_stream_pushes_the_new_state_when_a_switch_moves(
     assert second["structure_revision"] == first["structure_revision"]
 
 
-def _parse(chunk: str) -> Any:
+def _parse(chunk: str) -> tuple[str, Any]:
     head, _, body = chunk.partition("\n")
-    assert head == "event: live"
-    return json.loads(body.removeprefix("data: ").strip())
+    assert head.startswith("event: ")
+    return head.removeprefix("event: "), json.loads(body.removeprefix("data: ").strip())

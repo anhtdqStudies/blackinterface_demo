@@ -55,7 +55,12 @@ const labelY = computed(() =>
 </script>
 
 <template>
-  <g class="sym" :class="{ selected }" @click="$emit('select', symbol.device_id)">
+  <g
+    class="sym"
+    :class="{ selected }"
+    @pointerdown.stop
+    @click.stop="$emit('select', symbol.device_id)"
+  >
     <!-- Masks the conductor behind the symbol. -->
     <rect
       :x="symbol.x - 13"

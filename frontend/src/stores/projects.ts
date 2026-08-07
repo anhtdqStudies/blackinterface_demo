@@ -2,14 +2,15 @@
  * Projects: named DataServer connections.
  *
  * The flow this store exists for: create a project, type an opc.tcp:// address,
- * connect — and the station store repaints from whatever that server holds.
+ * connect — and the structure store repaints from whatever that server holds.
  * Success also freezes a snapshot server-side, so reopening the project later
  * renders instantly without the DataServer running.
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { ApiError, api, type Project } from '@/api/client'
-import { useStationStore } from '@/stores/station'
+import { useStreamStore } from '@/stores/stream'
+import { useStructureStore } from '@/stores/structure'
 
 export const useProjectsStore = defineStore('projects', () => {
   const projects = ref<Project[]>([])
@@ -40,7 +41,7 @@ export const useProjectsStore = defineStore('projects', () => {
   async function finish(ok: boolean, loadError: string | null): Promise<boolean> {
     lastLoadError.value = loadError
     await fetchList()
-    if (ok) await useStationStore().load()
+    if (ok) await Promise.all([useStructureStore().load(), useStreamStore().prime()])
     return ok
   }
 
@@ -89,7 +90,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       projects.value = await api.deleteProject(id)
       // Deleting the active project unloads the model server-side; mirror that.
-      await useStationStore().load()
+      await Promise.all([useStructureStore().load(), useStreamStore().prime()])
     } catch (cause) {
       capture(cause)
     } finally {

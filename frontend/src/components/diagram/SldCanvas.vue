@@ -29,7 +29,7 @@ const props = defineProps<{
   deviceState: Record<string, DeviceLive>
   selectedDeviceId: string | null
 }>()
-defineEmits<{ select: [deviceId: string] }>()
+defineEmits<{ select: [deviceId: string]; selectBay: [bayId: string] }>()
 
 function points(edge: Edge): string {
   return edge.points.map((p) => `${p.x},${p.y}`).join(' ')
@@ -69,6 +69,7 @@ function focusSection(top: number, bottom: number): void {
     h: bottom - top + PAD * 2,
   }
 }
+
 defineExpose({ focusSection, fit })
 
 /** Client pixel -> drawing coordinates, honouring the letterboxing of `meet`. */
@@ -103,6 +104,8 @@ let moved = false
 let lastClient = { x: 0, y: 0 }
 
 function onPointerDown(event: PointerEvent): void {
+  const target = event.target as Element
+  if (target.closest('.sym, .bay-col')) return
   panning = true
   moved = false
   lastClient = { x: event.clientX, y: event.clientY }
@@ -287,7 +290,20 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
       </g>
 
       <!-- Bay captions: designation on top, the operator's name under it. -->
-      <g v-for="column in diagram.columns" :key="column.bay_id">
+      <g
+        v-for="column in diagram.columns"
+        :key="column.bay_id"
+        class="bay-col"
+        @click.stop="$emit('selectBay', column.bay_id)"
+      >
+        <rect
+          class="bay-hit"
+          :x="column.x - 45"
+          :y="column.top"
+          width="90"
+          :height="column.bottom - column.top"
+          fill="transparent"
+        />
         <text
           :x="column.x"
           :y="column.label_y"
@@ -409,5 +425,11 @@ svg text.level {
 .legend .group {
   color: var(--fg);
   opacity: 0.75;
+}
+.bay-col {
+  cursor: pointer;
+}
+.bay-col:hover text.bay {
+  fill: var(--accent);
 }
 </style>

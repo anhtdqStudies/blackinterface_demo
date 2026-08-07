@@ -1,99 +1,167 @@
-/* Design tokens.
- *
- * The state colours are not decoration. They copy OneATS Grid Designer, because
- * the operators at this station already read that palette without thinking:
- *
- *   devices     red = CLOSED,     green = OPEN
- *   conductors  blue = energised, green = de-energised
- *   both        grey = UNDETERMINED - quality is not GOOD, we refuse to guess (I2)
- *
- * Yes, green means two different things depending on what it is painting. That
- * is the existing convention; inventing a better one would be worse.
- *
- * Grey must never be mistakable for green. "De-energised" is the sentence that
- * makes someone reach into a cubicle, so getting that wrong is a safety bug,
- * not a style bug.
- */
-:root {
-  --bg: #0d0f12;
-  --panel: #151920;
-  --panel-2: #1c222c;
-  --line: #2b3240;
-  --fg: #e6e9ef;
-  --dim: #8b93a3;
-  --accent: #5b9dff;
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
+@custom-variant dark (&:is(.dark *));
+
+/* ===========================================================================
+ * TWO PALETTES. They are not allowed to touch.
+ *
+ * 1. STATION — what the plant is doing. Copied from OneATS Grid Designer,
+ *    because the operators here already read that palette without thinking:
+ *
+ *      devices     red  = CLOSED,     green = OPEN
+ *      conductors  blue = energised,  green = de-energised
+ *      both        grey = UNDETERMINED — quality is not GOOD, we refuse to
+ *                                        guess (AGENTS.md I2)
+ *
+ *    Green means two different things depending on what it paints. That is the
+ *    existing convention; inventing a better one would be worse.
+ *
+ * 2. SYSTEM — what *this software* is doing: link up/down, loading, errors.
+ *
+ * Why they are separate (ADR-0014 section 2). Before this split the header used
+ * `--closed` (red) for "connection lost" and `--open` (green) for "online" —
+ * the same two colours that mean "breaker closed" and "disconnector open" on
+ * the diagram. Red then meant both a normal plant state and a fault in our
+ * software, and green meant both an open switch and a healthy socket. An
+ * operator glancing at the screen was being asked to keep two vocabularies
+ * apart with no visual cue that there were two.
+ *
+ * The rule that follows: SYSTEM NEVER USES RED OR GREEN. "Online" is not a
+ * safety statement and does not get to borrow the colour of one — it is neutral,
+ * because the absence of a warning is the signal. Trouble is amber, and a dead
+ * link is rose: alarming, and unmistakably not the device red beside it.
+ * ======================================================================== */
+
+@theme {
+  /* --- chrome ------------------------------------------------------------ */
+  --color-bg: #0d0f12;
+  --color-panel: #151920;
+  --color-panel-2: #1c222c;
+  --color-line: #2b3240;
+  --color-fg: #e6e9ef;
+  --color-dim: #8b93a3;
+  --color-accent: #5b9dff;
+
+  /* --- palette 1: station ------------------------------------------------ */
   /* device position */
-  --closed: #e5484d;
-  --open: #24c07a;
-  --intermediate: #f5a524;
-  --undetermined: #8b8d98;
+  --color-st-closed: #e5484d;
+  --color-st-open: #24c07a;
+  --color-st-intermediate: #f5a524;
+  --color-st-undetermined: #8b8d98;
 
   /* conductor energisation */
-  --live: #4aa3ff;
-  --dead: #24c07a;
+  --color-st-live: #4aa3ff;
+  --color-st-dead: #24c07a;
   /* Earthed: a closed earth switch is bonded to this section. Deliberately not
      the same green as "de-energised" — one is a measured bond to earth, the
      other is an absence of voltage, and only the first is a reason to relax. */
-  --earthed: #b48ce8;
+  --color-st-earthed: #b48ce8;
 
+  /* --- palette 2: system ------------------------------------------------- */
+  --color-sys-ok: #8b93a3; /* neutral on purpose. Never green. */
+  --color-sys-warn: #f0b429; /* degraded but usable */
+  --color-sys-down: #ff5c8a; /* rose, never the device red */
+  --color-sys-idle: #5c6474; /* snapshot: valid, but not live */
+
+  /* --- spacing -----------------------------------------------------------
+   * One scale: 4 8 12 16 24 32. Tailwind's `p-1 p-2 p-3 p-4 p-6 p-8` land on
+   * exactly these, so the rule is "use the utility, never an arbitrary value".
+   * Named here so the scale is a decision on the page rather than a habit, and
+   * so `p-[7px]` in a review reads as the mistake it is. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* --- shape and type ---------------------------------------------------- */
   --radius: 6px;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-lg: 15px;
+  --text-xl: 18px;
 }
 
-* {
-  box-sizing: border-box;
+/* Legacy aliases. The components predating ADR-0014 still reference these; they
+ * go away as each view is rewritten, and nothing new may use them. */
+:root {
+  --bg: var(--color-bg);
+  --panel: var(--color-panel);
+  --panel-2: var(--color-panel-2);
+  --line: var(--color-line);
+  --fg: var(--color-fg);
+  --dim: var(--color-dim);
+  --accent: var(--color-accent);
+  --closed: var(--color-st-closed);
+  --open: var(--color-st-open);
+  --intermediate: var(--color-st-intermediate);
+  --undetermined: var(--color-st-undetermined);
+  --live: var(--color-st-live);
+  --dead: var(--color-st-dead);
+  --earthed: var(--color-st-earthed);
+  --mono: var(--font-mono);
 }
 
-html,
-body,
-#app {
-  height: 100%;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font: 13px/1.5 var(--font-sans);
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-dim);
+  }
 }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font:
-    13px/1.5 ui-sans-serif,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
-}
-
+/* Element defaults still relied on by the views written before ADR-0014.
+ * Kept out of @layer base so the design-system components can override them
+ * with plain utility classes. */
 button {
-  background: var(--panel-2);
-  color: var(--fg);
-  border: 1px solid var(--line);
+  background: var(--color-panel-2);
+  color: var(--color-fg);
+  border: 1px solid var(--color-line);
   border-radius: var(--radius);
   padding: 5px 11px;
   cursor: pointer;
   font: inherit;
 }
 button:hover:not(:disabled) {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 button.on {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
   color: #08111f;
   font-weight: 600;
-}
-
-a {
-  color: var(--accent);
-}
-
-code {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--dim);
 }
 
 table {
@@ -106,15 +174,23 @@ td {
   vertical-align: top;
 }
 td:first-child {
-  color: var(--dim);
+  color: var(--color-dim);
   width: 38%;
   padding-right: 8px;
 }
 
 .dim {
-  color: var(--dim);
+  color: var(--color-dim);
+}
+
+/* Numbers that sit above one another — measurements, counts, tap positions —
+ * must not jitter as digits change. `tabular-nums` is not decoration here: a
+ * column of readings that shifts sideways on every update is a column nobody
+ * can scan. Applied by `ValueCell` once that exists; available meanwhile. */
+.numeric {
+  font-variant-numeric: tabular-nums;
 }
 .empty {
-  color: var(--dim);
+  color: var(--color-dim);
   font-style: italic;
 }

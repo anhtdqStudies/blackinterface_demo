@@ -38,7 +38,7 @@
           },
           "issues": {
             "items": {
-              "$ref": "#/components/schemas/ValidationIssue"
+              "$ref": "#/components/schemas/ValidationIssueOut"
             },
             "title": "Issues",
             "type": "array"
@@ -116,7 +116,7 @@
           },
           "issues": {
             "items": {
-              "$ref": "#/components/schemas/ValidationIssue"
+              "$ref": "#/components/schemas/ValidationIssueOut"
             },
             "title": "Issues",
             "type": "array"
@@ -285,6 +285,31 @@
           "label_y"
         ],
         "title": "ColumnView",
+        "type": "object"
+      },
+      "Coverage": {
+        "description": "How much of what was asked for could actually be answered.\n\n`resolved < requested` is the natural home for drift (I7): a NodeId that\nstopped resolving shows up here rather than as a silently shorter list.",
+        "properties": {
+          "missing": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "requested": {
+            "default": 0,
+            "title": "Requested",
+            "type": "integer"
+          },
+          "resolved": {
+            "default": 0,
+            "title": "Resolved",
+            "type": "integer"
+          }
+        },
+        "title": "Coverage",
         "type": "object"
       },
       "CrossCheck": {
@@ -624,7 +649,7 @@
           },
           "issues": {
             "items": {
-              "$ref": "#/components/schemas/ValidationIssue"
+              "$ref": "#/components/schemas/ValidationIssueOut"
             },
             "title": "Issues",
             "type": "array"
@@ -652,6 +677,115 @@
           "summary"
         ],
         "title": "EnergizationOut",
+        "type": "object"
+      },
+      "EvidenceRecord": {
+        "description": "What a facet knew, when, from where, and how well.\n\n`subject` is a scope ref (ADR-0010), so evidence, URL, pane and tool argument\nare the same vocabulary rather than four dialects of it.",
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "args": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Args",
+            "type": "object"
+          },
+          "called_at": {
+            "format": "date-time",
+            "title": "Called At",
+            "type": "string"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage",
+            "default": {
+              "missing": [],
+              "requested": 0,
+              "resolved": 0
+            }
+          },
+          "limits": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Limit"
+            },
+            "title": "Limits",
+            "type": "array"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "quality": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PointQ"
+            },
+            "title": "Quality",
+            "type": "array"
+          },
+          "release": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "tool": {
+            "title": "Tool",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "subject",
+          "called_at",
+          "source"
+        ],
+        "title": "EvidenceRecord",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -806,6 +940,22 @@
         "title": "Island",
         "type": "object"
       },
+      "IssuesOut": {
+        "properties": {
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssueOut"
+            },
+            "title": "Issues",
+            "type": "array"
+          }
+        },
+        "required": [
+          "issues"
+        ],
+        "title": "IssuesOut",
+        "type": "object"
+      },
       "JunctionView": {
         "description": "A real connection to a busbar. Drawn as a dot; a crossing has none.",
         "properties": {
@@ -835,6 +985,47 @@
         "title": "JunctionView",
         "type": "object"
       },
+      "Limit": {
+        "description": "One caveat, machine-readable so the UI can rank and translate it.",
+        "properties": {
+          "code": {
+            "$ref": "#/components/schemas/LimitCode"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "subjects": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Subjects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "Limit",
+        "type": "object"
+      },
+      "LimitCode": {
+        "description": "Why an answer is worth less than it looks.",
+        "enum": [
+          "points_missing",
+          "quality_not_good",
+          "data_stale",
+          "from_snapshot",
+          "link_down",
+          "deadband_applied",
+          "no_history",
+          "unit_unverified"
+        ],
+        "title": "LimitCode",
+        "type": "string"
+      },
       "LinkOut": {
         "description": "The state of the subscription itself.\n\n`connected=False` does not mean the station is down — it means we have\nstopped hearing about it. What is on screen is then the last thing we knew,\nwhich is worth showing and worth labelling, but is not the present tense.",
         "properties": {
@@ -862,6 +1053,11 @@
             "title": "Rejected",
             "type": "integer"
           },
+          "revision": {
+            "default": 0,
+            "title": "Revision",
+            "type": "integer"
+          },
           "since": {
             "anyOf": [
               {
@@ -887,72 +1083,21 @@
         "type": "object"
       },
       "LiveOut": {
-        "description": "Everything about the station that moves, in one document.\n\nThe split this expresses: `/api/diagram` is geometry and `/api/bays` is\nstructure — both change only when the station is browsed again. Everything\nhere changes constantly, and is exactly what `/api/stream` pushes. One\nshape for the first load and for every update, so the client has a single\ncode path applying it.\n\n`structure_revision` is the geometry's version. A client whose copy no\nlonger matches must refetch the drawing before trusting these keys to join\nonto it.",
+        "description": "Everything that moves, in one document — the shape `/api/live` returns.\n\nThe stream sends these three as separate typed events at their own rates\n(ADR-0012); the poll endpoint hands over all three at once, because a\nclient that has just connected needs the whole present tense before it can\nrender anything. Same schemas either way, so there is still one code path\napplying each cadence.",
         "properties": {
-          "bay_is_live": {
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "default": {},
-            "title": "Bay Is Live",
-            "type": "object"
-          },
-          "devices": {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/DeviceLiveOut"
-            },
-            "default": {},
-            "title": "Devices",
-            "type": "object"
-          },
-          "energization": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EnergizationOut"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "link": {
             "$ref": "#/components/schemas/LinkOut"
           },
-          "loaded": {
-            "title": "Loaded",
-            "type": "boolean"
+          "measurement": {
+            "$ref": "#/components/schemas/MeasurementOut"
           },
-          "revision": {
-            "title": "Revision",
-            "type": "integer"
-          },
-          "structure_revision": {
-            "title": "Structure Revision",
-            "type": "integer"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
+          "state": {
+            "$ref": "#/components/schemas/StateOut"
           }
         },
         "required": [
-          "loaded",
-          "revision",
-          "structure_revision",
+          "state",
+          "measurement",
           "link"
         ],
         "title": "LiveOut",
@@ -968,6 +1113,134 @@
         ],
         "title": "LiveState",
         "type": "string"
+      },
+      "LoginIn": {
+        "properties": {
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginIn",
+        "type": "object"
+      },
+      "MeOut": {
+        "description": "The caller's identity and permissions (ADR-0016, ADR-0017).\n\n`capabilities` is the field the UI switches on. `roles` is for display and\nfor support calls — \"which roles is this account holding\" is the first\nquestion when somebody reports a missing button.\n\n`authenticated=False` means nobody is signed in, which is not an error: it\nis what `/api/me` answers before the login screen has been used.",
+        "properties": {
+          "auth_mode": {
+            "default": "session",
+            "title": "Auth Mode",
+            "type": "string"
+          },
+          "authenticated": {
+            "default": false,
+            "title": "Authenticated",
+            "type": "boolean"
+          },
+          "capabilities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Capabilities",
+            "type": "array"
+          },
+          "display_name": {
+            "default": "",
+            "title": "Display Name",
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Roles",
+            "type": "array"
+          },
+          "user": {
+            "title": "User",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user",
+          "roles",
+          "capabilities"
+        ],
+        "title": "MeOut",
+        "type": "object"
+      },
+      "MeasurementOut": {
+        "description": "What the station is *reading*. The `measurement` cadence.\n\nKeyed by subject so a panel scoped to `bay:D03` looks up exactly its own\nreadings. Subjects with no instrument transformers are simply absent —\nan empty list would claim we looked and found nothing.",
+        "properties": {
+          "deadband_override_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadband Override Pct"
+          },
+          "measured_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Measured At"
+          },
+          "readings": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ReadingOut"
+              },
+              "type": "array"
+            },
+            "default": {},
+            "title": "Readings",
+            "type": "object"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "revision"
+        ],
+        "title": "MeasurementOut",
+        "type": "object"
+      },
+      "PasswordChangeIn": {
+        "properties": {
+          "current_password": {
+            "title": "Current Password",
+            "type": "string"
+          },
+          "new_password": {
+            "title": "New Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "PasswordChangeIn",
+        "type": "object"
       },
       "Point": {
         "properties": {
@@ -985,6 +1258,67 @@
           "y"
         ],
         "title": "Point",
+        "type": "object"
+      },
+      "PointQ": {
+        "description": "One point as it was read, with everything needed to judge it (I2).",
+        "properties": {
+          "age_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Ms"
+          },
+          "point": {
+            "title": "Point",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/Quality",
+            "default": "MISSING"
+          },
+          "ts_source": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ts Source"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "point"
+        ],
+        "title": "PointQ",
         "type": "object"
       },
       "ProjectCreateIn": {
@@ -1136,6 +1470,20 @@
         "title": "Quality",
         "type": "string"
       },
+      "Quantity": {
+        "description": "What is being measured. Always known; unlike the unit, never in doubt.",
+        "enum": [
+          "active_power",
+          "reactive_power",
+          "power_factor",
+          "voltage",
+          "current",
+          "frequency",
+          "tap_position"
+        ],
+        "title": "Quantity",
+        "type": "string"
+      },
       "RailView": {
         "properties": {
           "busbar_id": {
@@ -1199,6 +1547,105 @@
         "title": "RailView",
         "type": "object"
       },
+      "ReadingOut": {
+        "description": "One analog value, with everything needed to distrust it.\n\n`unit` is `\"?\"` when the scale was never measured — see the module\ndocstring of `domain/measurement.py`. A client must then print the quantity\nname instead of inventing a unit.\n\n`value` is null unless quality is GOOD. The raw number is still on\n`raw_value` for provenance, so a panel can show what the DataServer said\nwithout implying the number is usable (I2, I6).",
+        "properties": {
+          "deadband_abs": {
+            "default": 0.0,
+            "title": "Deadband Abs",
+            "type": "number"
+          },
+          "deadband_pct": {
+            "default": 0.0,
+            "title": "Deadband Pct",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "measurand": {
+            "title": "Measurand",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/Quality"
+          },
+          "quantity": {
+            "$ref": "#/components/schemas/Quantity"
+          },
+          "raw_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Value"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Timestamp"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "unit": {
+            "$ref": "#/components/schemas/Unit"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "id",
+          "subject",
+          "measurand",
+          "quantity",
+          "unit",
+          "quality"
+        ],
+        "title": "ReadingOut",
+        "type": "object"
+      },
       "Reason": {
         "description": "Why an island got its state.\n\nA code, not a sentence. Operators read Vietnamese and the wording belongs to\nthe UI; the API must not freeze it.",
         "enum": [
@@ -1256,6 +1703,129 @@
         "title": "Severity",
         "type": "string"
       },
+      "Source": {
+        "description": "The provenance of an answer, down to the release it was pinned to.",
+        "properties": {
+          "catalog_snapshot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Snapshot"
+          },
+          "endpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SourceKind"
+          },
+          "node_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Node Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Source",
+        "type": "object"
+      },
+      "SourceKind": {
+        "description": "Where the numbers in this answer physically came from.",
+        "enum": [
+          "opcua",
+          "snapshot",
+          "fixture",
+          "store",
+          "derived"
+        ],
+        "title": "SourceKind",
+        "type": "string"
+      },
+      "StateOut": {
+        "description": "What the station *is*: positions, `IsLive`, and the solved energisation.\n\nThe `state` cadence of the stream (ADR-0012). Every field here is discrete\nand safety-relevant, so nothing on this path is throttled or deadbanded.\n\n`structure_revision` is the geometry's version. A client whose copy no\nlonger matches must refetch the drawing before trusting these keys to join\nonto it.",
+        "properties": {
+          "bay_is_live": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "default": {},
+            "title": "Bay Is Live",
+            "type": "object"
+          },
+          "devices": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeviceLiveOut"
+            },
+            "default": {},
+            "title": "Devices",
+            "type": "object"
+          },
+          "energization": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EnergizationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "loaded": {
+            "title": "Loaded",
+            "type": "boolean"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "structure_revision": {
+            "title": "Structure Revision",
+            "type": "integer"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "loaded",
+          "revision",
+          "structure_revision"
+        ],
+        "title": "StateOut",
+        "type": "object"
+      },
       "StationOut": {
         "properties": {
           "bay_count": {
@@ -1290,7 +1860,7 @@
           },
           "issues": {
             "items": {
-              "$ref": "#/components/schemas/ValidationIssue"
+              "$ref": "#/components/schemas/ValidationIssueOut"
             },
             "title": "Issues",
             "type": "array"
@@ -1442,6 +2012,74 @@
         "title": "StationView",
         "type": "object"
       },
+      "SummaryOut": {
+        "description": "How one scope is doing right now — the first evidence-bearing facet.\n\nAnswers the question Module A exists for (\"what is the state of D03?\") in\none call, and attaches the `EvidenceRecord` that says how far that answer\ncan be trusted: which points were asked for, which came back, how old they\nare, and what is degraded about them (ADR-0013).\n\nThe evidence is built by this endpoint, never by a language model (I3).",
+        "properties": {
+          "bays": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Bays",
+            "type": "array"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/EvidenceRecord"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationIssueOut"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "measurements": {
+            "items": {
+              "$ref": "#/components/schemas/ReadingOut"
+            },
+            "title": "Measurements",
+            "type": "array"
+          },
+          "node_states": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Node States",
+            "type": "object"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          },
+          "switch_states": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Switch States",
+            "type": "object"
+          }
+        },
+        "required": [
+          "scope",
+          "kind",
+          "label",
+          "bays",
+          "switch_states",
+          "node_states",
+          "measurements",
+          "issues",
+          "evidence"
+        ],
+        "title": "SummaryOut",
+        "type": "object"
+      },
       "SwitchState": {
         "description": "Position of a switching device.\n\nMaps IEC 61850 Dbpos, but with one addition that matters (AGENTS.md I2):\n`UNDETERMINED` is what we report whenever quality is not GOOD. We never\nturn bad data into a position.",
         "enum": [
@@ -1589,6 +2227,17 @@
         "title": "TransformerLinkView",
         "type": "object"
       },
+      "Unit": {
+        "description": "The unit to print after the number, when we are entitled to print one.\n\n`UNKNOWN` is a deliberate sentinel rather than an empty string: it must be\nimpossible to confuse \"we did not measure the scale\" with \"this quantity is\ndimensionless\". Power factor is the second case and gets `NONE`.",
+        "enum": [
+          "?",
+          "",
+          "Hz",
+          "step"
+        ],
+        "title": "Unit",
+        "type": "string"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1629,11 +2278,20 @@
         "title": "ValidationError",
         "type": "object"
       },
-      "ValidationIssue": {
-        "description": "Something the builder could not resolve. Surfaced, never swallowed (I7).",
+      "ValidationIssueOut": {
+        "description": "A builder issue on the wire, with its UI group (A/B/C).",
         "properties": {
           "code": {
             "title": "Code",
+            "type": "string"
+          },
+          "group": {
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ],
+            "title": "Group",
             "type": "string"
           },
           "message": {
@@ -1658,9 +2316,10 @@
         "required": [
           "severity",
           "code",
-          "message"
+          "message",
+          "group"
         ],
-        "title": "ValidationIssue",
+        "title": "ValidationIssueOut",
         "type": "object"
       }
     }
@@ -1850,9 +2509,27 @@
         "summary": "Health"
       }
     },
+    "/api/issues": {
+      "get": {
+        "operationId": "list_issues_api_issues_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Issues"
+      }
+    },
     "/api/live": {
       "get": {
-        "description": "One poll of what `/api/stream` pushes. The fallback when SSE cannot get\nthrough, and what the UI loads before the stream's first event arrives.",
+        "description": "One poll of everything `/api/stream` pushes. The fallback when SSE cannot\nget through, and what the UI loads before the stream's first event.",
         "operationId": "live_api_live_get",
         "responses": {
           "200": {
@@ -1867,6 +2544,122 @@
           }
         },
         "summary": "Live"
+      }
+    },
+    "/api/login": {
+      "post": {
+        "description": "Verify a password and start a session.\n\nWrites a row to the local SQLite store and sets a cookie. Nothing here\nreaches OneATS (I1) — this endpoint is about who is looking at the station,\nnot about the station.",
+        "operationId": "login_api_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Login"
+      }
+    },
+    "/api/logout": {
+      "post": {
+        "description": "End the session server-side and clear the cookie.",
+        "operationId": "logout_api_logout_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Logout"
+      }
+    },
+    "/api/me": {
+      "get": {
+        "description": "The current caller, or an empty identity when nobody is signed in.\n\nResolved through `get_principal`, not by reading the cookie here: every\nfacet must agree about who is calling, and a second way of working that out\nis a second answer waiting to disagree with the first.",
+        "operationId": "me_api_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Me"
+      }
+    },
+    "/api/password": {
+      "post": {
+        "description": "Change your own password. The current one has to be given again.\n\nOnly your own: changing somebody else's belongs with `account.manage` and\nan audit record, and that screen does not exist yet. Better absent than\nhalf-built.",
+        "operationId": "change_password_api_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordChangeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Change Password"
       }
     },
     "/api/projects": {
@@ -2091,17 +2884,60 @@
     },
     "/api/stream": {
       "get": {
-        "description": "Push the live document whenever anything moves (Server-Sent Events).\n\nThe first event is the current state, so a client needs no separate initial\nfetch. Read-only in both directions: SSE has no channel back, and the data\nbehind it is a subscription to OneATS, never a command to it (I1).",
+        "description": "Push each cadence whenever it moves (Server-Sent Events).\n\nThe first three events are the current state, measurements and link, so a\nclient needs no separate initial fetch. Read-only in both directions: SSE\nhas no channel back, and the data behind it is a subscription to OneATS,\nnever a command to it (I1).",
         "operationId": "stream_api_stream_get",
         "responses": {
           "200": {
             "content": {
               "text/event-stream": {}
             },
-            "description": "Live state"
+            "description": "Live cadences"
           }
         },
         "summary": "Stream"
+      }
+    },
+    "/api/summary": {
+      "get": {
+        "description": "How this part of the station is doing, with the evidence behind it.",
+        "operationId": "summary_api_summary_get",
+        "parameters": [
+          {
+            "description": "Scope ref, e.g. station, vl:220kV, bay:D03",
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "station",
+              "description": "Scope ref, e.g. station, vl:220kV, bay:D03",
+              "title": "Scope",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Summary"
       }
     }
   }

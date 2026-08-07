@@ -3,16 +3,34 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-05 · phiên: energization solver + realtime (subscription + SSE)
+**Cập nhật lần cuối**: 2026-08-07 · phiên: **soát lại lô 0–3 trước khi mở GĐ 2** —
+bịt rò định danh thô sang bề mặt operator, vá một test xanh rỗng, commit toàn bộ
+GĐ 0 + 1 + 1.5.
 
 ---
 
 ## Đang ở đâu
 
-**Giai đoạn: 1 — Module #1 xong. Khung dự án xong. Có git.**
+**GĐ 1.5 xong (lô 0–3), đã soát lại và đã commit.** Kế tiếp: **GĐ 2** —
+BlackCore (agent), pane `chat`, alarm.
+
+> Hai việc mở đầu GĐ 2, theo thứ tự: (1) hỏi người dùng pane `anomalies` nên lọc
+> theo scope hay luôn toàn trạm — xem mục soát lại 2026-08-07; (2) `chat` đã là
+> một `PaneKind` và đã có trong hai preset, nên GĐ 2 chỉ cần thay `PaneLater.vue`
+> bằng component thật, **không** đụng vào hợp đồng pane.
+
+> **Việc rẻ nhất và quyết định nhất hiện nay không phải viết code**: xin một dump
+> của **trạm thứ hai** (Q4) và chạy `tools/probe_dataserver.py --dump` lên nó.
+> Cả 6/6 template mới chỉ đo trên DEMO_SAS. Trạm thứ hai ra 12/12 thì ADR-0015 là
+> chuyện quy mô; ra một nửa `UNKNOWN` thì nó là việc gấp và M1 phải nghĩ lại.
 
 Trỏ vào DataServer → ra sơ đồ một sợi 13 ngăn / 80 thiết bị, **không vẽ tay,
-không map point**. Mục tiêu M1 đã chứng minh được trên `DEMO_SAS`.
+không map point**. Mục tiêu M1 đã chứng minh được trên `DEMO_SAS`. Từ GĐ 1 sơ đồ
+còn mang **số đo** (P/Q/U/I/f/nấc MBA, 79 điểm) và mỗi câu trả lời mang
+**EvidenceRecord**.
+
+**Chưa xem bằng mắt trên trình duyệt** kể từ GĐ 0. Cả GĐ 0 và GĐ 1 mới verify tới
+mức build + typecheck + lint + 288 test + đối chiếu DataServer thật bằng script.
 
 Chạy thử:
 ```bash
@@ -20,7 +38,51 @@ cd backend  && uv sync
 cd frontend && npm install && npm run build
 cd backend  && uv run uvicorn blackinterface.api.app:app --port 8080
 ```
-→ mở `http://127.0.0.1:8080` · kịch bản: `docs/40-testing/manual-test-01-topology.md`
+→ mở `http://127.0.0.1:8080`
+
+Hai kịch bản chạy tay, theo thứ tự:
+1. `docs/40-testing/manual-test-01-topology.md` — sơ đồ + mang điện + realtime
+2. `docs/40-testing/manual-test-02-measurement.md` — số đo + bằng chứng (GĐ 1)
+
+**Đăng nhập** (ADR-0017). Lần chạy đầu tự tạo tài khoản, **mật khẩu
+`blackinterface`** cho tất cả:
+
+| Tài khoản | Vai | Thấy gì |
+|---|---|---|
+| `operator` | operator | sơ đồ, pane Bất thường (nhóm C). **Không** thấy `#/eng` |
+| `supervisor` | supervisor | như trên + `control.sign` |
+| `maintenance` | maintenance | như operator, không có control |
+| `protection` | protection | sự kiện bảo vệ, `binding.read` |
+| `admin` | admin | quản trị. **Không** thấy trạm |
+| `engineer` | engineer | `#/eng` (Kết nối + độ phủ + cảnh báo model) + nút *Tải lại từ nguồn* |
+| **`truc`** | operator+supervisor+maintenance | trạm ít người: một người kiêm nhiều việc |
+
+**Workspace nhiều pane** (lô 0 phần hai, 2026-08-06). Header có ba nút bố cục:
+*Giám sát · Hội thoại · Sự cố*. Đáng thử:
+
+1. Đổi bố cục → **scope giữ nguyên**, chỉ query `?l=` đổi
+2. Bấm một thiết bị trên sơ đồ → **mọi ô** đổi theo cùng lúc
+3. Kéo giãn đường phân cách → F5 → cỡ giữ nguyên (nhớ riêng theo từng preset)
+4. Gõ `?l=linhtinh` → im lặng về *Giám sát*, **không** redirect; còn scope sai
+   thì vẫn bị redirect. Khác nhau có chủ ý
+5. Bố cục *Hội thoại* → ô chat hiện «Có ở giai đoạn sau» (GĐ 2 cắm component vào)
+
+Đáng thử tay nhất:
+1. Chưa đăng nhập → mọi URL đều đưa về `#/login`, và link sâu được giữ để quay lại
+2. `operator` gõ thẳng `#/eng` → bị đưa về sơ đồ; gọi thẳng API project → **403**
+3. `engineer` → vào `#/eng`
+4. Đăng xuất → phiên bị huỷ **ở máy chủ**, cookie cũ dán lại cũng vô dụng
+
+Khởi động sẽ log cảnh báo liệt kê tài khoản còn dùng mật khẩu mặc định. Đổi bằng
+`POST /api/password`.
+
+**Bỏ qua đăng nhập khi phát triển** — `BI_AUTH=env`, danh tính lấy từ `BI_ROLE`:
+```bash
+BI_AUTH=env BI_ROLE=engineer uv run uvicorn blackinterface.api.app:app --port 8080
+BI_AUTH=env BI_ROLE=operator,maintenance   # một người nhiều vai
+BI_AUTH=env BI_ROLE=engineer,supervisor    # từ chối lúc khởi động, đúng thiết kế
+```
+**Không dùng ở trạm**: nó cấp cùng bộ quyền cho bất kỳ ai chạm tới cổng mạng.
 
 ---
 
@@ -151,7 +213,277 @@ từ snapshot (`StationStore.startup()`).
 
 ---
 
-## Việc kế tiếp (theo thứ tự)
+## KẾ HOẠCH ĐÃ CHỐT (2026-08-05) — đọc mục này trước
+
+Phiên thiết kế 2026-08-05 đã đọc `document/@Station_UseCases 1.xlsx` (30 use case,
+6 module) và chốt lại toàn bộ hướng đi. **Kế hoạch dưới đây thay thế mục "Việc kế
+tiếp" cũ** (giữ nguyên bên dưới để tra lịch sử).
+
+### Điều quan trọng nhất nhận ra
+
+Thứ đã dựng xong 3 phiên qua (topology → SLD → energization → realtime) **không
+phải sản phẩm, nó là nền móng**. Trong 30 use case, **không có use case nào là
+"vẽ SLD"** — cả bảng là *câu hỏi → trả lời có bằng chứng*. Có hai luồng:
+
+| | Luồng 1 (xong) | Luồng 2 (chưa) |
+|---|---|---|
+| Là gì | endpoint → nối → dựng lại SLD + trạng thái | hỏi tiếng Việt → trả lời có evidence |
+| Ai chạy | deterministic, không LLM | LLM chọn tool + diễn đạt |
+| Sống độc lập? | **có** | không — cần luồng 1 làm nền |
+
+Và cột `Expected Result` của file use case là **cấu trúc dữ liệu** (`CB, DS, ES,
+MW, MVAR`), không phải câu văn → chính tác giả nghiệp vụ đã tự tách đúng theo I3/I4.
+
+### 5 ADR mới
+
+| ADR | Nội dung | Ảnh hưởng |
+|---|---|---|
+| [0010](../10-architecture/adr/0010-scope-and-facet.md) | `scope × facet` là trục địa chỉ hoá | → invariant **I8** mới |
+| [0011](../10-architecture/adr/0011-single-gated-write-path.md) | một đường ghi qua `control/`, registry rỗng; agent không có tool ghi | → **I1 viết lại** |
+| [0012](../10-architecture/adr/0012-stream-cadences.md) | tách nhịp `state`/`measurement`/`alarm` trên một stream | chặn module A |
+| [0013](../10-architecture/adr/0013-evidence-envelope.md) | evidence envelope trên mọi facet, làm NGAY | chặn A, B |
+| [0014](../10-architecture/adr/0014-frontend-workspace.md) | shadcn-vue, workspace nhiều pane, nhiều hội thoại, i18n | chặn toàn bộ frontend |
+| [0015](../10-architecture/adr/0015-engineer-authored-templates.md) | **thêm 2026-08-06** — template do engineer soạn, có phiên bản, phải chứng minh trước khi dùng | chặn GĐ 2.5; làm sống lại «chốt bản»; nâng **Q4** lên chặn |
+| [0016](../10-architecture/adr/0016-roles-and-capabilities.md) | **thêm 2026-08-06** — vai và quyền: quyền là đơn vị, vai chỉ là gói; kiểm ở tầng facet; agent mượn quyền người hỏi | chạm **mọi** route, agent, evidence, giao diện → phải cắm chỗ ngay ở GĐ 1.5; **đổi cửa vào mặc định** từ SLD sang tóm tắt AI |
+
+### Thứ tự thi công
+
+| GĐ | Nội dung | Đổi tính năng? |
+|---|---|---|
+| **0** ✅ | **Nền**: `domain/scope.py` + `domain/evidence.py` · tách `api/app.py` (651 dòng) thành routers + schemas · tách `api/source.py` (3 trách nhiệm) · shadcn-vue + Tailwind + i18n · tách store theo vòng đời · scope vào URL · `control/` rỗng + đổi luật `check.py` | **không** — 197 test hiện có phải vẫn xanh, đó là thước đo |
+| **1** ✅ | **Module A** (Monitoring): `domain/measurement.py`, đọc `MMXU1`/`YLTC.TapPos`/`Subs.BB*.PPVmax,Hz`, tách nhịp SSE, `/api/summary` + evidence đầu tiên | có |
+| **1.5** | **Nền UI/UX** (chèn 2026-08-06 theo yêu cầu người dùng): thi công phần workspace của ADR-0014 còn nợ — `app/layout/` + `PaneHost` + `presets.ts`, `Pane`/`Layout` vào `stores/workspace.ts`, bố cục vào URL, đủ 10 component `ui/`, bốn trạng thái mỗi pane, tách bề mặt engineer khỏi operator, **chuyển nhóm C issue sang bề mặt vận hành**. Hợp đồng: [`docs/20-ui/frontend-architecture.md`](../20-ui/frontend-architecture.md) · Màn hình: [`docs/20-ui/screens.md`](../20-ui/screens.md) | backend đổi **đúng một chỗ**: issue trả kèm nhóm A/B/C |
+| **2** | **Agent lát cắt dọc, MỎNG** — chỉ 2 tool (`resolve` + `summary`). Session memory, streaming, `LLMProvider`, evidence chạy thật đầu-cuối | có |
+| **2.5** | **Trình soạn template + chốt bản** ([ADR-0015](../10-architecture/adr/0015-engineer-authored-templates.md)): template vào store thay vì package · chọn theo chữ ký thay `infer_bay_type()` · trình soạn **đồ thị** (không phải canvas vẽ) · cổng chứng minh đối chiếu `IsLive` · bảng `releases` pin cả `ModelVersion` lẫn phiên bản template | có |
+| **3** | **Module B** (Alarm/Event): event store + alarm + notification | có |
+| **4** | **Module E** (Report) · **Module F** (Knowledge/RAG — độc lập, làm song song được) | có |
+| **5** | **Module D** (Trend — chờ HIS) · **Module C** (Control — mở `control/registry.py`) | có |
+
+**Vì sao chèn GĐ 1.5 ngay trước GĐ 2** (người dùng nêu 2026-08-06): ADR-0014 đã
+chốt workspace nhiều pane từ 2026-08-05 nhưng **chưa thi công một dòng nào** —
+`stores/workspace.ts` mới giữ scope, không có `Pane`/`Layout`/preset/`PaneHost`,
+frontend vẫn là 4 view cố định theo route. Mà **chat LÀ một pane**: có `PaneHost`
+sẵn thì GĐ 2 chỉ thêm 1 component; chưa có thì chat thành view cố định thứ 5, rồi
+alarm thành thứ 6, và lúc đó đập lại tốn gấp nhiều lần. Toàn bộ frontend hiện mới
+**1.314 dòng** — đây là lúc rẻ nhất.
+
+**Vì sao agent ở GĐ 2 chứ không phải cuối**: kiến trúc agent (bộ nhớ hội thoại,
+streaming, hợp đồng tool, evidence) là chỗ rủi ro cao nhất và chưa ai kiểm chứng.
+Dựng mỏng lúc mới có 2 tool thì sai còn sửa được; phát hiện sai sau khi có 7 tool
+là đập lại tất cả.
+
+### Mô hình dữ liệu còn thiếu (đo từ file use case, có đích danh point)
+
+| Cần | Point | Use case |
+|---|---|---|
+| ✅ Điện áp thanh cái | `Subs.BBxx.PPVmax` — **chú ý chữ m thường**, file use case ghi sai | A-01 |
+| ✅ Tần số | `Subs.BBxx.Hz` + `BAYx.MMXU1.Hz` | A-01 |
+| ✅ P / Q / U / I / PF | `BAYx.MMXU1.totW / totVAr / Vlin / Amax / totPF` | A-01, A-02 |
+| ✅ Nấc MBA | `ATx.YLTC.TapPos` | A-01 |
+| Tagging | `BAYx.XCBR1.Tagging` | A-02, C-08 |
+| Alarm severity ≥ 800 + category | CRITICAL / PROTECTION / ANALOG / COMMUNICATION / OTHER | A-01, A-02, A-04 |
+
+### Hai chỗ nhặt được, PHẢI KIỂM CHỨNG trước khi dùng (§5.4)
+
+- **Q6 có thể có lời giải**: sheet A02 map `ES14→XSWI11`, `ES24→XSWI21`,
+  `ES75→XSWI71`, `ES76→XSWI72` — tiếp địa bám số của dao cách ly cạnh nó.
+  Đây là **tài liệu**, chưa phải **đo được**. Phải xác minh trên DataServer.
+- **Tên chỉ danh lấy từ `Description`**, không phải `Name`/`SName` như đang dùng.
+
+### Câu hỏi còn treo
+
+- **Trend (D) lấy lịch sử từ đâu?** OneATS HIS đã đo được là **chưa chạy** (48010
+  là `sunshine`). Người dùng chốt: *gác lại*, làm module use case trước.
+- **A-06 Auxiliary** (AC/DC, UPS, battery) không thuộc ngăn nào → bộ scope chưa
+  có chỗ. Không phải MVP, hoãn được, nhưng nếu có nhiều thiết bị "ngoài ngăn"
+  thì bộ danh từ phải rộng ra sớm.
+
+---
+
+## GĐ 0 — Nền (2026-08-05) ✅
+
+Thước đo đặt ra: **không đổi tính năng, 197 test cũ vẫn xanh**. Kết quả:
+**247 test xanh** (197 cũ + 50 mới), `tools/check.py` xanh cả 7 mục, và
+`backend/openapi.json` **không đổi một byte** — `git diff` rỗng. Đó là bằng
+chứng mạnh nhất rằng việc tách `api/` là thuần tuý cấu trúc.
+
+### Backend
+
+| Việc | Kết quả |
+|---|---|
+| `domain/scope.py` | `ScopeRef` + `parse/format` + `parent/contains` + `exists/bays_in`. **Từ chối chứ không nới rộng**: scope sai → `InvalidInputError`, không bao giờ âm thầm thành `station`. 24 test |
+| `domain/evidence.py` | `EvidenceRecord`/`Coverage`/`PointQ`/`Limit` + **`EvidenceBuilder`** |
+| `control/` | `registry.COMMANDS = {}` · `guard.py` · `audit.py`. 12 test |
+| `tools/check.py` | luật I1 đổi hình: cấm gọi ghi **ngoài `control/`**, `COMMANDS` rỗng (parse bằng `ast`), `agent/` cấm import `control/`. Thêm mục **so ngữ pháp scope giữa `scope.py` và `scope.ts`** |
+| `api/app.py` 651 → **86 dòng** | tách thành `deps.py` · `schemas.py` · `mappers.py` · `routers/{health,projects,station,live,diagram}.py` |
+| `api/source.py` 409 → **~280 dòng** | tách `broadcast.py` (revision + listener) · `reader.py` (đọc nguồn) · `watch.py` (vòng đời subscription). `StationStore` giờ chỉ trả lời "model nào đang hiện hành và đổi lúc nào" |
+
+**Hai quyết định đáng ghi lại:**
+
+1. **`limits` do builder suy ra, không do facet nhớ.** ADR-0013 bắt buộc `limits`
+   trong 5 tình huống. Để mỗi facet tự nhớ thì luật chỉ đúng tới facet đầu tiên
+   viết vội. Nên facet chỉ khai báo **sự kiện** (`point()` / `missing()` /
+   `note()`), builder suy ra `points_missing` / `quality_not_good` /
+   `data_stale` / `from_snapshot`. Facet thêm được cảnh báo, **không bỏ được**.
+2. **`limits` và `refusal` là CODE, không phải câu chữ.** ADR-0013 ví dụ bằng
+   câu tiếng Việt, nhưng frontend đã có i18n (ADR-0014) và agent trả lời theo
+   ngôn ngữ người hỏi — prose nướng vào backend sẽ sai ở cả hai. Cùng lý do với
+   `reason` code trong `energization.py`. Nhãn nằm ở `frontend/src/i18n/`.
+
+**`guard.py` mặc định là TỪ CHỐI.** Chưa mô hình hoá interlock/tagging/authority
+thì trả `NOT_EVALUABLE`, không im lặng. Một câu hỏi chưa hỏi không được phép đọc
+thành một câu hỏi đã thông qua — đây là I2 áp cho *hành động* thay vì cho *câu nói*.
+
+**Đã kiểm chứng luật mới thật sự bắt vi phạm** (như đã làm với luật cũ):
+thêm `node.PosCtl(1)` vào `api/` → đỏ; thêm 1 lệnh vào `COMMANDS` → đỏ;
+thêm `'feeder'` vào `SCOPE_KINDS` của TS → đỏ. Khôi phục → xanh.
+
+### Frontend
+
+| Việc | Kết quả |
+|---|---|
+| Stack | Tailwind **v4** (cấu hình bằng CSS `@theme`, **không** có file JS config) + `@tailwindcss/vite` + `components.json` + `lib/utils.ts` + reka-ui + lucide + vue-i18n 11 |
+| **Sửa lỗi màu** | hai bảng màu tách bạch: `st-*` (trạm) và `sys-*` (phần mềm). `sys-*` **không dùng đỏ/xanh lá** |
+| i18n | `vi` mặc định + `en`, lưu lựa chọn ở localStorage, có nút đổi trên header. **Mọi** chuỗi hiển thị đã chuyển sang catalogue, kể cả nhãn của `state`/`liveState`/`reason` (trước nằm cứng trong `state.ts`) |
+| scope vào URL | `#/ops/bay:D03` là địa chỉ chính. `router.beforeEach` **redirect** scope sai thay vì âm thầm rơi về `station` |
+| Store theo vòng đời | `station.ts` (god store) → `structure.ts` · `live.ts` · `workspace.ts` (+ `projects.ts` sẵn có) |
+| `ui/` | `StatusDot.vue` · `Panel.vue` · `Badge.vue` |
+
+**Lỗi an toàn đã sửa (đây là thứ đáng giá nhất của phần frontend).** Header cũ tô
+"mất kết nối" bằng `--closed` (đỏ) và "trực tuyến" bằng `--open` (xanh lá) —
+**đúng hai màu** đang mang nghĩa "máy cắt đóng" và "dao mở" trên sơ đồ cách đó
+vài centimet. Đỏ khi đó vừa là trạng thái vận hành bình thường vừa là sự cố của
+chính phần mềm. Giờ: `sys-ok` trung tính (trực tuyến **không** phải phát biểu an
+toàn, nên không được mượn màu của một phát biểu an toàn), `sys-warn` hổ phách,
+`sys-down` hồng. Ghi vào bảng bẫy §7 của `AGENTS.md`.
+
+**`StationView` không còn state chọn cục bộ.** Trước đây `selectedBay`/
+`selectedDevice` là ref, phải xoá tay ở ba chỗ, không link được, refresh là mất.
+Giờ chỉ có `workspace.scope` = URL.
+
+**Chưa xem bằng mắt trên trình duyệt.** Mới verify tới mức build + typecheck +
+lint + 247 test. Giao diện đổi nhiều (Tailwind, hai bảng màu, i18n, route mới)
+→ **phải chạy tay `docs/40-testing/manual-test-01-topology.md`** trước khi làm GĐ 1.
+
+### Nợ lại từ GĐ 0, cố ý
+
+- **`EvidenceBlock.vue` chưa làm.** Chưa endpoint nào trả `EvidenceRecord` nên
+  `schema.d.ts` chưa có kiểu đó — dựng component theo phỏng đoán là đúng cái sai
+  lầm mà repo này đã tránh nhiều lần. Làm ở GĐ 1 cùng facet đầu tiên.
+- **`api/*.py` chưa gắn evidence.** ADR-0013 nói mọi facet phải có; hiện chưa có
+  facet nào theo nghĩa đó (`/api/station`, `/api/bays` là bản đồ/cấu trúc).
+  `/api/energization` là ứng viên đầu tiên, gắn ở GĐ 1.
+- **Alias `--bg`/`--closed`… trong `styles.css`** vẫn còn cho các component
+  chưa viết lại. Mỗi lần viết lại một view thì bớt dần; **không cái mới nào
+  được dùng**.
+
+*(Hai món đầu đã trả xong ở GĐ 1 — xem dưới.)*
+
+---
+
+## GĐ 1 — Module A (Monitoring) (2026-08-06) ✅
+
+**288 test xanh** (247 → 288), `tools/check.py` xanh cả 7 mục.
+
+### Đo trước, viết sau
+
+Việc đầu tiên không phải là code mà là **mở DataServer ra đo**, vì file use case
+và ADR-0012 đều chép point từ tài liệu chứ chưa ai kiểm. Ba thứ nhặt được:
+
+1. **`PPVmax`, không phải `PPVMax`.** Sai case là không bind được.
+2. **Không có `EngineeringUnits` trên bất kỳ measurand nào.** → quyết định thiết
+   kế lớn nhất của giai đoạn, xem dưới.
+3. **`/SAS/AT1/YLTC` có 5 Method điều khiển bộ đổi nấc** (`TapChg`, `MasCtl`,
+   `EmerCtl`, `ParCtl`, `ResetCtl`) nằm ngay cạnh `TapPos` mà ta đọc. Đã thêm cả
+   5 vào `FORBIDDEN_CALLS` của `check.py` (I1).
+
+Fixture `sas_tree.json` dump lại từ DataServer thật: **thuần thêm** 80 node, không
+xoá node nào, không NodeId nào đổi, vẫn `DEMO_SAS v654`.
+
+### Backend
+
+| Việc | Kết quả |
+|---|---|
+| `domain/measurement.py` | danh mục measurand + `Reading` + `MeasurementSet` + deadband. Thuần |
+| `domain/observation.py` | tách hai họ: `state_points`/`apply_state_samples` và `measurement_points`/`apply_measurement_samples` |
+| `domain/scope.py` | thêm `ScopeKind.TRANSFORMER` — `TapPos` phải có chủ thể thật, không mượn `device:` |
+| `api/broadcast.py` | `Cadence` + `Listener` giữ **một chỗ cho mỗi nhịp** |
+| `api/throttle.py` | giảm nhịp `measurement`, **có sườn xuống** |
+| `api/summary.py` + `routers/summary.py` | facet đầu tiên mang `EvidenceRecord` |
+| `LiveOut` | tách thành `StateOut` / `MeasurementOut` / `LinkOut`; SSE có 3 loại sự kiện |
+
+### Ba quyết định thiết kế
+
+**1. Không in đơn vị nào chưa đo được thang.** DataServer không công bố đơn vị,
+nên biết `Vlin` là điện áp nhưng không biết 221.08 là V hay kV. In "221.08 V"
+cạnh thanh cái 220 kV còn tệ hơn không in gì. Số nào chưa chắc thang thì hiện
+**số trần + tên đại lượng**, và bằng chứng mang `LimitCode.UNIT_UNVERIFIED`.
+`Hz`, hệ số công suất, nấc MBA được miễn vì không thể sai thang. → **Q7**.
+
+**2. Deadband theo từng đại lượng, không phải một số toàn cục.** 0,5 % của 50 Hz
+là 0,25 Hz — dao động rất lớn; 0,5 % của phụ tải là nhiễu. ADR-0012 nói một biến
+môi trường là đủ; khi làm thì thấy không đúng, biến đó giờ chỉ là **đặt đè**.
+**Nấc MBA không deadband** vì nó rời rạc như vị trí dao — làm mượt là giấu mất
+thao tác đổi nấc.
+
+**3. Throttle phải có sườn xuống.** Chặn hết trong cửa sổ thì số đo *cuối* của
+một chùm không bao giờ tới, và client đứng ở một số cũ mà không có gì báo là cũ.
+
+### Kiểm chứng trên DataServer thật (không phải fixture)
+
+Duyệt live: 13 ngăn, 6 thanh cái, 1 MBA, **97 điểm state + 79 điểm số đo**, khớp
+từng con số với đường fixture. Mở subscription 20 s: **176 monitored item,
+`rejected=0`**, nhận được 1 nhịp `link`, 1 nhịp `state`, **4 nhịp `measurement`**,
+và `structure_revision` **không đổi** — DEMO_SAS sinh số đo ngẫu nhiên liên tục mà
+đồ thị điện không dựng lại lần nào. Đó là ADR-0012 luật 1 chạy trên dữ liệu thật.
+
+### Frontend
+
+`stores/stream.ts` giữ EventSource **duy nhất** và phân nhánh theo `event.type` —
+đúng thứ ADR-0012 luật 3 yêu cầu, và tách hẳn "sở hữu socket" khỏi "giữ dữ liệu".
+`stores/live.ts` chỉ còn nhịp `state`; `stores/measurements.ts` là nhịp
+`measurement`; `stores/summary.ts` bám theo scope trên URL.
+
+`ui/EvidenceBlock.vue` — món nợ GĐ 0 đã trả. Nó đặt **cảnh báo lên trước** xuất
+xứ, vì một câu trả lời có khiếm khuyết và một câu trả lời sạch trông y hệt nhau
+nếu không có gì bắt phải khác. Bảng màu **hệ thống**, không mượn đỏ/xanh lá của
+trạm. `components/panels/MeasurementPanel.vue` hiện số đo và **nói rõ có áp
+deadband** (ADR-0012 hệ quả 3).
+
+### Một lỗi thiết kế bắt được khi chạy thật
+
+Chạy app lên rồi gọi `/api/summary?scope=station` thì thấy **89/159 điểm bị gắn
+«dữ liệu cũ»** trên một trạm hoàn toàn khoẻ mạnh. Nguyên nhân: `SourceTimestamp`
+của OPC UA nói lúc giá trị **được sinh ra**, nên một dao cách ly không nhúc nhích
+suốt một ngày mang timestamp một ngày tuổi — mà vẫn là hiện tại.
+
+Một cảnh báo luôn bật là cảnh báo vô nghĩa: nó dạy người vận hành bỏ qua khối
+bằng chứng, đúng thứ khối đó sinh ra để chống. Đã sửa: `EvidenceBuilder.point()`
+nhận `expect_refresh`, chỉ điểm **được kỳ vọng cập nhật liên tục** (số đo) mới bị
+xét cũ; vị trí đóng cắt thì không. `age_ms` vẫn báo cho mọi điểm — tuổi vẫn đáng
+xem, chỉ là không phải lỗi.
+
+Còn nợ: trường hợp **RTU chết sau lưng DataServer** (link xanh nhưng một điểm
+ngừng cập nhật) giờ không phát hiện được nữa. Cần "chu kỳ cập nhật kỳ vọng" theo
+từng điểm, mà ta chưa đo được — đừng đoán.
+
+### Nợ lại từ GĐ 1, cố ý
+
+- **`/api/energization` vẫn chưa mang evidence.** GĐ 0 hẹn gắn ở đây, nhưng khi
+  làm thì thấy `summary` là chỗ đúng hơn: nó là *phán quyết về một scope*, còn
+  `/api/energization` là bản đồ toàn trạm. Facet nào sinh sau cứ theo khuôn
+  `api/summary.py`.
+- **Giá trị theo pha chưa đọc** (`AphsA/B/C`, `WphsA/B/C`, …). `MMXU1` có 26 con,
+  ta lấy 6. Chưa có use case cho từng pha — thêm khi có, đừng thêm trước.
+- **`MSQI1` (thành phần đối xứng) chưa đọc.** Cùng lý do.
+- **`Tagging` chưa đọc** dù use case A-02/C-08 cần. Thuộc Module B/C.
+- **Kịch bản chạy tay**: `docs/40-testing/manual-test-02-measurement.md`.
+- **Số đo chưa lên sơ đồ**, mới ở panel bên phải. Vẽ nhãn lên SLD là việc của
+  diagram engine, không phải của giai đoạn này.
+
+---
+
+## Việc kế tiếp — BẢN CŨ (trước 2026-08-05, giữ để tra lịch sử)
 
 ### 0. Xem lại giao diện mới bằng mắt — ✅ **ĐÃ CHẠY TAY 2026-08-05**
 Người dùng xác nhận: **energization và realtime chạy đúng trên trình duyệt**,
@@ -372,6 +704,283 @@ Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (m
 
 ## Nhật ký phiên gần nhất
 
+### 2026-08-06 — Tài khoản trong SQLite + màn hình đăng nhập ✅
+
+Người dùng yêu cầu làm luôn thay vì để tới GĐ 2.5. Lược đồ bảng đã chốt sẵn ở
+ADR-0016 §7 nên đây là hiện thực; phần chưa quyết — **cách xác thực** — viết
+thành [ADR-0017](../10-architecture/adr/0017-local-accounts-and-sessions.md).
+
+- Migration `003_users.sql`: `users` (có `external_id`, `password_changed_at`),
+  `user_roles` (một người **nhiều** vai), `sessions`.
+- `passwords.py` — **Argon2id** qua `argon2-cffi`, tham số mặc định của thư viện.
+  Một module duy nhất để chỗ cần soi lại chỉ có một.
+- **Phiên lưu phía máy chủ, không phải JWT.** Lý do vận hành: token tự chứa
+  không rút lại được trước khi hết hạn, mà *"khoá người này ngay"* mới là thao
+  tác thật sự cần. `set_disabled()` xoá luôn phiên đang mở.
+- Cookie `HttpOnly` + `SameSite=Lax`; **chỉ SHA-256 của token vào bảng**, nên đọc
+  được bảng vẫn không đăng nhập được thành ai.
+- **401 ≠ 403** — một cái sửa được bằng đăng nhập, một cái không. Gộp lại là bắt
+  giao diện đoán, và nó sẽ đoán sai theo cả hai chiều.
+- Bề mặt công khai đúng **ba** đường (`/api/login` `/api/health` `/api/me`), test
+  khẳng định **bằng dấu bằng**. `public()` là hàm riêng chứ không phải cờ của
+  `requires()`, để "ai cũng gọi được" là một chữ phải gõ ra và grep thấy.
+- Gieo 7 tài khoản (6 vai + `truc` nhiều vai), **chỉ khi bảng chưa có ai** — kiểm
+  từng tên thì tài khoản quản trị viên đã xoá sẽ mọc lại.
+- `password_changed_at IS NULL` → khởi động log cảnh báo nêu tên. Mỗi lần khởi
+  động, không phải một lần lúc gieo.
+- Frontend: `LoginView.vue`, guard chuyển hướng có giữ link sâu, nút đăng xuất,
+  và **không gọi gì về trạm khi chưa đăng nhập** (nếu không, màn hình đăng nhập
+  tự rải 401 ra console và một cái login chạy tốt trông như hỏng).
+
+**Một lỗi bắt được trong lúc làm**: `/api/me` lúc đầu tự đọc cookie thay vì đi
+qua `get_principal()`. Test phát hiện ngay vì override của test bị bỏ qua — và
+đó chính xác là dạng lỗi đáng sợ: **hai chỗ trả lời câu hỏi "ai đang gọi"**, sớm
+muộn sẽ trả lời khác nhau. Giờ mọi facet đi qua đúng một hàm.
+
+`test_accounts.py` cố ý **không dùng override** — nó chạy đường thật, có cookie:
+`test_authz.py` chứng minh cổng từ chối sai principal, file này chứng minh trình
+duyệt trở thành đúng principal. Thiếu vế sau là bỏ trống nửa quan trọng.
+
+Nợ ghi rõ trong ADR-0017: **chưa chống dò mật khẩu**, chưa có bảng nhật ký kiểm
+toán, chưa có màn hình quản lý tài khoản.
+
+### 2026-08-06 — GĐ 1.5 lô 1: design system `ui/` ✅
+
+Đủ 10/10 component theo [`frontend-architecture.md` §6](../20-ui/frontend-architecture.md).
+Logic hiển thị số đo (I2, Q7) tập trung ở `ui/valueCell.ts`; `ValueCell.vue` là
+biểu diễn duy nhất trên màn hình.
+
+Tích hợp tối thiểu: `MeasurementPanel` → `DataTable` + `ValueCell`;
+`MeasurementPane` → `Skeleton`/`Empty`; `EvidencePane` → `Skeleton`/`ErrorBox`.
+`Field.vue` sẵn sàng — lô 2 gắn vào `StatePane`/`DevicePanel`.
+
+`check.py` xanh, dist build lại. **Chưa xem bằng mắt** — xem hướng dẫn test ở
+phiên Cursor tiếp theo hoặc chạy tay preset *Giám sát*.
+
+### 2026-08-07 — GĐ 1.5 lô 2: ruột pane viết lại ✅
+
+Ruột pane chuyển hẳn vào `features/` — không còn bọc `components/panels/` (trừ
+`SldCanvas`). Mỗi pane dùng bốn trạng thái: `Skeleton` · `ErrorBox` · `Empty` ·
+`ready` (nội dung + `Field`/`ValueCell`/…).
+
+| Pane | File |
+|---|---|
+| Số đo | `features/monitoring/MeasurementPane.vue` |
+| Trạng thái | `StatePane.vue` + `DeviceStateContent.vue` (`Field`) |
+| Mang điện | `EnergizationPane.vue` |
+| Sơ đồ | `SldPane.vue` (+ Skeleton/ErrorBox khi load model) |
+| Độ phủ | `features/engineer/CoveragePane.vue` |
+| Cảnh báo model | `ModelIssuesPane.vue` + `features/shared/IssueList.vue` |
+
+`components/panels/` giữ cho `views/` legacy — **lô 3 đã xoá** (xem dưới). Test browser: lô 1 + lô 2
+pass trên preset *Giám sát* và *Sự cố*. `check.py` xanh.
+
+### 2026-08-07 — GĐ 1.5 polish: layout inspector (screens.md §3.1) ✅
+
+Preset *Giám sát* đổi sang **SLD full height trái (72%) + inspector phải (28%)** —
+không còn dải Bất thường dưới sơ đồ, không còn 3 pane xếp chồng bên phải.
+
+| File | Việc |
+|---|---|
+| `features/monitoring/InspectorPane.vue` | Accordion: Trạng thái · Số đo · Mang điện · Bất thường · Bằng chứng |
+| `features/monitoring/ScopeHeader.vue` | Tiêu đề scope + «Về toàn trạm» |
+| `ui/CollapsibleSection.vue` | Hàng accordion tái dùng |
+| `app/layout/presets.ts` | `kind: inspector`; incident = SLD + inspector |
+| `app/layout/PaneFrame.vue` | `params.chrome: minimal` — bỏ header IN HOA trùng |
+| `app/layout/Header.vue` | 2 hàng: tên trạm + link; segmented preset + metadata mờ |
+
+Trạng thái mở/đóng section nhớ theo preset (`localStorage` `bi.inspector.*`).
+
+**2026-08-07 bổ sung:** mỗi section có **scroll riêng** + **kéo đổi chiều cao** (reka-ui
+splitter dọc); card `mx-2` để viền không sát mép.
+
+### 2026-08-07 — GĐ 1.5 lô 3: `#/eng`, issue nhóm A/B/C, xoá legacy ✅
+
+**Backend**
+- `domain/issue_groups.py` — 12 mã → nhóm A/B/C (duy nhất nơi phân loại).
+- `ValidationIssueOut` + trường `group` trên mọi response có issue.
+- `GET /api/issues` — danh sách issue kèm nhóm (`station.read`).
+
+**Frontend**
+- `#/eng` — `EngView.vue`: Kết nối + Độ phủ + Cảnh báo model (A+B); nút **Chốt bản** → `#/ops/station`.
+- `ConnectionsPane`, `AnomaliesPane` (chỉ nhóm C) — thay `PaneLater`.
+- `ModelIssuesPane` lọc A+B; preset *Giám sát* / *Sự cố* dùng `anomalies`.
+- Router: `landingFor(engineer)` → `#/eng`; redirect `/projects`, `/issues`, `/bay/:id`.
+- Header: bỏ link Issues/Projects; thêm **Kỹ thuật** (`model.connect`).
+- Xoá: `BayView`, `IssuesView`, `ProjectsView`, `components/panels/*`.
+
+Đáng thử:
+1. `engineer` đăng nhập → vào `#/eng`, nối/mở project, xem issue A+B.
+2. `operator` → preset *Giám sát*, ô **Bất thường** chỉ nhóm C (nếu có).
+3. `#/projects` / `#/issues` / `#/bay/D03` → redirect hợp lý.
+4. `python tools/check.py` xanh.
+
+### 2026-08-07 — Sửa click SLD + số đo khi chọn thiết bị ✅
+
+**Triệu chứng:** click symbol trên sơ đồ “không ra gì”; pane *Số đo* trống dù
+DataServer có MMXU trên ngăn.
+
+**Nguyên nhân (đã đo trên trình duyệt):**
+1. Sơ đồ mặc định *fit cả trạm* → symbol ~**4 px** trên màn hình, click trúng nền
+   pan thay vì thiết bị.
+2. Kéo/pan trên `<svg>` nuốt click (pointer capture).
+3. Số đo backend gom theo `bay:D03`; click thiết bị set `device:…` — pane phải
+   leo lên scope cha (`stores/measurements.ts` `forPane`).
+4. Trình duyệt cache chunk JS cũ (`MeasurementPane-*.js`) sau `npm run build`.
+
+**Đã sửa:**
+- `SldCanvas` / `DeviceSymbol`: không pan khi chạm symbol; click nhãn **ngăn**
+  chọn `bay:…`; giữ zoom do người dùng tự chỉnh (không auto-zoom khi click).
+- `workspace.go()` giữ query `?l=`.
+- `MeasurementPane` + `forPane` — hiện dòng *Số đo của bay:…* khi leo scope.
+
+**Cách thử lại:** `npm run build` → **Ctrl+Shift+R** (hard refresh) → preset
+*Giám sát* → click **271** (máy cắt đỏ) hoặc nhãn **D03** trên sơ đồ → cột phải:
+*Trạng thái* + *Số đo* (6 hàng MMXU). URL: `#/ops/device:D03.XCBR1?l=monitor`.
+
+`check.py` xanh (2026-08-07).
+
+### 2026-08-07 — Soát lại lô 0–3 trước khi mở GĐ 2 ✅
+
+Người dùng yêu cầu kiểm xem lô 0–3 đã đủ để chuyển giai đoạn chưa. Cổng tự động
+xanh sạch ngay từ đầu (`check.py` 9/9, **348 test**, typecheck/lint/format,
+`openapi.json` đồng bộ, `dist/` mới hơn mọi file `src/`), và cấu trúc khớp hợp
+đồng `frontend-architecture.md`. Nhưng đọc kỹ thì ra **hai lỗ mà chính cổng
+không nhìn thấy** — cả hai đều thuộc loại repo này đã bị cắn nhiều lần:
+
+**1. Luật khoá ADR-0014 §8 bị vi phạm, và bị vi phạm bằng một lần *dời chỗ*.**
+`features/monitoring/DeviceStateContent.vue` — pane *Trạng thái* của **operator**
+— hiện `device.ln`, **Dbpos thô**, và `source_ref` (NodeId). `screens.md` §1 ghi
+*"đã có test"*: không có test nào. `frontend-architecture.md` §9 để ô trống với
+lý do *"chờ lô 2 chuyển panel xong, vì hôm nay `DevicePanel` vẫn hiện"* — và cái
+thực sự xảy ra ở lô 2 là ba trường đó được **chép nguyên** từ `DevicePanel` sang
+pane mới. Không ai quyết định gì cả; nó chỉ đi theo lúc viết lại.
+
+Đã bỏ ba trường khỏi bề mặt operator (chỗ của chúng là pane `binding`, chưa làm)
+và **dựng máy dò**: `check.py` mục 5 quét `.vue` ngoài `features/engineer/` tìm
+`source_ref` · `sourceRef` · `rawDbpos` · `logicalNode` · `.ln`. Đã chứng minh
+máy dò có dò (thêm lại một dòng vi phạm → đỏ → hoàn nguyên).
+
+> Bài học ghi lại vì nó sẽ lặp: **một luật hoãn gác không đứng yên chờ.** Lý do
+> hoãn ("chờ lô 2") chính là lý do nó bị phá — lô 2 là lần viết lại, và viết lại
+> là lúc code cũ được chép đi mà không ai đọc lại luật.
+
+**2. `test_every_code_emitted_in_domain_is_classified` xanh rỗng.** Tên nói là
+quét `domain/`, thân hàm chỉ `assert len(ALL_KNOWN) == 12`. `issue_group()`
+**raise** với mã lạ và `/api/issues` gọi nó cho mọi issue → mã thứ 13 thêm vào
+sẽ không phải thiếu nhãn mà là **500 trên đúng trang người trực mở ra để xem có
+gì sai**. Nay test quét thật bằng regex `code="…"` trên cả package `domain/`, so
+hai chiều, và tự khẳng định tìm được ≥12 mã **trước khi** so — để chính nó không
+xanh rỗng lần nữa. Chứng minh có dò: thêm `code="a_thirteenth_code"` vào
+`domain/topology.py` → đỏ → hoàn nguyên. (Hiện trạng 12 mã phát ra = 12 mã phân
+loại, không có lỗi đang chạy.)
+
+**Ba chỗ nhỏ sửa kèm:**
+- Nút **«Chốt bản»** ở `#/eng` chỉ là `RouterLink` sang `#/ops/station` — không
+  chốt gì. Chốt bản là ADR-0015 (bảng `releases`, pin `ModelVersion`), chưa tồn
+  tại. Đổi nhãn thành **«Sang màn vận hành»** / *"To the operator view"*.
+- `EvidencePane.retry()` gọi lại `props.scope`, trong khi thứ hiện trên màn hình
+  do `summary.follow()` nạp theo **workspace scope**. Bằng nhau khi không ghim,
+  lệch ngay khi có ghim. Store giờ giữ `asking` = scope của câu trả lời đang
+  hiện, và retry hỏi lại đúng câu đã hỏng.
+- `screens.md` §2 còn ghi `state` = *"mới là DevicePanel"*, `anomalies` = *"đang
+  nằm nhầm ở bề mặt engineer"*, `model-issues` = *"đang lẫn nhóm C"* — lô 3 đã
+  sửa cả ba từ hôm trước, bảng chưa cập nhật.
+
+**Còn nợ, cố ý**: pane `anomalies` **không lọc theo scope** — click một ngăn thì
+mọi pane khác đổi theo, riêng ô Bất thường vẫn hiện cả trạm. Đã ghi vào bảng
+`screens.md` §2 thay vì sửa vội, vì chưa rõ người trực muốn ô đó thu hẹp theo
+ngăn hay muốn nó luôn là toàn trạm (mâu thuẫn an toàn ở ngăn khác vẫn phải thấy).
+**Hỏi người dùng ở phiên sau.**
+
+`check.py` xanh 9/9, 348 test. **Toàn bộ GĐ 0 + 1 + 1.5 đã được commit** — trước
+phiên này chúng nằm trong working tree, 103 path đổi + 7.284 dòng thêm, commit
+gần nhất còn là GĐ 1.
+
+### 2026-08-06 — GĐ 1.5 lô 0, phần hai: hợp đồng pane ✅ (lô 0 XONG)
+
+Hiện thực phần workspace của [ADR-0014](../10-architecture/adr/0014-frontend-workspace.md),
+theo [hợp đồng frontend §3–§10](../20-ui/frontend-architecture.md).
+
+**Bố cục giờ là dữ liệu.** `app/layout/panes.ts` giữ `Pane`/`Layout` và bảng
+`PANE_COMPONENTS` — thêm một loại pane là **một dòng**, không phải một nhánh
+`v-if`. `presets.ts` giữ cả ba bố cục, và là **chỗ duy nhất** được định nghĩa
+bố cục.
+
+- `#/ops/<scope>?l=<preset>` — chủ thể ở path, cách bày ở query. **Scope sai thì
+  redirect, preset sai thì im lặng về mặc định**: chỉ cái đầu mới khiến thanh
+  địa chỉ và màn hình nói khác nhau về trạm.
+- `pane.scope` **vắng = đi theo URL**. Đặt scope là hành động ghim có chủ ý, và
+  ô bị ghim **phải hiện nhãn ghim** — không thì màn hình lặng lẽ nói về hai ngăn.
+- `App.vue` còn đúng một dòng `<Shell />`. Header, vòng đời stream và banner lỗi
+  tách ra `app/layout/` — ba việc khác nhau, ba lý do đổi khác nhau.
+- `StationView.vue` **xoá**; cách bày cũ (sơ đồ trái, sidebar phải) giờ chỉ là
+  `presets.monitor`, một object trong ba.
+- Bảy pane trong `features/` bọc panel cũ nguyên trạng — bản chuyển tiếp, lô 2
+  viết lại ruột. Bọc để màn hình đang chạy không thụt lùi.
+
+**`check.py` mục 5 mới — bốn luật của hợp đồng**: `PaneHost` không rẽ nhánh theo
+`kind` · bố cục chỉ ở `presets.ts` · `ui/**` không import `stores/`/`api/` · khoá
+i18n có đủ ở **cả** `vi` lẫn `en`. Và **cả năm máy dò đều đã chứng minh là có
+dò** — phá hỏng từng luật, chạy riêng mục 5, xác nhận đỏ, hoàn nguyên. Đây là
+bài học của phần một, áp dụng ngay chứ không chờ bị cắn lần nữa.
+
+**Một chỗ suýt rò**: `summary.follow()` trước đây gọi từ view, giờ gọi từ pane —
+mà pane bị dựng lại mỗi lần đổi preset. Không có chốt idempotent thì mỗi lần đổi
+bố cục lại thêm một watcher, và hệ quả là **tải lên máy chủ tại trạm**, không
+phải màn hình vỡ. Đã chốt trong store.
+
+`check.py` xanh toàn bộ, 308 test. **Chưa xem bằng mắt** — cần chạy tay.
+
+### 2026-08-06 — GĐ 1.5 lô 0, phần một: nền phân quyền ✅
+
+Hiện thực [ADR-0016](../10-architecture/adr/0016-roles-and-capabilities.md).
+Làm trước mọi thứ khác trong lô 0 vì nó **chạm mọi route** — để sau là viết lại,
+không phải bổ sung.
+
+**Backend**
+- `domain/authz.py` — 19 quyền, 6 gói vai, `capabilities_for()` hợp các vai.
+  `parse_roles("operator,maintenance")` để một người giữ nhiều vai chạy thật
+  ngay từ đầu, không phải phát hiện là hỏng khi có màn hình đăng nhập.
+- `check_role_set()` — **luật tách nhiệm vụ cưỡng chế lúc dựng principal**, không
+  phải lúc kiểm. Chỉ có luật hợp thì `engineer + supervisor` sẽ **cộng ra đúng
+  tài khoản ADR-0016 cấm**: vừa sửa mô hình vừa ký lệnh dựa trên mô hình đó.
+- `api/authz.py` — `Principal`, `requires()`, `iter_api_routes()`. Đặt ở đây chứ
+  không ở `deps.py` (khác hợp đồng một chỗ, đã ghi lý do trong
+  [frontend-architecture.md §11](../20-ui/frontend-architecture.md)).
+- **18/18 facet khai `requires=`.** Mặc định là từ chối. Chỉ `/api/me` và
+  `/api/health` được khai `requires()` rỗng — và danh sách đó được test khẳng
+  định **bằng dấu bằng**, không phải bằng "chứa".
+- `GET /api/me` → `{user, roles, capabilities}`.
+- `EvidenceRecord.actor` — `/api/summary` ghi tên người hỏi. Không có trường này
+  thì không có nhật ký kiểm toán, và mất là mất vĩnh viễn.
+- `BI_ROLE` / `BI_USER` trong `config.py`.
+
+**Frontend**
+- `authz.ts` (danh sách quyền, đối chiếu chéo bằng `check.py`), `stores/session.ts`.
+- Component hỏi `can('model.connect')`, **không** hỏi `roles.includes('engineer')`.
+  Hỏi theo tên vai thì thêm một vai là phải sửa mọi component đã gọi tên vai cũ.
+- `main.ts` **đợi** `/api/me` trước khi mount, nếu không guard sẽ đá engineer ra
+  khỏi chính màn hình của họ mỗi lần F5.
+- Lỗi khi đọc `/api/me` → session **rỗng quyền**, không bao giờ rơi về "cho qua".
+
+**`check.py` mục 4 mới** — quét AST mọi decorator route; đối chiếu danh sách
+quyền giữa hai ngôn ngữ (cùng khuôn mẫu với ngữ pháp scope).
+
+**Một lỗi đáng ghi**: bản đầu của test *"mọi facet đều khai `requires=`"* **xanh
+một cách rỗng**. FastAPI 0.141 bọc mỗi `include_router` vào một lớp vỏ, nên
+`app.routes` không chứa endpoint nào — duyệt lớp trên cùng tìm được 0 route và
+mọi khẳng định đều đúng vô nghĩa. Bắt được nhờ một test khác *(chỉ `/api/me` và
+`/api/health` mở)* fail. Nay `iter_api_routes()` đi xuống, và test tự khẳng định
+tìm được đủ số route **trước khi** kiểm bất cứ thứ gì. Đây là lý do một test
+"cổng có chặn" phải luôn đi kèm một test "máy dò có dò".
+
+`check.py` xanh toàn bộ, 308 test.
+
+**Còn lại của lô 0**: `panes.ts` → `presets.ts` → `workspace` mọc phần bố cục →
+`PaneHost` → `Shell`/`Header` → token trong `styles.css`. *(Xong cùng ngày — xem
+mục «lô 0, phần hai» ở trên.)*
+
 ### 2026-08-05 — Làm rõ nguồn dữ liệu + chốt thiết kế project/connect
 - Người dùng đổi project trong DataServer nhưng sơ đồ không đổi → nguyên nhân:
   `BI_SOURCE=fixture` là mặc định, backend vẽ từ `sas_tree.json`, không đụng
@@ -398,9 +1007,12 @@ Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (m
 | Q1 | **Định nghĩa struct chính thức của alarm ExtensionObject** (ns=2, TypeId 5803) | Team DataServer, ATS | Việc #3 — hiện đang reverse-engineer, field cuối còn lệch |
 | Q2 | ATS đã có thư viện bay template chuẩn EVN chưa? | Nội bộ ATS | ~~Việc #1~~ — đã tự dựng 6 template. Vẫn hữu ích để đối chiếu ở trạm khác |
 | Q3 | `IsLive` (thanh cái + ngăn) và `SAS_SIM.CheckLiveState`: OneATS tính thế nào? Vì sao `BB29`/`D12` trả `BadWaitingForInitialData`? | Team DataServer | **Đã tự trả lời phần chính (2026-08-05)**: OneATS suy `<bay>.IsLive` **từ** `Subs.BB*.IsLive` qua Lua `CheckLiveState`. Ta gieo mầm từ thanh cái, tự giải, đối chiếu → **7/7 khớp**. Còn hỏi: vì sao 2 điểm kia hỏng, và mầm của chính thanh cái từ đâu ra |
-| Q4 | Có trạm thật thứ 2–3 để verify ADR-0002 + ADR-0008 không? | Nội bộ ATS | **Cao** — mã thanh cái theo cấp điện áp và quy ước LN mới đo trên 1 trạm |
+| Q4 | Có trạm thật thứ 2–3 để verify ADR-0002 + ADR-0008 không? | Nội bộ ATS | **CHẶN** (nâng từ Cao, 2026-08-06) — mã thanh cái theo cấp điện áp và quy ước LN mới đo trên **1 trạm**; cả 6/6 template đều `observed_on: DEMO_SAS v654`. ADR-0015 đứng hay đổ tuỳ câu này: trạm thứ hai ra 12/12 thì trình soạn template là chuyện quy mô, ra một nửa `UNKNOWN` thì là việc gấp. **Phép thử rẻ nhất và quyết định nhất của cả dự án** — chỉ cần một dump, `tools/probe_dataserver.py --dump` đã có sẵn |
+| Q4b | Quy ước đánh số LN (`XSWI1`=dao thanh cái 1, `XSWI7`=dao đường dây…) là **chuẩn cố định** của OneATS cho mọi project, hay **cấu hình được** lúc dựng bằng Grid Designer? | Team DataServer / Grid Designer, ATS | **CHẶN** cùng Q4. Nếu đặt tự do thì `infer_bay_type()` sập ở trạm sau và toàn bộ M1 phải nghĩ lại. Có thể `document/UserManual/OneATS_UserManual_Chapter-F_OneATS-GridStudio.pdf` đã trả lời — **chưa đọc** |
 | Q5 | Account read-only trên DataServer: xin ở đâu? | Team vận hành | Invariant I1 khi triển khai thật |
+| Q8 | **ATS đã có hệ thống tài khoản người dùng để liên thông chưa?** (2026-08-06) | Nội bộ ATS | ADR-0016 chốt lưu tài khoản ở SQLite cục bộ + `external_id` để móc sang nguồn ngoài. Trả lời sớm thì `external_id` trỏ đúng chỗ ngay lần đầu; trả lời muộn thì có giai đoạn **hai nơi cấp quyền**, người nghỉ việc phải xoá hai chỗ |
 | Q6 | **Dao tiếp địa nối vào node nào?** `-75/-76` quanh `-7`, `-35/-38` quanh `-3`, `-94/-95` quanh `-9` | Team thiết kế / bản vẽ Grid Designer | Đang đọc từ ảnh chụp SLD, **chưa chứng minh**. Không ảnh hưởng energization, nhưng ảnh hưởng câu hỏi an toàn ("đoạn này đã tiếp địa chưa") ở module #2+ |
+| Q7 | **Thang đo của số đo là gì?** DataServer không công bố `EngineeringUnits`/`EURange` trên bất kỳ measurand nào (đã kiểm từng biến, 2026-08-06). `Vlin` = 221.08 — V hay kV? `totW` = 87.43 — W hay MW? | Team DataServer, ATS | Hiện **không in đơn vị** cho áp/dòng/công suất, chỉ in số + tên đại lượng, và gắn `LimitCode.UNIT_UNVERIFIED`. Chặn việc hiện đơn vị đúng trên UI và mọi câu agent nói về độ lớn |
 
 ---
 
@@ -422,6 +1034,113 @@ Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (m
 ---
 
 ## Nhật ký phiên
+
+### 2026-08-06 (cuối phiên, tiếp 2) — ADR-0016: vai và quyền
+- **Bối cảnh sản phẩm người dùng nêu, quan trọng, chưa từng ghi ở đâu**: Black
+  Interface nhắm vào **trạm KHÔNG NGƯỜI TRỰC và trạm ÍT NGƯỜI** — *"user không
+  cần thiết phải quan sát SLD mà có thể dùng AI để tóm tắt phân tích báo cáo"*.
+- Người dùng đưa ảnh **ma trận actor của chính ATS** (`document/@Station_UseCases 1.xlsx`):
+  Operator · Supervisor (Trạm trưởng) · Maintenance · Protection (kỹ sư relay) ·
+  Admin, kèm bảng actor × chức năng A–F. Bốn điều rút ra:
+  - hình dạng đúng (ma trận), nhưng **mức module quá thô**: *"có C"* không phân
+    biệt được **soạn** lệnh với **ký** lệnh;
+  - **Supervisor có C** → xác nhận việc tách `control.draft` / `control.sign`;
+  - **Protection và Maintenance là vai thật** — bản đề xuất trước của tôi bỏ sót;
+  - **không actor nào dựng mô hình**, vì thế giới của họ có Grid Designer làm
+    trước rồi → đó đúng là bước ta tự động hoá, nên ta cần vai thứ sáu `engineer`.
+- **Rút lại một câu ở lượt trước**: tôi nói *"phân quyền ở đây chủ yếu chống nhầm
+  lẫn, không chống kẻ xấu, vì máy nằm trong phòng điều khiển"*. Trạm không người
+  trực nghĩa là **truy cập từ xa** → phân quyền là bảo mật thật. Điều này biến
+  việc lưu tài khoản từ *tuỳ chọn* thành *cần*.
+- Người dùng chốt: **lưu tài khoản vào SQLite luôn** (*"sau này có thể đồng bộ
+  database ngược cũng được"*), và **chưa cần làm màn hình đăng nhập**.
+- Viết [ADR-0016](../10-architecture/adr/0016-roles-and-capabilities.md): **quyền
+  là đơn vị, vai chỉ là gói, một người giữ nhiều vai** (hoà tan lo ngại "chia quá
+  nhiều vai") · 19 quyền ở mức *module × động từ* · 6 gói vai giữ đúng 5 tên của
+  ATS + `engineer` · kiểm ở **tầng facet** vì agent gọi thẳng facet, không đi qua
+  giao diện · **agent mượn quyền người hỏi**, không có quyền riêng · bảng `users`
+  có `external_id` làm bản lề để sau liên thông mà không phải di trú.
+- Ba nguyên tắc tách nhiệm vụ, cố ý: `engineer` **không bao giờ** có
+  `control.sign` · `admin` không có quyền vận hành · `maintenance` không có control.
+- **Sửa `screens.md`**: cửa vào mặc định đổi từ **SLD** sang **tóm tắt AI**, mỗi
+  vai vào thẳng thứ mình cần. SLD thành nơi *xác minh*, không phải cửa vào. Thêm
+  §4.0 luồng đăng nhập → thao tác.
+- **Sửa `frontend-architecture.md`**: thêm §11 nền phân quyền vào **lô 0** của
+  GĐ 1.5 — `Capability` · `Principal` qua mọi route · `requires=` mặc định **từ
+  chối** · `/api/me` · `EvidenceRecord.actor` · vai lấy từ `BI_ROLE` để thử được
+  cả sáu bề mặt mà chưa cần đăng nhập.
+- Thêm câu hỏi mở **Q8** (ATS đã có hệ thống tài khoản chưa).
+- **Chưa động vào code.** Chỉ tài liệu.
+
+### 2026-08-06 (cuối phiên, tiếp) — ADR-0015: template do engineer soạn
+- Người dùng truy vai trò engineer: *"engineer có thể CRUD project à?"*, *"tinh
+  chỉnh cái gì? review cái gì?"*, rồi *"template này chỉ viết riêng cho DEMO thôi à?"*
+- Rà code trả lời, ra **ba phát hiện**:
+  1. `IssuesView` đang trộn **ba loại** issue cần ba cách xử lý khác nhau: (A) mô
+     hình chưa suy được → sửa bằng **code/template**; (B) sự thật về DataServer →
+     chỉ chấp nhận hoặc chỉ tay; (C) `earthed_while_live` /
+     `energization_conflict` / `energization_mismatch` → **trạng thái vận hành,
+     phải nổi lên màn hình operator**, chôn trong tab engineer là nguy hiểm.
+  2. Bảng `releases` **không tồn tại**; `LAST_MODEL_VERSION` khai báo rồi nhưng
+     **không chỗ nào ghi hay đọc** ngoài test → phát hiện drift (I7) chưa nối.
+  3. `docs/20-domain/bay-templates.md` phát biểu *"cấu trúc ngăn do loại ngăn
+     quyết định, không do trạm"* như **sự thật**, trong khi mới đo **một trạm** →
+     đã gắn `GIẢ ĐỊNH — chưa xác minh` theo §5.4, thêm **Q4b**, nâng **Q4 lên CHẶN**.
+- Tôi đề xuất "template là mã sản phẩm, đừng cho engineer sửa" → **người dùng
+  không đồng ý và có lý**: ta mới đo một trạm, sơ đồ 1½ máy cắt/tứ giác cần
+  template mới, chờ ATS ra bản dựng thì sản phẩm không nhân bản được.
+- Đọc lại ADR-0008 thì thấy **nó vốn đã định cho engineer sửa** — lý do bác bỏ
+  phương án Python chính là *"kỹ sư trạm không sửa được"*. Chọn YAML là để mở
+  đường đó, chỉ là đường chưa bao giờ được dựng. ADR-0015 hoàn tất, không lật.
+- Viết [ADR-0015](../10-architecture/adr/0015-engineer-authored-templates.md):
+  template vào store của bản cài · trình soạn **đồ thị** không phải canvas vẽ ·
+  bộ sinh vẫn là mã, cấm sửa tại trạm · chọn template bằng **chữ ký** thay
+  `infer_bay_type()` · **cổng chứng minh** đối chiếu `IsLive` chặn việc chốt bản ·
+  release pin cả `ModelVersion` lẫn phiên bản template.
+- **Rút lại** kết luận "chốt bản đã chết" của lượt trước: nó đúng khi template là
+  hằng số; template do người soạn thì lại có thật một thứ để duyệt và đóng băng.
+- Hạn chế đã ghi thẳng vào ADR, đừng quảng cáo quá: **cổng chứng minh chỉ mạnh
+  bằng các trạng thái trạm tình cờ đang ở**. Dao chưa bao giờ mở thì nhánh qua nó
+  không được kiểm — chính lỗi `T1_LINE` v1 vẫn lọt nếu không ngăn nào đang ăn
+  điện từ thanh cái vòng.
+- Thi công thành **GĐ 2.5**, sau agent. GĐ 1.5 giữ thuần frontend.
+- **Chưa động vào code.** Chỉ tài liệu.
+
+### 2026-08-06 (cuối phiên) — Người dùng nêu UI/UX, chèn GĐ 1.5
+- Nguyên văn yêu cầu: *"tôi muốn giao diện được thiết kế đồng nhất ngay từ đầu để
+  sau này đỡ phải sửa lại"*, *"tốt nhất là phác thảo được các màn hình có thể
+  dựng, flow user dùng"*, và hỏi có tận dụng Cursor/Codex làm song song được không.
+- Kiểm lại: ADR-0014 đã chốt **nguyên tắc** (2 bảng màu, pane là dữ liệu, 3
+  preset, cấu trúc thư mục) nhưng **chưa có** danh mục màn hình và luồng người
+  dùng — đúng khoảng trống người dùng chỉ ra. Và phần đã chốt thì **chưa thi
+  công**: không có `app/layout/`, không có `PaneHost`/`presets.ts`, `features/`
+  chưa tồn tại, `ui/` mới 4/10 component.
+- Người dùng chọn: chèn **GĐ 1.5 trước GĐ 2**; giao trước **danh mục màn hình +
+  flow**, chưa làm token/prototype/handoff.
+- Viết [`docs/20-ui/screens.md`](../20-ui/screens.md): 15 loại pane, 3 preset bố
+  cục + màn hình engineer (ASCII wireframe), 4 luồng người dùng, bốn trạng thái
+  bắt buộc của mọi pane, bảng "cái KHÔNG làm", bảng lệch với code hôm nay.
+- **Chưa động vào code.** Backend không đổi, không chạy lại test.
+- Điều kiện để chia việc cho Cursor/Codex, ghi lại để phiên sau không quên:
+  component thuần trong `ui/` (nhận props, không đụng store) chia được; còn
+  `PaneHost`, `presets.ts`, store và `scope.ts` là kiến trúc — một người làm.
+
+### 2026-08-06 — GĐ 1: Module A (Monitoring)
+- Người dùng chốt cách làm việc: **họ chỉ test tay trên giao diện**, còn test tự
+  động là việc của agent; và **giữ codebase sạch, chia nhỏ module/component theo
+  kiến trúc**. Từ đây báo cáo nên nói về cấu trúc và lý do, không phải số test.
+- Mở DataServer đo trước khi viết code → bắt được `PPVmax` (không phải `PPVMax`),
+  phát hiện **không có `EngineeringUnits`**, và 5 Method điều khiển bộ đổi nấc
+  nằm ngay cạnh `TapPos`.
+- Dump lại fixture: thuần thêm 80 node, không xoá, không NodeId nào đổi.
+- Hiện thực ADR-0012 đầy đủ. Trong lúc làm phát hiện ADR **sai hai chỗ** (case
+  của `PPVmax`, và giả định một deadband toàn cục là đủ) → ghi vào cuối ADR thay
+  vì sửa phần đã accepted.
+- `EvidenceRecord` lần đầu đi ra API qua `/api/summary`, và `EvidenceBlock.vue`
+  lần đầu hiện nó lên màn hình. Đây là món nợ có chủ ý từ GĐ 0, trả đúng lúc có
+  kiểu thật trong `schema.d.ts` thay vì dựng theo phỏng đoán.
+- Kiểm chứng trên DataServer thật: 176 điểm subscribe, `rejected=0`, 20 s chạy
+  → 4 nhịp `measurement`, `structure_revision` không đổi. Luật 1 đứng vững.
 
 ### 2026-08-04 — Khảo sát OneATS + dựng workspace
 - Đọc manual OneATS (8 chương), phân tích `document/SLD_serviceOut/`

@@ -1,6 +1,6 @@
 # OneATS DataServer — Sự thật đã đo
 
-> **Trạng thái: ĐÃ ĐO TRỰC TIẾP trên hệ chạy thật — 2026-08-04**
+> **Trạng thái: ĐÃ ĐO TRỰC TIẾP trên hệ chạy thật — 2026-08-04, bổ sung §8b 2026-08-06**
 > Đo lại bằng: `python tools/verify_dataserver.py`
 > Mọi số liệu trong file này đều đến từ hệ live, **không phải từ manual PDF**.
 > Manual có chỗ mâu thuẫn với thực tế — xem §9.
@@ -257,6 +257,45 @@ lifetime / keepalive 3000 / 1000
 **Một subscription phía server → fan-out SSE cho N client.** Đừng tạo subscription
 theo từng browser.
 
+Đo lại 2026-08-06 khi thêm Module A: **176 monitored item** (97 vị trí/IsLive + 79
+số đo), server nhận hết, `rejected=0`. Trong 20 s quan sát: 1 nhịp `link`, 1 nhịp
+`state`, 4 nhịp `measurement` — đồ thị điện **không** dựng lại lần nào dù DEMO_SAS
+sinh số đo ngẫu nhiên liên tục. Đó là ADR-0012 luật 1 chạy trên dữ liệu thật.
+
+---
+
+## 8b. Số đo tương tự — đo 2026-08-06 (DEMO_SAS v654)
+
+Đọc trực tiếp bằng `tools/probe_dataserver.py`; danh mục ở
+`backend/src/blackinterface/domain/measurement.py`.
+
+| Chủ thể | Đường dẫn | Data attribute dùng |
+|---|---|---|
+| Ngăn | `/SAS/<VL>/<BAY>/MMXU1` | `totW` `totVAr` `totPF` `Vlin` `Amax` `Hz` |
+| Thanh cái | `/SAS/Subs/BBxx` | `PPVmax` `Hz` |
+| MBA | `/SAS/AT1/YLTC` | `TapPos` |
+
+`MMXU1` có 26 con (thêm `AphsA/B/C`, `PhVphsA/B/C`, `WphsA/B/C`, `VArphsA/B/C`,
+`PFphsA/B/C`, `PPVphsAB/BC/CA`, `Aneut`, `Tagging`). Ta chỉ lấy tổng và cực đại;
+giá trị theo pha chưa có use case nên chưa đọc. 11/12 ngăn có `MMXU1`.
+
+### Ba phát hiện quan trọng
+
+**1. `PPVmax` viết thường chữ m**, không phải `PPVMax` như ghi trong ADR-0012 và
+tài liệu use case. Case sai thì không bind được.
+
+**2. KHÔNG có `EngineeringUnits` / `EURange` / `Unit` trên bất kỳ measurand nào.**
+Đã kiểm tra từng biến. Vậy **đơn vị không lấy được từ nguồn**: `Vlin` đọc ra
+221.08 và không có gì nói đó là V hay kV. Black Interface do đó **không in đơn vị**
+cho công suất/áp/dòng, chỉ in số kèm tên đại lượng, và gắn
+`LimitCode.UNIT_UNVERIFIED` vào bằng chứng. `Hz`, hệ số công suất và nấc MBA được
+miễn vì không thể sai thang. → **Câu hỏi mở Q7**: xin ATS thang đo thật.
+
+**3. DEMO_SAS sinh số đo ngẫu nhiên, không nhất quán vật lý.** Cùng lúc đo được
+`D03.MMXU1.Hz = 51.33` và `Subs/BB21.Hz = 49.71` — bất khả thi trong một trạm đồng
+bộ. Đừng dùng số của DEMO để kiểm chứng công thức điện; nó chỉ dùng để kiểm chứng
+đường dẫn dữ liệu.
+
 ---
 
 ## 9. Bề mặt GHI — cấm chạm, và là rủi ro bảo mật
@@ -264,12 +303,17 @@ theo từng browser.
 Address space có sẵn bề mặt ghi, hiện **không được bảo vệ**:
 ```
 <bay>.XCBR1.PosCtl / <bay>.XSWI*.PosCtl    Method điều khiển đóng cắt
+ATx.YLTC.TapChg / MasCtl / EmerCtl / ParCtl / ResetCtl   ← đo 2026-08-06
 SysCommon.Force / Unforce / UnforceAllData
 SysCommon.EnableAlarm / DisableAlarm
 OATagging.SetTagging / RemoveTagging / ChangeTagging
 OAAlarm.Ack* / Enable / Disable / Delete / Change*Limit
 OADataModel.Restart / OnlineUpdate          ← restart data server
 ```
+
+Nhóm `YLTC` đáng chú ý: ta **đọc** `TapPos` ngay cạnh 5 Method điều khiển bộ đổi
+nấc. Đã thêm cả 5 vào `FORBIDDEN_CALLS` của `tools/check.py` — đọc một node nằm
+sát một lệnh chính là lúc phải viết ranh giới ra, không phải lúc mặc định nó có.
 
 **Endpoint đang là SecurityPolicy None + Anonymous cho phép** → bất kỳ ai tới được
 cổng 48050 đều gọi được `PosCtl`. Trên máy demo thì không sao; **trước khi triển khai

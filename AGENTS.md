@@ -18,8 +18,12 @@
 | 5 | `docs/10-architecture/overview.md` | Khi thêm module hoặc đổi ranh giới lớp |
 | 6 | `docs/10-architecture/adr/` | Khi định làm khác một quyết định đã chốt |
 | 7 | `docs/40-testing/` | Khi muốn tự tay chạy thử một module đã xong |
+| 8 | `document/@Station_UseCases 1.xlsx` | Khi làm bất kỳ module use case nào (A–F). Sheet `Use Case` = khung; `A01`/`A02`/`A04` = chi tiết, có **đích danh point** |
 
 Không đọc `document/UserManual/*.pdf` trừ khi thật sự cần — đã chắt lọc vào `docs/`.
+
+⚠ File use case là **ví dụ về loại việc người dùng muốn giải quyết**, không phải
+khuôn mẫu để code từng dòng — xem I8. Dùng nó làm **bộ đề kiểm tra độ phủ**.
 
 ---
 
@@ -39,17 +43,26 @@ Chi tiết: `docs/00-product/vision.md`
 
 ---
 
-## 2. Bảy luật bất biến (INVARIANTS)
+## 2. Tám luật bất biến (INVARIANTS)
 
 Vi phạm bất kỳ luật nào dưới đây = sai, kể cả khi code chạy được.
 Nếu bạn nghĩ cần phá luật, **dừng lại và hỏi người dùng**, đừng tự quyết.
 
-### I1. MVP là READ-ONLY. Cưỡng chế bằng cấu trúc, không bằng prompt.
-- Tool registry **không được chứa** bất kỳ tool ghi nào.
+### I1. Một đường ghi duy nhất, qua `control/`. Cưỡng chế bằng cấu trúc, không bằng prompt.
+*(Phát biểu lại 2026-08-05 theo ADR-0011 — module C nằm trong MVP nhưng làm sau cùng.)*
+
+- **Không module nào ngoài `control/` được chạm bề mặt ghi của OneATS.**
+- **`control/registry.py` RỖNG** cho tới khi có ADR riêng mở từng lệnh một.
+  Tới lúc này, trên thực tế hệ vẫn read-only — chỉ khác là chỗ để mở đã có sẵn.
+- **Agent KHÔNG BAO GIỜ có tool ghi.** Vĩnh viễn, kể cả sau khi module C mở.
+  Agent được *chuẩn bị* thao tác (kiểm tra interlock, dựng checklist, đọc trình
+  tự, giải thích hậu quả — đều là đọc). Nút bấm ở UI, người bấm, có xác nhận.
+  **Agent soạn phiếu, người ký.**
+- `agent/` **không được import** `control/`.
 - Client OPC UA phải dùng account read-only, không Anonymous.
-- Không bao giờ gọi `*.PosCtl`, `SysCommon.Force/Unforce`, `OADataModel.Restart`,
+- Bề mặt ghi: `*.PosCtl`, `SysCommon.Force/Unforce`, `OADataModel.Restart`,
   `OATagging.Set*`, `OAAlarm.Ack*/Enable/Disable`.
-- Danh sách đầy đủ bề mặt ghi: `docs/30-integration/oneats-dataserver.md` §Bề mặt ghi.
+  Danh sách đầy đủ: `docs/30-integration/oneats-dataserver.md` §Bề mặt ghi.
 
 ### I2. Không khẳng định trạng thái khi quality không GOOD.
 Mọi phát biểu về trạng thái thiết bị **bắt buộc** kèm `(value, quality, timestamp/age)`.
@@ -83,6 +96,21 @@ Point catalog phải freeze thành snapshot có hash, pin vào release, pin kèm
 `OADataModel.ModelVersion`. Runtime chỉ lấy *giá trị* live. NodeId không resolve được
 = **drift**, phải nổi lên UI như sự cố hệ thống, cấm im lặng fallback.
 
+### I8. Địa chỉ hoá bằng `scope × facet`, không bằng use case. (ADR-0010)
+30 use case trong `document/@Station_UseCases 1.xlsx` là **ví dụ về loại việc**,
+không phải khuôn mẫu để code từng dòng. A-01/A-02/A-03 là *cùng một hàm*, khác
+mỗi phạm vi.
+
+- **Scope** (`station`, `bay:D03`, `device:D03.XCBR1`, `point:…`) là một khái
+  niệm dùng chung cho: URL frontend · tham số tool của agent · khoá pane ·
+  `subject` của evidence. `domain/scope.py` là **nơi duy nhất** parse/format —
+  không nơi nào ghép chuỗi `f"bay:{id}"` bằng tay.
+- **LLM không bao giờ tự sinh scope ref.** Người dùng nói "271", resolver
+  deterministic đổi thành `device:D03.XCBR1`. Không phân giải được thì báo không
+  tìm thấy — **cấm đoán**.
+- **Thước đo kiểm tra được**: thêm use case mà phải thêm tool cho agent →
+  thiết kế đã sai. Thêm đúng cách là thêm một bộ lọc hoặc một scope.
+
 ---
 
 ## 3. Tech stack (đã chốt)
@@ -97,11 +125,13 @@ Point catalog phải freeze thành snapshot có hash, pin vào release, pin kèm
 | Agent | **Pydantic AI** | |
 | LLM | OpenRouter (dev) → Ollama (trạm) | qua interface `LLMProvider`, đổi bằng config |
 | Frontend | **Vite + Vue 3 + TypeScript** (ADR-0009) | build tĩnh → FastAPI serve → 1 process, không cần Node runtime |
+| UI kit | **shadcn-vue** + Tailwind v4 + reka-ui (ADR-0014) | cài theo đường **Vite**, KHÔNG dùng Nuxt. MCP: `npx shadcn-vue@latest mcp init --client claude` |
+| i18n | **vue-i18n** — `vi` mặc định + `en` | ngôn ngữ UI ≠ ngôn ngữ câu trả lời của LLM |
 | Type API | **sinh từ OpenAPI** (`openapi-typescript`) | backend đổi field → frontend lỗi biên dịch |
 | Đóng gói | embedded CPython + Inno Setup → Windows Service | |
 
 **Không được thêm** vào stack mà không có ADR: MongoDB, Postgres, Docker, Redis,
-Node runtime ở production, message broker.
+Node runtime ở production, message broker, **Nuxt** (ADR-0009 đã bác, ADR-0014 xác nhận lại).
 
 ---
 
@@ -114,14 +144,22 @@ backend/src/blackinterface/
   logs.py        # structlog; gọi configure() một lần lúc khởi động
   domain/        # L4 Neutral Station Model — contract hợp nhất, immutable
     models.py        Bay/Device/Busbar/ConnectivityNode/PointSample/ValidationIssue
-    observation.py   StationObs — đầu vào trung tính cho mọi importer;
-                     watch_points/apply_samples = nền của realtime (thuần)
+    observation.py   StationObs — đầu vào trung tính cho mọi importer; nền của
+                     realtime, TÁCH LÀM HAI HỌ: state_points/apply_state_samples
+                     (rời rạc, dựng lại graph) và measurement_points/
+                     apply_measurement_samples (tương tự, chỉ dán nhãn). Hai
+                     danh sách rời nhau — ADR-0012 luật 1 (thuần)
     bay_types.py     suy loại ngăn từ thành phần LN
     templates.py     loader + registry cho templates/*.yaml
     templates/       6 bay template (ADR-0008)
     topology.py      observation + template -> StationGraph  (thuần, không I/O)
     energization.py  StationGraph -> vùng mang điện; gieo mầm từ thanh cái,
                      đối chiếu với <bay>.IsLive của OneATS (thuần, không I/O)
+    scope.py         ScopeRef — NƠI DUY NHẤT parse/format scope ref (I8)
+    measurement.py   danh mục measurand + Reading + deadband theo TỪNG đại lượng.
+                     Không in đơn vị nào chưa đo được thang (thuần)
+    evidence.py      EvidenceRecord/Coverage/PointQ/Limit + EvidenceBuilder;
+                     builder tự suy ra `limits`, facet chỉ khai báo sự kiện
   integration/   # L5 importers + adapters — CHỈ ĐÂY được biết NodeId
     dump.py          đọc dump JSON -> StationObs (offline, dùng cho test/demo)
     opcua/discovery.py  browse DataServer live -> StationObs (hiếm: cấu trúc)
@@ -130,19 +168,53 @@ backend/src/blackinterface/
   diagram/       # L6 graph → layout → ViewModel → SVG
     layout.py        StationGraph -> DiagramView (toạ độ, deterministic)
   api/           # L3 Typed Domain API (FastAPI, HTTP/SSE)
-    source.py        StationStore: project (snapshot|live) hoặc fallback
-                     BI_SOURCE; giữ obs, vá theo lô, phát revision cho SSE
+    app.py           CHỈ lắp ráp: lifespan, middleware, include_router, static.
+                     Thứ tự include_router = thứ tự path trong openapi.json
+    deps.py          state của process (settings/db/store); router lấy qua
+                     get_store() — test đổi bằng deps.use()
+    schemas.py       MỌI response model. Tên = tên schema trong openapi.json
+    mappers.py       domain -> schema, hàm thuần, không đọc state toàn cục
+    routers/         health · projects · station · live · summary · diagram
+    summary.py       facet `summary`: một scope -> câu trả lời + EvidenceRecord.
+                     Khuôn mẫu cho mọi facet sau
+    source.py        StationStore: model nào đang hiện hành và đổi lúc nào
+    reader.py        SourceReader: đọc nguồn -> StationObs (import lazy asyncua)
+    watch.py         MonitorSupervisor: vòng đời subscription, sync() idempotent
+    broadcast.py     Cadence(state|measurement|link) + revision mỗi nhịp +
+                     Listener giữ MỘT chỗ CHO MỖI nhịp (ADR-0012)
+    throttle.py      giảm nhịp `measurement`, có sườn xuống nên số đo cuối của
+                     một chùm không bao giờ mất
     errors.py        exception -> JSON {"error": {code, message, detail}}
-    app.py           endpoint (kể cả /api/projects) + serve frontend/dist
-  agent/         # L2 BlackCore (Pydantic AI: intent, tools, planner, evidence)
+  agent/         # L2 BlackCore (Pydantic AI) — CHƯA CÓ, kế hoạch ở docs/90-progress/status.md
+    provider.py      LLMProvider: OpenRouter (dev) -> local GPU tại trạm
+    session.py       lịch sử hội thoại (nhiều phiên), nạp từ store/sessions
+    resolve.py       "271" -> device:D03.XCBR1 — DETERMINISTIC, không qua LLM
+    tools/           registry CHỈ ĐỌC, mỗi tool trả (payload, EvidenceRecord)
+  control/       # đường ghi DUY NHẤT (I1, ADR-0011) — hình dạng đã có, cửa đóng
+    registry.py      lệnh được phép — `COMMANDS = {}`, check.py parse bằng ast
+    guard.py         tiền điều kiện; đồng thời là hiện thực C-01 (đọc thuần).
+                     Mặc định LÀ TỪ CHỐI: không đánh giá được ≠ đã thông qua
+    audit.py         AuditEntry + AuditSink (chỉ append, không sửa/xoá)
   store/         # SQLite (ADR-0006)
     db.py            connection, WAL, migration tiến-một-chiều
     meta.py          repository app_meta — mẫu cho các repository sau
     projects.py      repository projects + snapshot (StationObs JSON, opaque)
     migrations/      NNN_name.sql, đánh số liên tục từ 001
 backend/openapi.json  # HỢP ĐỒNG API. Sinh ra, được check.py gác
-frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009), xem frontend/README.md
+frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009) + shadcn-vue (ADR-0014)
+  components.json      # cấu hình shadcn-vue CLI (`npx shadcn-vue@latest add …`)
+  src/styles.css       # Tailwind v4 cấu hình BẰNG CSS (@theme) — không có file JS
   src/api/schema.d.ts  # SINH từ openapi.json. ĐỪNG SỬA TAY
+  src/scope.ts         # parse/format ScopeRef, khớp domain/scope.py (I8).
+                       # check.py so hai bộ ScopeKind, lệch là đỏ
+  src/router.ts        # `/ops/:scope` là địa chỉ chính; scope sai -> redirect
+  src/i18n/            # vi (mặc định) + en. Nhãn của MỌI code từ backend ở đây
+  src/lib/utils.ts     # cn() cho shadcn-vue
+  src/ui/              # design system; hai bảng màu tách bạch (ADR-0014 §2)
+  src/stores/          # tách theo VÒNG ĐỜI: structure · live · measurements ·
+                       # workspace · summary · projects.
+                       # stream.ts giữ EventSource DUY NHẤT và phân nhánh theo
+                       # event.type — store giữ dữ liệu, không giữ socket
 tools/           # script vận hành/kiểm chứng — chạy được độc lập
 docs/            # xem §0
 document/        # tài liệu gốc ATS (manual PDF, output service SLD) — CHỈ ĐỌC
@@ -238,7 +310,7 @@ cd backend
 uv sync
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest                # 197 test, không cần DataServer
+uv run pytest                # 288 test, không cần DataServer
 uv run pytest -m live        # cần DataServer đang chạy
 uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
@@ -282,6 +354,7 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `DBB`/`EBB` là thanh cái | **Sai.** Đó là **bảo vệ so lệch thanh cái**. Thanh cái thật ở `/SAS/Subs/BB11..BB29`. |
 | `-9` (XSWI9) là dao chọn thanh cái như `-1`/`-2` | **Sai ở ngăn đường dây/MBA.** `-9` nối thanh cái vòng thẳng vào phía **đường dây**, bỏ qua máy cắt. Ở ngăn nối vòng (D12/E04) thì `-9` lại nằm sau máy cắt. Cùng số hiệu LN, khác vị trí điện — xem §5.5. |
 | Màu: đỏ = có điện | **Sai.** OneATS: **thiết bị** đỏ=đóng/xanh lá=mở; **dây dẫn** xanh dương=có điện/xanh lá=không điện. |
+| Dùng màu của sơ đồ để báo trạng thái phần mềm (mất kết nối, đang tải) | **Sai và đã từng gây lỗi thật.** Header cũ tô "mất kết nối" bằng `--closed` (đỏ) và "trực tuyến" bằng `--open` (xanh lá) — đúng hai màu đang có nghĩa "máy cắt đóng" và "dao mở" trên sơ đồ bên cạnh. **Hai bảng màu tách bạch** (ADR-0014 §2, `styles.css`): `st-*` cho trạm, `sys-*` cho phần mềm, và `sys-*` **không bao giờ dùng đỏ hoặc xanh lá**. "Trực tuyến" là màu trung tính. |
 | Vẽ `-1` và `-2` trên cùng một đường thẳng đứng | **Sai và nguy hiểm.** Đường đó chạm cả hai thanh cái tại cùng một điểm → hình luôn trông như có đường dẫn xuyên qua cả hai, bất kể dao ở đâu. Mỗi dao nối thanh cái phải có **làn x riêng** + **chấm nối**; cắt ngang không chấm = không nối. `test_no_conductor_runs_through_another_devices_busbar_connection` khoá điều này. |
 | Mỗi cấp điện áp một hình riêng | SLD thật vẽ **cả trạm trong một hình**, cấp cao nhất trên cùng và **lật ngược** để hai nhóm thanh cái quay vào nhau. `layout_station()`; `/api/diagram`. |
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
@@ -294,6 +367,11 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `PointSample.source_ref` là NodeId của logical node | **Sai** (đã sửa 2026-08-05). Phải là NodeId của **biến** sinh ra giá trị (`...XCBR1.PosSt`), không phải của LN cha. `dump.py` vốn đã đúng; `discovery.py` thì không — vừa hỏng truy vết, vừa khiến subscribe sai node. |
 | Mất kết nối thì xoá sơ đồ / coi là mất điện | **Sai và nguy hiểm.** Rớt link là tin về *ta*, không phải về trạm. Giữ nguyên giá trị cuối, đặt `connected=false`, nói rõ trên header. Trạm rỗng trông y hệt trạm cắt hết điện. |
 | Vá `StationGraph` tại chỗ cho nhanh | Không cần. Đo 2026-08-05: `build_station` 0.71 ms + `solve_energization` 0.21 ms. Dựng lại toàn bộ mỗi lô ~1 ms và **bảo đảm** kết quả giống hệt duyệt mới — sửa tại chỗ không hứa được điều đó. |
+| Cho số đo đi chung đường với vị trí đóng cắt | **Sai.** Số đo tương tự đổi liên tục và **không** đổi topology. Chung đường thì `build_station` + `solve_energization` chạy lại mỗi khi phụ tải nhích 0,1 MW, và một bão số đo có thể hoãn việc xử lý một máy cắt vừa nhảy. Hai họ hàm rời nhau trong `observation.py`, `StationStore` định tuyến theo `source_ref`, `test_realtime.py` khoá lại việc hai danh sách không giao nhau (ADR-0012 luật 1). |
+| In đơn vị theo suy đoán (kV, MW) cho số đo | **Sai.** DataServer **không** công bố `EngineeringUnits` trên bất kỳ measurand nào (đo 2026-08-06). Biết đại lượng, **không** biết thang: `Vlin` = 221.08 có thể là V hoặc kV. In "221.08 V" cạnh thanh cái 220 kV còn tệ hơn không in gì. Chỉ `Hz`, hệ số công suất, nấc MBA là miễn. Số nào chưa xác minh thang → `Unit.UNKNOWN` + `LimitCode.UNIT_UNVERIFIED` trong bằng chứng. Câu hỏi mở Q7. |
+| Một ngưỡng deadband toàn cục cho mọi số đo | **Sai.** 0,5 % của 50 Hz là 0,25 Hz — dao động rất lớn; 0,5 % của phụ tải là nhiễu. Deadband khai theo **từng đại lượng** trong `domain/measurement.py`; `BI_MEASUREMENT_DEADBAND_PCT` chỉ là đặt đè. Nấc MBA **không** deadband: nó rời rạc như vị trí dao. |
+| Throttle chỉ cần chặn sườn lên | **Sai.** Bỏ hết trong cửa sổ thì số đo *cuối* của một chùm không bao giờ tới, client đứng ở một số cũ mà không có gì báo là cũ. `api/throttle.py` có sườn xuống. |
+| Số của DEMO_SAS dùng để kiểm chứng công thức điện được | **Không.** Simulator sinh ngẫu nhiên từng điểm: đo cùng lúc `D03.MMXU1.Hz = 51.33` và `BB21.Hz = 49.71` — bất khả thi trong một trạm đồng bộ. Dùng nó để kiểm chứng **đường dẫn dữ liệu**, không phải vật lý. |
 
 ---
 

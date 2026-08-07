@@ -8,11 +8,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from blackinterface.api import app as app_module
+from blackinterface.api import deps
 from blackinterface.api.source import StationStore
 from blackinterface.config import Settings
 from blackinterface.domain.observation import StationObs
 from blackinterface.errors import SourceUnavailableError
 from blackinterface.integration.dump import load_dump
+from blackinterface.store.db import Database
 from tests.conftest import SAS_TREE
 
 
@@ -21,13 +23,16 @@ def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     if not SAS_TREE.exists():
         pytest.skip(f"fixture missing: {SAS_TREE}")
     data_dir = tmp_path_factory.mktemp("data")
-    app_module.database = app_module.Database(data_dir / "test.sqlite")
-    app_module.store = StationStore(
-        # realtime off: the project tests below use made-up DataServer URLs, and
-        # a subscription would be the one thing in this module actually dialling
-        # the network. Realtime wiring has its own tests in test_realtime.py.
-        Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
-        app_module.database,
+    database = Database(data_dir / "test.sqlite")
+    deps.use(
+        StationStore(
+            # realtime off: the project tests below use made-up DataServer URLs, and
+            # a subscription would be the one thing in this module actually dialling
+            # the network. Realtime wiring has its own tests in test_realtime.py.
+            Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
+            database,
+        ),
+        database,
     )
     with TestClient(app_module.app) as test_client:
         yield test_client
@@ -45,6 +50,14 @@ def test_station_summary(client: TestClient) -> None:
     assert body["device_count"] == 80
     assert body["coverage"]["position_good"] == 80
     assert set(body["voltage_levels"]) == {"220kV", "110kV", "22kV"}
+    for issue in body["issues"]:
+        assert issue["group"] in {"A", "B", "C"}
+
+
+def test_issues_list_matches_station(client: TestClient) -> None:
+    station_issues = client.get("/api/station").json()["issues"]
+    listed = client.get("/api/issues").json()["issues"]
+    assert listed == station_issues
 
 
 def test_bays_listing_is_complete(client: TestClient) -> None:
@@ -126,6 +139,12 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         "POST /api/projects/{project_id}/open",
         "POST /api/projects/{project_id}/refresh",
         "DELETE /api/projects/{project_id}",
+        # Accounts and sessions (ADR-0017). These write to `users`, `user_roles`
+        # and `sessions` — rows about who is *looking* at the station, which is
+        # as far from a OneATS command as a write in this system gets.
+        "POST /api/login",
+        "POST /api/logout",
+        "POST /api/password",
     }
 
 
@@ -147,14 +166,14 @@ def _serve_fixture(monkeypatch: pytest.MonkeyPatch) -> None:
     async def observe(url: str) -> StationObs:
         return load_dump(SAS_TREE).model_copy(update={"source": url})
 
-    monkeypatch.setattr(app_module.store, "_observe_opcua", observe)
+    monkeypatch.setattr(deps.get_store(), "_observe_opcua", observe)
 
 
 def _serve_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
     async def observe(url: str) -> StationObs:
         raise SourceUnavailableError(f"cannot read the OneATS DataServer at {url}", url=url)
 
-    monkeypatch.setattr(app_module.store, "_observe_opcua", observe)
+    monkeypatch.setattr(deps.get_store(), "_observe_opcua", observe)
 
 
 def test_create_project_connects_and_snapshots(
@@ -250,10 +269,12 @@ def test_deleting_the_active_project_unloads_the_model(client: TestClient) -> No
 
 def test_not_loaded_reports_503_with_a_reason() -> None:
     """A broken source must not look like an empty station."""
-    original = app_module.store
+    original = deps.get_store()
     try:
-        app_module.store = StationStore(
-            Settings(source="fixture", fixture=SAS_TREE.parent / "does-not-exist.json")
+        deps.use(
+            StationStore(
+                Settings(source="fixture", fixture=SAS_TREE.parent / "does-not-exist.json")
+            )
         )
         with TestClient(app_module.app, raise_server_exceptions=False) as broken:
             response = broken.get("/api/station")
@@ -261,4 +282,4 @@ def test_not_loaded_reports_503_with_a_reason() -> None:
         assert response.json()["error"]["code"] == "model_not_loaded"
         assert "does-not-exist.json" in broken.get("/api/health").json()["load_error"]
     finally:
-        app_module.store = original
+        deps.use(original)

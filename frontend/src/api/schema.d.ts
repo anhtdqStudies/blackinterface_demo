@@ -133,6 +133,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Issues */
+        get: operations["list_issues_api_issues_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/live": {
         parameters: {
             query?: never;
@@ -142,12 +159,104 @@ export interface paths {
         };
         /**
          * Live
-         * @description One poll of what `/api/stream` pushes. The fallback when SSE cannot get
-         *     through, and what the UI loads before the stream's first event arrives.
+         * @description One poll of everything `/api/stream` pushes. The fallback when SSE cannot
+         *     get through, and what the UI loads before the stream's first event.
          */
         get: operations["live_api_live_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Login
+         * @description Verify a password and start a session.
+         *
+         *     Writes a row to the local SQLite store and sets a cookie. Nothing here
+         *     reaches OneATS (I1) — this endpoint is about who is looking at the station,
+         *     not about the station.
+         */
+        post: operations["login_api_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Logout
+         * @description End the session server-side and clear the cookie.
+         */
+        post: operations["logout_api_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Me
+         * @description The current caller, or an empty identity when nobody is signed in.
+         *
+         *     Resolved through `get_principal`, not by reading the cookie here: every
+         *     facet must agree about who is calling, and a second way of working that out
+         *     is a second answer waiting to disagree with the first.
+         */
+        get: operations["me_api_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change Password
+         * @description Change your own password. The current one has to be given again.
+         *
+         *     Only your own: changing somebody else's belongs with `account.manage` and
+         *     an audit record, and that screen does not exist yet. Better absent than
+         *     half-built.
+         */
+        post: operations["change_password_api_password_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -286,13 +395,34 @@ export interface paths {
         };
         /**
          * Stream
-         * @description Push the live document whenever anything moves (Server-Sent Events).
+         * @description Push each cadence whenever it moves (Server-Sent Events).
          *
-         *     The first event is the current state, so a client needs no separate initial
-         *     fetch. Read-only in both directions: SSE has no channel back, and the data
-         *     behind it is a subscription to OneATS, never a command to it (I1).
+         *     The first three events are the current state, measurements and link, so a
+         *     client needs no separate initial fetch. Read-only in both directions: SSE
+         *     has no channel back, and the data behind it is a subscription to OneATS,
+         *     never a command to it (I1).
          */
         get: operations["stream_api_stream_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Summary
+         * @description How this part of the station is doing, with the evidence behind it.
+         */
+        get: operations["summary_api_summary_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -319,7 +449,7 @@ export interface components {
             is_live: boolean | null;
             is_live_quality: components["schemas"]["Quality"];
             /** Issues */
-            issues: components["schemas"]["ValidationIssue"][];
+            issues: components["schemas"]["ValidationIssueOut"][];
             /** Logical Nodes */
             logical_nodes: string[];
             /** Name */
@@ -341,7 +471,7 @@ export interface components {
             is_live: boolean | null;
             is_live_quality: components["schemas"]["Quality"];
             /** Issues */
-            issues: components["schemas"]["ValidationIssue"][];
+            issues: components["schemas"]["ValidationIssueOut"][];
             /** Logical Nodes */
             logical_nodes: string[];
             /** Name */
@@ -402,6 +532,30 @@ export interface components {
             top: number;
             /** X */
             x: number;
+        };
+        /**
+         * Coverage
+         * @description How much of what was asked for could actually be answered.
+         *
+         *     `resolved < requested` is the natural home for drift (I7): a NodeId that
+         *     stopped resolving shows up here rather than as a silently shorter list.
+         */
+        Coverage: {
+            /**
+             * Missing
+             * @default []
+             */
+            missing: string[];
+            /**
+             * Requested
+             * @default 0
+             */
+            requested: number;
+            /**
+             * Resolved
+             * @default 0
+             */
+            resolved: number;
         };
         /**
          * CrossCheck
@@ -535,7 +689,7 @@ export interface components {
             /** Islands */
             islands: components["schemas"]["Island"][];
             /** Issues */
-            issues: components["schemas"]["ValidationIssue"][];
+            issues: components["schemas"]["ValidationIssueOut"][];
             /** Node State */
             node_state: {
                 [key: string]: components["schemas"]["LiveState"];
@@ -544,6 +698,53 @@ export interface components {
             summary: {
                 [key: string]: number;
             };
+        };
+        /**
+         * EvidenceRecord
+         * @description What a facet knew, when, from where, and how well.
+         *
+         *     `subject` is a scope ref (ADR-0010), so evidence, URL, pane and tool argument
+         *     are the same vocabulary rather than four dialects of it.
+         */
+        EvidenceRecord: {
+            /** Actor */
+            actor?: string | null;
+            /** Args */
+            args?: {
+                [key: string]: string | number | boolean | null;
+            };
+            /**
+             * Called At
+             * Format: date-time
+             */
+            called_at: string;
+            /**
+             * @default {
+             *       "missing": [],
+             *       "requested": 0,
+             *       "resolved": 0
+             *     }
+             */
+            coverage: components["schemas"]["Coverage"];
+            /**
+             * Limits
+             * @default []
+             */
+            limits: components["schemas"]["Limit"][];
+            /** Model Version */
+            model_version?: string | null;
+            /**
+             * Quality
+             * @default []
+             */
+            quality: components["schemas"]["PointQ"][];
+            /** Release */
+            release?: string | null;
+            source: components["schemas"]["Source"];
+            /** Subject */
+            subject: string;
+            /** Tool */
+            tool: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -612,6 +813,11 @@ export interface components {
              */
             voltage_level: string;
         };
+        /** IssuesOut */
+        IssuesOut: {
+            /** Issues */
+            issues: components["schemas"]["ValidationIssueOut"][];
+        };
         /**
          * JunctionView
          * @description A real connection to a busbar. Drawn as a dot; a crossing has none.
@@ -629,6 +835,29 @@ export interface components {
             /** Y */
             y: number;
         };
+        /**
+         * Limit
+         * @description One caveat, machine-readable so the UI can rank and translate it.
+         */
+        Limit: {
+            code: components["schemas"]["LimitCode"];
+            /**
+             * Count
+             * @default 0
+             */
+            count: number;
+            /**
+             * Subjects
+             * @default []
+             */
+            subjects: string[];
+        };
+        /**
+         * LimitCode
+         * @description Why an answer is worth less than it looks.
+         * @enum {string}
+         */
+        LimitCode: "points_missing" | "quality_not_good" | "data_stale" | "from_snapshot" | "link_down" | "deadband_applied" | "no_history" | "unit_unverified";
         /**
          * LinkOut
          * @description The state of the subscription itself.
@@ -649,6 +878,11 @@ export interface components {
              * @default 0
              */
             rejected: number;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
             /** Since */
             since?: string | null;
             /**
@@ -659,43 +893,18 @@ export interface components {
         };
         /**
          * LiveOut
-         * @description Everything about the station that moves, in one document.
+         * @description Everything that moves, in one document — the shape `/api/live` returns.
          *
-         *     The split this expresses: `/api/diagram` is geometry and `/api/bays` is
-         *     structure — both change only when the station is browsed again. Everything
-         *     here changes constantly, and is exactly what `/api/stream` pushes. One
-         *     shape for the first load and for every update, so the client has a single
-         *     code path applying it.
-         *
-         *     `structure_revision` is the geometry's version. A client whose copy no
-         *     longer matches must refetch the drawing before trusting these keys to join
-         *     onto it.
+         *     The stream sends these three as separate typed events at their own rates
+         *     (ADR-0012); the poll endpoint hands over all three at once, because a
+         *     client that has just connected needs the whole present tense before it can
+         *     render anything. Same schemas either way, so there is still one code path
+         *     applying each cadence.
          */
         LiveOut: {
-            /**
-             * Bay Is Live
-             * @default {}
-             */
-            bay_is_live: {
-                [key: string]: boolean | null;
-            };
-            /**
-             * Devices
-             * @default {}
-             */
-            devices: {
-                [key: string]: components["schemas"]["DeviceLiveOut"];
-            };
-            energization?: components["schemas"]["EnergizationOut"] | null;
             link: components["schemas"]["LinkOut"];
-            /** Loaded */
-            loaded: boolean;
-            /** Revision */
-            revision: number;
-            /** Structure Revision */
-            structure_revision: number;
-            /** Updated At */
-            updated_at?: string | null;
+            measurement: components["schemas"]["MeasurementOut"];
+            state: components["schemas"]["StateOut"];
         };
         /**
          * LiveState
@@ -706,12 +915,99 @@ export interface components {
          * @enum {string}
          */
         LiveState: "LIVE" | "DEAD" | "EARTHED" | "UNKNOWN";
+        /** LoginIn */
+        LoginIn: {
+            /** Password */
+            password: string;
+            /** Username */
+            username: string;
+        };
+        /**
+         * MeOut
+         * @description The caller's identity and permissions (ADR-0016, ADR-0017).
+         *
+         *     `capabilities` is the field the UI switches on. `roles` is for display and
+         *     for support calls — "which roles is this account holding" is the first
+         *     question when somebody reports a missing button.
+         *
+         *     `authenticated=False` means nobody is signed in, which is not an error: it
+         *     is what `/api/me` answers before the login screen has been used.
+         */
+        MeOut: {
+            /**
+             * Auth Mode
+             * @default session
+             */
+            auth_mode: string;
+            /**
+             * Authenticated
+             * @default false
+             */
+            authenticated: boolean;
+            /** Capabilities */
+            capabilities: string[];
+            /**
+             * Display Name
+             * @default
+             */
+            display_name: string;
+            /** Roles */
+            roles: string[];
+            /** User */
+            user: string;
+        };
+        /**
+         * MeasurementOut
+         * @description What the station is *reading*. The `measurement` cadence.
+         *
+         *     Keyed by subject so a panel scoped to `bay:D03` looks up exactly its own
+         *     readings. Subjects with no instrument transformers are simply absent —
+         *     an empty list would claim we looked and found nothing.
+         */
+        MeasurementOut: {
+            /** Deadband Override Pct */
+            deadband_override_pct?: number | null;
+            /** Measured At */
+            measured_at?: string | null;
+            /**
+             * Readings
+             * @default {}
+             */
+            readings: {
+                [key: string]: components["schemas"]["ReadingOut"][];
+            };
+            /** Revision */
+            revision: number;
+        };
+        /** PasswordChangeIn */
+        PasswordChangeIn: {
+            /** Current Password */
+            current_password: string;
+            /** New Password */
+            new_password: string;
+        };
         /** Point */
         Point: {
             /** X */
             x: number;
             /** Y */
             y: number;
+        };
+        /**
+         * PointQ
+         * @description One point as it was read, with everything needed to judge it (I2).
+         */
+        PointQ: {
+            /** Age Ms */
+            age_ms?: number | null;
+            /** Point */
+            point: string;
+            /** @default MISSING */
+            quality: components["schemas"]["Quality"];
+            /** Ts Source */
+            ts_source?: string | null;
+            /** Value */
+            value?: number | boolean | string | null;
         };
         /** ProjectCreateIn */
         ProjectCreateIn: {
@@ -765,6 +1061,12 @@ export interface components {
          * @enum {string}
          */
         Quality: "GOOD" | "UNCERTAIN" | "BAD" | "MISSING";
+        /**
+         * Quantity
+         * @description What is being measured. Always known; unlike the unit, never in doubt.
+         * @enum {string}
+         */
+        Quantity: "active_power" | "reactive_power" | "power_factor" | "voltage" | "current" | "frequency" | "tap_position";
         /** RailView */
         RailView: {
             /** Busbar Id */
@@ -798,6 +1100,47 @@ export interface components {
             y: number;
         };
         /**
+         * ReadingOut
+         * @description One analog value, with everything needed to distrust it.
+         *
+         *     `unit` is `"?"` when the scale was never measured — see the module
+         *     docstring of `domain/measurement.py`. A client must then print the quantity
+         *     name instead of inventing a unit.
+         *
+         *     `value` is null unless quality is GOOD. The raw number is still on
+         *     `raw_value` for provenance, so a panel can show what the DataServer said
+         *     without implying the number is usable (I2, I6).
+         */
+        ReadingOut: {
+            /**
+             * Deadband Abs
+             * @default 0
+             */
+            deadband_abs: number;
+            /**
+             * Deadband Pct
+             * @default 0
+             */
+            deadband_pct: number;
+            /** Id */
+            id: string;
+            /** Measurand */
+            measurand: string;
+            quality: components["schemas"]["Quality"];
+            quantity: components["schemas"]["Quantity"];
+            /** Raw Value */
+            raw_value?: number | boolean | string | null;
+            /** Source Ref */
+            source_ref?: string | null;
+            /** Source Timestamp */
+            source_timestamp?: string | null;
+            /** Subject */
+            subject: string;
+            unit: components["schemas"]["Unit"];
+            /** Value */
+            value?: number | null;
+        };
+        /**
          * Reason
          * @description Why an island got its state.
          *
@@ -827,6 +1170,64 @@ export interface components {
          * @enum {string}
          */
         Severity: "info" | "warning" | "error";
+        /**
+         * Source
+         * @description The provenance of an answer, down to the release it was pinned to.
+         */
+        Source: {
+            /** Catalog Snapshot */
+            catalog_snapshot?: string | null;
+            /** Endpoint */
+            endpoint?: string | null;
+            kind: components["schemas"]["SourceKind"];
+            /**
+             * Node Ids
+             * @default []
+             */
+            node_ids: string[];
+        };
+        /**
+         * SourceKind
+         * @description Where the numbers in this answer physically came from.
+         * @enum {string}
+         */
+        SourceKind: "opcua" | "snapshot" | "fixture" | "store" | "derived";
+        /**
+         * StateOut
+         * @description What the station *is*: positions, `IsLive`, and the solved energisation.
+         *
+         *     The `state` cadence of the stream (ADR-0012). Every field here is discrete
+         *     and safety-relevant, so nothing on this path is throttled or deadbanded.
+         *
+         *     `structure_revision` is the geometry's version. A client whose copy no
+         *     longer matches must refetch the drawing before trusting these keys to join
+         *     onto it.
+         */
+        StateOut: {
+            /**
+             * Bay Is Live
+             * @default {}
+             */
+            bay_is_live: {
+                [key: string]: boolean | null;
+            };
+            /**
+             * Devices
+             * @default {}
+             */
+            devices: {
+                [key: string]: components["schemas"]["DeviceLiveOut"];
+            };
+            energization?: components["schemas"]["EnergizationOut"] | null;
+            /** Loaded */
+            loaded: boolean;
+            /** Revision */
+            revision: number;
+            /** Structure Revision */
+            structure_revision: number;
+            /** Updated At */
+            updated_at?: string | null;
+        };
         /** StationOut */
         StationOut: {
             /** Bay Count */
@@ -842,7 +1243,7 @@ export interface components {
             /** Device Count */
             device_count: number;
             /** Issues */
-            issues: components["schemas"]["ValidationIssue"][];
+            issues: components["schemas"]["ValidationIssueOut"][];
             /** Load Seconds */
             load_seconds: number | null;
             /** Model Version */
@@ -907,6 +1308,40 @@ export interface components {
             transformers: components["schemas"]["TransformerLinkView"][];
             /** Width */
             width: number;
+        };
+        /**
+         * SummaryOut
+         * @description How one scope is doing right now — the first evidence-bearing facet.
+         *
+         *     Answers the question Module A exists for ("what is the state of D03?") in
+         *     one call, and attaches the `EvidenceRecord` that says how far that answer
+         *     can be trusted: which points were asked for, which came back, how old they
+         *     are, and what is degraded about them (ADR-0013).
+         *
+         *     The evidence is built by this endpoint, never by a language model (I3).
+         */
+        SummaryOut: {
+            /** Bays */
+            bays: string[];
+            evidence: components["schemas"]["EvidenceRecord"];
+            /** Issues */
+            issues: components["schemas"]["ValidationIssueOut"][];
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /** Measurements */
+            measurements: components["schemas"]["ReadingOut"][];
+            /** Node States */
+            node_states: {
+                [key: string]: number;
+            };
+            /** Scope */
+            scope: string;
+            /** Switch States */
+            switch_states: {
+                [key: string]: number;
+            };
         };
         /**
          * SwitchState
@@ -987,6 +1422,16 @@ export interface components {
             /** Y */
             y: number;
         };
+        /**
+         * Unit
+         * @description The unit to print after the number, when we are entitled to print one.
+         *
+         *     `UNKNOWN` is a deliberate sentinel rather than an empty string: it must be
+         *     impossible to confuse "we did not measure the scale" with "this quantity is
+         *     dimensionless". Power factor is the second case and gets `NONE`.
+         * @enum {string}
+         */
+        Unit: "?" | "" | "Hz" | "step";
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1001,12 +1446,17 @@ export interface components {
             type: string;
         };
         /**
-         * ValidationIssue
-         * @description Something the builder could not resolve. Surfaced, never swallowed (I7).
+         * ValidationIssueOut
+         * @description A builder issue on the wire, with its UI group (A/B/C).
          */
-        ValidationIssue: {
+        ValidationIssueOut: {
             /** Code */
             code: string;
+            /**
+             * Group
+             * @enum {string}
+             */
+            group: "A" | "B" | "C";
             /** Message */
             message: string;
             severity: components["schemas"]["Severity"];
@@ -1184,6 +1634,26 @@ export interface operations {
             };
         };
     };
+    list_issues_api_issues_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssuesOut"];
+                };
+            };
+        };
+    };
     live_api_live_get: {
         parameters: {
             query?: never;
@@ -1200,6 +1670,112 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LiveOut"];
+                };
+            };
+        };
+    };
+    login_api_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_api_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    me_api_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+        };
+    };
+    change_password_api_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1399,13 +1975,45 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Live state */
+            /** @description Live cadences */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "text/event-stream": unknown;
+                };
+            };
+        };
+    };
+    summary_api_summary_get: {
+        parameters: {
+            query?: {
+                /** @description Scope ref, e.g. station, vl:220kV, bay:D03 */
+                scope?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

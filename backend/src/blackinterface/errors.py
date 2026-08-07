@@ -52,6 +52,31 @@ class ConflictError(BlackInterfaceError):
     http_status = 409
 
 
+class UnauthenticatedError(BlackInterfaceError):
+    """Nobody is signed in (ADR-0017).
+
+    Kept apart from `ForbiddenError` because the caller can do something about
+    this one. A UI that cannot tell them apart either shows a login screen to
+    somebody already signed in, or shows "not permitted" to somebody who only
+    needed to sign in.
+    """
+
+    code = "unauthenticated"
+    http_status = 401
+
+
+class ForbiddenError(BlackInterfaceError):
+    """The caller is known and lacks the capability this facet requires (ADR-0016).
+
+    403 rather than 404: hiding the existence of a facet would mean the UI could
+    not tell "you may not" from "it is broken", and an operator who cannot tell
+    those apart escalates the wrong one.
+    """
+
+    code = "forbidden"
+    http_status = 403
+
+
 class ModelNotLoadedError(BlackInterfaceError):
     """No station model in memory yet, or the last load failed."""
 

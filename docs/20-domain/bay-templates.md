@@ -15,6 +15,15 @@ Ngăn đường dây 220kV hai thanh cái ở Bến Cát và Hóc Môn có cùng
 
 Và quan trọng hơn: **quy ước đánh số LN của ATS/EVN đã mã hoá sẵn vị trí điện.**
 
+> ⚠ **GIẢ ĐỊNH — chưa xác minh** (ghi rõ 2026-08-06 theo §5.4).
+> Hai câu trên **mới đo trên đúng một trạm**: cả 6/6 template đều mang
+> `observed_on: … # DEMO_SAS v654`. "Bến Cát" và "Hóc Môn" ở đây là hai *ngăn*
+> trong cùng DEMO_SAS, **không phải hai trạm**.
+> Chưa biết: OneATS Grid Designer có luôn sinh `XSWI1/2/7/9` theo cùng quy tắc
+> cho mọi project không, hay engineer đặt tự do lúc dựng. Nếu đặt tự do thì việc
+> suy loại ngăn sập ở trạm sau.
+> Xem câu hỏi mở **Q4** trong `docs/90-progress/status.md`, và ADR-0015 §Bối cảnh.
+
 | LN | Hậu tố EVN | Vị trí |
 |---|---|---|
 | `XSWI1` | `-1` | dao cách ly thanh cái 1 |

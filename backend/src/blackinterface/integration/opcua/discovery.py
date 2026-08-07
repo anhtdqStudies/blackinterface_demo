@@ -20,10 +20,17 @@ from typing import Any
 
 from asyncua import Client, ua
 
+from blackinterface.domain.measurement import (
+    BAY_MEASURANDS,
+    BUSBAR_MEASURANDS,
+    TRANSFORMER_MEASURANDS,
+    wanted_das,
+)
 from blackinterface.domain.observation import (
     BayObs,
     BusbarObs,
     LogicalNodeObs,
+    MeasurandObs,
     StationObs,
     TransformerObs,
 )
@@ -46,8 +53,18 @@ LIVE_DA = "IsLive"
 #: logical nodes. Measured on DEMO_SAS (2026-08-05): /SAS/AT1/YPTR, .../YLTC.
 TRANSFORMER_LNS = ("YPTR", "YLTC")
 
-WANTED_BAY_DA = (POSITION_DA, NAME_DA, SHORT_NAME_DA)
-WANTED_BUSBAR_DA = (NAME_DA, LIVE_DA)
+WANTED_BAY_DA = frozenset({POSITION_DA, NAME_DA, SHORT_NAME_DA})
+WANTED_BUSBAR_DA = frozenset({NAME_DA, LIVE_DA}) | wanted_das(BUSBAR_MEASURANDS)
+
+
+def _wanted_under(ln_name: str) -> frozenset[str]:
+    """Data attributes to read under one logical node of a bay.
+
+    Structure first, then whatever the measurement catalog asks for under this
+    particular LN — so `MMXU1` yields six analog values and `XSWI1` yields
+    none, from one loop that knows neither name.
+    """
+    return WANTED_BAY_DA | wanted_das(BAY_MEASURANDS, ln_name)
 
 
 async def _children(node: Any) -> list[Any]:
@@ -191,9 +208,10 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                 if node_class != ua.NodeClass.Object:
                     continue
                 logical_nodes[child_name] = child
+                wanted = _wanted_under(child_name)
                 for attribute in await _children(child):
                     attribute_name = (await attribute.read_browse_name()).Name
-                    if attribute_name in WANTED_BAY_DA:
+                    if attribute_name in wanted:
                         read_nodes.append(attribute)
                         read_keys.append((bay_name, child_name, attribute_name))
             layout.append((level_name, bay_name, bay, logical_nodes))
@@ -211,6 +229,9 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                     name=_scalar(values.get((bay_name, ln_name, NAME_DA))),
                     short_name=_scalar(values.get((bay_name, ln_name, SHORT_NAME_DA))),
                     position=to_sample(values.get(position_key), refs.get(position_key)),
+                    measurands=_measurands(
+                        values, refs, (bay_name, ln_name), wanted_das(BAY_MEASURANDS, ln_name)
+                    ),
                     source_ref=ln_node.nodeid.to_string(),
                 )
             )
@@ -228,18 +249,78 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
 
 
 async def _discover_transformers(client: Client, sas: Any) -> list[TransformerObs]:
-    """Station-level siblings of the voltage levels that carry YPTR/YLTC."""
-    found: list[TransformerObs] = []
+    """Station-level siblings of the voltage levels that carry YPTR/YLTC.
+
+    `YLTC` also holds the tap changer's write surfaces (`TapChg`, `MasCtl`,
+    `EmerCtl`, `ParCtl` are Methods — browsed 2026-08-06). We read `TapPos` and
+    nothing else; invoking any of those methods is forbidden outside `control/`
+    and `tools/check.py` enforces it (AGENTS.md I1).
+    """
+    layout: list[tuple[str, Any, dict[str, Any]]] = []  # id, node, measuring LNs
+    read_nodes: list[Any] = []
+    read_keys: list[Key] = []
+
     for child in await _children(sas):
         name = (await child.read_browse_name()).Name
         if VOLTAGE_LEVEL_RE.match(name) or name == "Subs":
             continue
         if await child.read_node_class() != ua.NodeClass.Object:
             continue
-        grandchildren = {(await g.read_browse_name()).Name for g in await _children(child)}
-        if any(ln in grandchildren for ln in TRANSFORMER_LNS):
-            found.append(TransformerObs(id=name, name=name, source_ref=child.nodeid.to_string()))
-    return found
+        grandchildren = {(await g.read_browse_name()).Name: g for g in await _children(child)}
+        if not any(ln in grandchildren for ln in TRANSFORMER_LNS):
+            continue
+        measuring: dict[str, Any] = {}
+        for ln_name, ln_node in sorted(grandchildren.items()):
+            wanted = wanted_das(TRANSFORMER_MEASURANDS, ln_name)
+            if not wanted:
+                continue
+            measuring[ln_name] = ln_node
+            for attribute in await _children(ln_node):
+                attribute_name = (await attribute.read_browse_name()).Name
+                if attribute_name in wanted:
+                    read_nodes.append(attribute)
+                    read_keys.append((name, ln_name, attribute_name))
+        layout.append((name, child, measuring))
+
+    values, refs = await _read_batch(client, read_nodes, read_keys)
+    return [
+        TransformerObs(
+            id=name,
+            name=name,
+            logical_nodes=tuple(
+                LogicalNodeObs(
+                    ln=ln_name,
+                    measurands=_measurands(
+                        values, refs, (name, ln_name), wanted_das(TRANSFORMER_MEASURANDS, ln_name)
+                    ),
+                    source_ref=ln_node.nodeid.to_string(),
+                )
+                for ln_name, ln_node in sorted(measuring.items())
+            ),
+            source_ref=node.nodeid.to_string(),
+        )
+        for name, node, measuring in layout
+    ]
+
+
+def _measurands(
+    values: dict[Key, ua.DataValue],
+    refs: dict[Key, str],
+    owner: Key,
+    wanted: frozenset[str],
+) -> tuple[MeasurandObs, ...]:
+    """The analog attributes the catalog asked for, in a stable order.
+
+    An attribute the server did not return is left out rather than recorded as
+    an empty reading: "never read" and "read nothing" are different facts, and
+    the first belongs in `Coverage.missing` (I2, I7).
+    """
+    found = []
+    for name in sorted(wanted):
+        key = (*owner, name)
+        if key in values:
+            found.append(MeasurandObs(da=name, sample=to_sample(values[key], refs.get(key))))
+    return tuple(found)
 
 
 async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
@@ -268,6 +349,7 @@ async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
             id=name,
             name=_scalar(values.get((name, NAME_DA))) or name,
             is_live=to_sample(values.get((name, LIVE_DA)), refs.get((name, LIVE_DA))),
+            measurands=_measurands(values, refs, (name,), wanted_das(BUSBAR_MEASURANDS)),
             source_ref=node.nodeid.to_string(),
         )
         for name, node in layout

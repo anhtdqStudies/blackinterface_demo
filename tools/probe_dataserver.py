@@ -165,7 +165,30 @@ async def show_overview(client: Client) -> None:
 
 # Data attributes the topology importer actually reads. --slim keeps only these
 # (plus their parents), which turns a ~2 MB dump into a ~100 KB test fixture.
-SLIM_DA = {"PosSt", "Name", "SName", "IsLive"}
+#
+# Two groups, because they behave differently once the fixture is running:
+# positions and IsLive are discrete and rebuild the electrical graph; the
+# measurands below are analog and only relabel it (ADR-0012). The list mirrors
+# domain/measurement.py — a data attribute added there must be added here too,
+# or the fixture stops being able to exercise it.
+SLIM_DA = {
+    # structure and position
+    "PosSt",
+    "Name",
+    "SName",
+    "IsLive",
+    # measurands: bay MMXU1
+    "totW",
+    "totVAr",
+    "totPF",
+    "Vlin",
+    "Amax",
+    "Hz",
+    # measurands: busbar (Subs/BBxx) — note the lowercase m, measured 2026-08-06
+    "PPVmax",
+    # measurands: transformer tap changer (ATx/YLTC)
+    "TapPos",
+}
 
 
 def slim_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:

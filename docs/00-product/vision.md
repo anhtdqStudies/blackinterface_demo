@@ -92,8 +92,14 @@ nhập endpoint DataServer
 - Event store cục bộ + SOE (nền cho M2)
 - 4 tool: `list_bays`, `get_bay_snapshot`, `get_active_alarms`, `resolve_object`
 
+**Trong phạm vi, nhưng ở GIAI ĐOẠN CUỐI** *(chốt 2026-08-05, ADR-0011)*
+- **Module C — Control**: điều khiển đóng/mở MC, tăng/giảm nấc MBA (C-09),
+  đặt tagging (C-07). Đi qua `control/` — đường ghi duy nhất, registry hiện rỗng.
+- Phần **đọc** của module C (C-01 interlock, C-02 authority, C-08 tagging) làm
+  được sớm hơn, và `guard.py` dùng lại được cho cả hai.
+- **Agent không bao giờ có tool ghi** — kể cả sau khi mở. Agent soạn phiếu, người ký.
+
 **Ngoài phạm vi MVP**
-- Mọi thao tác điều khiển/ghi
 - Import SLD (giữ cho phase sau, chỉ để đối chiếu)
 - SmartHIS / trend dài hạn
 - SOP RAG

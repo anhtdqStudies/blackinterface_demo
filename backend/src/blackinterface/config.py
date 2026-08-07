@@ -45,6 +45,45 @@ class Settings(BaseSettings):
     #: the server batches its notifications into this window.
     opcua_publish_ms: float = 500.0
 
+    # ---- measurements (ADR-0012)
+    #: Override every measurand's own deadband with this percentage. Left unset
+    #: on purpose: one percentage cannot serve both power and frequency, so the
+    #: per-quantity defaults in `domain/measurement.py` are the sane answer and
+    #: this exists only for an installation that has measured better ones.
+    measurement_deadband_pct: float | None = None
+    #: Slowest rate at which a measurement pulse reaches open streams. Trailing
+    #: edge, so the last reading of a burst always arrives — see `throttle.py`.
+    measurement_throttle_ms: float = 1000.0
+
+    # ---- who is using this installation (ADR-0016, ADR-0017)
+    #: `session` — identity comes from signing in; accounts live in SQLite.
+    #: `env`     — no login at all; the whole process runs as `BI_ROLE`. For
+    #:             development and for automated checks. Never at a station:
+    #:             it hands the same permissions to anyone who can reach the port.
+    auth: Literal["session", "env"] = "session"
+
+    #: Only read when `auth="env"`. Comma separated, because one person holding
+    #: several roles is the normal case at a lightly-manned station:
+    #:     BI_ROLE=operator,maintenance
+    role: str = "operator"
+    user: str = "local"
+
+    #: How long a sign-in lasts. A shift plus a margin — long enough not to
+    #: interrupt handover, short enough that a forgotten browser stops working.
+    session_hours: float = 12.0
+    session_cookie: str = "bi_session"
+    #: Set true behind HTTPS. Left false because a station install is plain HTTP
+    #: on the local network today, and a Secure cookie there is simply never sent
+    #: — which looks like a broken login rather than a security setting.
+    cookie_secure: bool = False
+
+    #: Create one account per role on a database that has none, so a fresh
+    #: install can be signed in to. See `api/accounts.py` for the list.
+    seed_accounts: bool = True
+    #: The password those accounts get. Known, therefore not a secret — the app
+    #: says so at startup for every account that still has it.
+    seed_password: str = "blackinterface"
+
     # ---- local storage
     data_dir: Path = REPO_ROOT / "data"
     db_name: str = "blackinterface.sqlite"

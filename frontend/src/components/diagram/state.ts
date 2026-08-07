@@ -1,28 +1,32 @@
 import type { LiveState, Quality, SwitchState } from '@/api/client'
 
 /**
- * EVN/IEC convention: red = closed/energised, green = open/de-energised.
+ * STATION palette only (ADR-0014 section 2). Nothing here may paint the
+ * application's own health — that is `ui/StatusDot.vue`, which uses a separate
+ * palette on purpose, because red once meant both "breaker closed" and "we lost
+ * the connection".
+ *
+ * OneATS Grid Designer convention: red = closed, green = open on a **device**;
+ * blue = energised, green = de-energised on a **conductor**. Green therefore
+ * means two different things depending on what it paints — operators here
+ * already read it that way, so we match rather than invent.
  *
  * UNDETERMINED is grey, never green. "De-energised" is the sentence that makes
  * someone reach into a cubicle; we only say it when the data supports it
  * (AGENTS.md I2).
+ *
+ * Labels are not here. They are read by people, so they live in `src/i18n/`:
+ * `t('state.CLOSED')`, `t('liveState.LIVE')`, `t('reason.' + code)`.
  */
 export const STATE_COLOR: Record<SwitchState, string> = {
-  CLOSED: 'var(--closed)',
-  OPEN: 'var(--open)',
-  INTERMEDIATE: 'var(--intermediate)',
-  UNDETERMINED: 'var(--undetermined)',
-}
-
-export const STATE_LABEL: Record<SwitchState, string> = {
-  CLOSED: 'ĐÓNG',
-  OPEN: 'MỞ',
-  INTERMEDIATE: 'TRUNG GIAN',
-  UNDETERMINED: 'KHÔNG XÁC ĐỊNH',
+  CLOSED: 'var(--color-st-closed)',
+  OPEN: 'var(--color-st-open)',
+  INTERMEDIATE: 'var(--color-st-intermediate)',
+  UNDETERMINED: 'var(--color-st-undetermined)',
 }
 
 export function stateColor(state: SwitchState): string {
-  return STATE_COLOR[state] ?? 'var(--undetermined)'
+  return STATE_COLOR[state] ?? 'var(--color-st-undetermined)'
 }
 
 /** Anything not GOOD is drawn dashed, so degraded data is visible at a glance. */
@@ -31,19 +35,14 @@ export function isDegraded(quality: Quality): boolean {
 }
 
 /**
- * Conductor colour, OneATS Grid Designer convention: BLUE = energised,
- * GREEN = de-energised.
+ * Conductor colour from a raw IsLive reading.
  *
- * Note this is not the same green as an open switch. In this convention green
- * means "no voltage here" on a conductor and "open" on a device — operators at
- * the station already read it that way, so we match rather than invent.
- *
- * `null`/`undefined` live state means we do not know, and neither does the
- * backend — grey, never green (AGENTS.md I2).
+ * `null`/`undefined` means we do not know, and neither does the backend —
+ * grey, never green (AGENTS.md I2).
  */
 export function railColor(isLive: boolean | null | undefined, quality: Quality): string {
-  if (quality !== 'GOOD' || isLive == null) return 'var(--undetermined)'
-  return isLive ? 'var(--live)' : 'var(--dead)'
+  if (quality !== 'GOOD' || isLive == null) return 'var(--color-st-undetermined)'
+  return isLive ? 'var(--color-st-live)' : 'var(--color-st-dead)'
 }
 
 /**
@@ -54,31 +53,12 @@ export function railColor(isLive: boolean | null | undefined, quality: Quality):
  * having that state is that it does not quietly become green.
  */
 export const LIVE_COLOR: Record<LiveState, string> = {
-  LIVE: 'var(--live)',
-  DEAD: 'var(--dead)',
-  EARTHED: 'var(--earthed)',
-  UNKNOWN: 'var(--undetermined)',
-}
-
-export const LIVE_LABEL: Record<LiveState, string> = {
-  LIVE: 'CÓ ĐIỆN',
-  DEAD: 'KHÔNG ĐIỆN',
-  EARTHED: 'ĐÃ TIẾP ĐỊA',
-  UNKNOWN: 'KHÔNG XÁC ĐỊNH',
-}
-
-/** Why the solver reached its verdict. Codes come from `domain.energization`. */
-export const REASON_LABEL: Record<string, string> = {
-  seeded_live: 'thanh cái ở đây đo được có điện',
-  seeded_dead: 'thanh cái ở đây đo được không điện',
-  through_transformer: 'lấy điện qua máy biến áp',
-  possible_via_uncertain:
-    'có thiết bị không đọc được vị trí — có thể đang nối vào vùng có điện',
-  earthed: 'có dao tiếp địa đang đóng',
-  no_measurement: 'thanh cái ở đây không đọc được IsLive',
-  isolated: 'mọi đường tới nguồn đều đang mở',
+  LIVE: 'var(--color-st-live)',
+  DEAD: 'var(--color-st-dead)',
+  EARTHED: 'var(--color-st-earthed)',
+  UNKNOWN: 'var(--color-st-undetermined)',
 }
 
 export function liveColor(state: LiveState): string {
-  return LIVE_COLOR[state] ?? 'var(--undetermined)'
+  return LIVE_COLOR[state] ?? 'var(--color-st-undetermined)'
 }

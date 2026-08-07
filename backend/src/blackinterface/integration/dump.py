@@ -25,11 +25,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from blackinterface.domain.measurement import (
+    BAY_MEASURANDS,
+    BUSBAR_MEASURANDS,
+    TRANSFORMER_MEASURANDS,
+    wanted_das,
+)
 from blackinterface.domain.models import PointSample, Quality
 from blackinterface.domain.observation import (
     BayObs,
     BusbarObs,
     LogicalNodeObs,
+    MeasurandObs,
     StationObs,
     TransformerObs,
 )
@@ -133,11 +140,7 @@ def parse_dump(
         if _is_busbar(path)
     ]
     transformers = [
-        TransformerObs(
-            id=path.rsplit("/", 1)[1],
-            name=path.rsplit("/", 1)[1],
-            source_ref=record.get("nodeid"),
-        )
+        _build_transformer(path, record, children)
         for path, record in sorted(by_path.items())
         if _is_transformer(path, children)
     ]
@@ -179,14 +182,16 @@ def _build_bay(
         if ln_record.get("class") != "Object":
             continue
         das = children.get(f"{path}/{ln_name}", {})
-        if POSITION_DA not in das and NAME_DA not in das:
-            continue  # not a switching device: MMXU, BCU, protection blocks
+        measurands = _measurands(das, wanted_das(BAY_MEASURANDS, ln_name))
+        if POSITION_DA not in das and NAME_DA not in das and not measurands:
+            continue  # neither a switching device nor a measuring one
         logical_nodes.append(
             LogicalNodeObs(
                 ln=ln_name,
                 name=_text(das.get(NAME_DA)),
                 short_name=_text(das.get(SHORT_NAME_DA)),
                 position=_sample(das.get(POSITION_DA)),
+                measurands=measurands,
                 source_ref=ln_record.get("nodeid"),
             )
         )
@@ -217,7 +222,48 @@ def _build_busbar(
         id=busbar_id,
         name=_text(das.get(NAME_DA)) or busbar_id,
         is_live=_sample(das.get("IsLive")),
+        measurands=_measurands(das, wanted_das(BUSBAR_MEASURANDS)),
         source_ref=record.get("nodeid"),
+    )
+
+
+def _build_transformer(
+    path: str, record: dict[str, Any], children: dict[str, dict[str, dict[str, Any]]]
+) -> TransformerObs:
+    """A transformer group. Only its measuring logical nodes are kept — it has
+    no switching devices of its own, and its bays are found by name pairing."""
+    transformer_id = path.rsplit("/", 1)[1]
+    logical_nodes = []
+    for ln_name, ln_record in sorted(children.get(path, {}).items()):
+        if ln_record.get("class") != "Object":
+            continue
+        measurands = _measurands(
+            children.get(f"{path}/{ln_name}", {}), wanted_das(TRANSFORMER_MEASURANDS, ln_name)
+        )
+        if measurands:
+            logical_nodes.append(
+                LogicalNodeObs(
+                    ln=ln_name, measurands=measurands, source_ref=ln_record.get("nodeid")
+                )
+            )
+    return TransformerObs(
+        id=transformer_id,
+        name=transformer_id,
+        logical_nodes=tuple(logical_nodes),
+        source_ref=record.get("nodeid"),
+    )
+
+
+def _measurands(das: dict[str, dict[str, Any]], wanted: frozenset[str]) -> tuple[MeasurandObs, ...]:
+    """The analog attributes the catalog asked for, in a stable order.
+
+    A wanted attribute the dump does not contain is simply absent here. That is
+    a fact about coverage, and `domain/evidence.py` is where it gets reported —
+    inventing an empty reading would turn "we never read it" into "it read
+    nothing", which are different things (I2, I7).
+    """
+    return tuple(
+        MeasurandObs(da=name, sample=_sample(das[name])) for name in sorted(wanted) if name in das
     )
 
 
