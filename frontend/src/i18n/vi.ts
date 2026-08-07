@@ -90,6 +90,7 @@ export default {
   },
   anomalies: {
     none: 'Không có bất thường vận hành.',
+    stationWide: 'Toàn trạm — cố ý không lọc theo {scope}.',
   },
   eng: {
     title: 'Kỹ thuật',

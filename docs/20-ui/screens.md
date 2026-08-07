@@ -63,7 +63,7 @@ không phải trống trơn, và tuyệt đối không tự nới scope ra.
 | kind | Nội dung | Scope có nghĩa | Module | Tình trạng |
 |---|---|---|---|---|
 | `sld` | Sơ đồ một sợi + overlay mang điện | `station` `vl` `transformer` | A | ✅ có (`SldCanvas`) |
-| `anomalies` | **Mâu thuẫn ta tự phát hiện**: tiếp địa đóng trên đoạn có điện · hai thanh cái nối cứng báo `IsLive` ngược nhau · ta tính khác OneATS | mọi scope | A | ✅ có (lô 3) — chỉ nhóm C. **Chưa lọc theo scope**: hiện toàn trạm ở mọi scope |
+| `anomalies` | **Mâu thuẫn ta tự phát hiện**: tiếp địa đóng trên đoạn có điện · hai thanh cái nối cứng báo `IsLive` ngược nhau · ta tính khác OneATS | **luôn toàn trạm** — xem dưới | A | ✅ có (lô 3) — chỉ nhóm C |
 | `state` | Bảng trạng thái đóng/mở/tiếp địa | mọi scope | A | ✅ có (lô 2) — `StatePane` + `DeviceStateContent`, theo prop `scope` |
 | `measurements` | Số đo P/Q/U/I/Hz/PF/nấc MBA | `bay` `busbar` `transformer` `station` | A | ✅ có |
 | `energization` | Mang điện + **lý do** mang điện | mọi scope | A | ✅ có |
@@ -74,6 +74,18 @@ không phải trống trơn, và tuyệt đối không tự nới scope ra.
 | `report` | Báo cáo dựng sẵn | `station` `vl` | E | ⬜ GĐ 4 |
 | `knowledge` | Tra cứu quy trình / SOP | tự do, không theo scope | F | ⬜ GĐ 4 |
 | `trend` | Đồ thị theo thời gian | `point` `bay` | D | ⬜ GĐ 5 (chờ HIS) |
+
+**Ngoại lệ có chủ ý: `anomalies` không đi theo scope** (người dùng chốt
+2026-08-07). Mọi pane khác trả lời *về cái bạn vừa bấm*; pane này trả lời *đang
+có gì sai, ở bất cứ đâu* — hai câu hỏi khác nhau. Dao tiếp địa đóng trên đoạn có
+điện ở D12 không bớt khẩn cấp vì người trực đang xem E07, và lọc nó đi là giấu
+đúng cái mà pane này sinh ra để hiện.
+
+Cái giá là ô này nói khác các ô bên cạnh về thứ đang trên màn hình, nên nó
+**phải tự khai**: khi workspace đang nhắm vào scope hẹp hơn `station`, pane hiện
+dòng *«Toàn trạm — cố ý không lọc theo bay:D03»*. Cùng một luật với pane bị ghim
+(§ hợp đồng pane): một ô không đi theo màn hình thì phải nói ra, nếu không nó
+thành cái bẫy.
 
 ### Bề mặt engineer
 

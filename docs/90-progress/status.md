@@ -14,10 +14,9 @@ GĐ 0 + 1 + 1.5.
 **GĐ 1.5 xong (lô 0–3), đã soát lại và đã commit.** Kế tiếp: **GĐ 2** —
 BlackCore (agent), pane `chat`, alarm.
 
-> Hai việc mở đầu GĐ 2, theo thứ tự: (1) hỏi người dùng pane `anomalies` nên lọc
-> theo scope hay luôn toàn trạm — xem mục soát lại 2026-08-07; (2) `chat` đã là
-> một `PaneKind` và đã có trong hai preset, nên GĐ 2 chỉ cần thay `PaneLater.vue`
-> bằng component thật, **không** đụng vào hợp đồng pane.
+> `chat` đã là một `PaneKind` và đã có trong hai preset, nên GĐ 2 chỉ cần thay
+> `PaneLater.vue` bằng component thật — **không** đụng vào hợp đồng pane. Đó
+> chính là thứ GĐ 1.5 được chèn vào để mua.
 
 > **Việc rẻ nhất và quyết định nhất hiện nay không phải viết code**: xin một dump
 > của **trạm thứ hai** (Q4) và chạy `tools/probe_dataserver.py --dump` lên nó.
@@ -887,11 +886,12 @@ loại, không có lỗi đang chạy.)
   nằm nhầm ở bề mặt engineer"*, `model-issues` = *"đang lẫn nhóm C"* — lô 3 đã
   sửa cả ba từ hôm trước, bảng chưa cập nhật.
 
-**Còn nợ, cố ý**: pane `anomalies` **không lọc theo scope** — click một ngăn thì
-mọi pane khác đổi theo, riêng ô Bất thường vẫn hiện cả trạm. Đã ghi vào bảng
-`screens.md` §2 thay vì sửa vội, vì chưa rõ người trực muốn ô đó thu hẹp theo
-ngăn hay muốn nó luôn là toàn trạm (mâu thuẫn an toàn ở ngăn khác vẫn phải thấy).
-**Hỏi người dùng ở phiên sau.**
+**Đã hỏi và đã chốt cùng ngày** — người dùng: *"bất thường thì luôn giữ cả
+trạm"*. Nên hành vi hiện tại là **đúng**, không phải nợ. Đã ghi thành ngoại lệ có
+chủ ý trong `screens.md` §2 và trong docstring của `AnomaliesPane`, kèm phần bù
+bắt buộc: khi workspace nhắm vào scope hẹp hơn `station`, pane **tự khai** dòng
+*«Toàn trạm — cố ý không lọc theo bay:D03»*. Cùng luật với pane bị ghim — một ô
+không đi theo màn hình thì phải nói ra, nếu không nó thành cái bẫy.
 
 `check.py` xanh 9/9, 348 test. **Toàn bộ GĐ 0 + 1 + 1.5 đã được commit** — trước
 phiên này chúng nằm trong working tree, 103 path đổi + 7.284 dòng thêm, commit

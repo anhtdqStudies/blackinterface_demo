@@ -88,6 +88,7 @@ export default {
   },
   anomalies: {
     none: 'No runtime anomalies.',
+    stationWide: 'Whole station — deliberately not narrowed to {scope}.',
   },
   eng: {
     title: 'Engineering',
