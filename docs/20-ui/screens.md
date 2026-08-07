@@ -121,6 +121,26 @@ trong tab engineer là để người trực không bao giờ nhìn thấy.
 
 ## 3. Bố cục (preset)
 
+> ### ⚠ Mục này sẽ bị thay ở đầu GĐ 2 — [ADR-0018](../10-architecture/adr/0018-conversation-first-workspace.md)
+>
+> Ba preset đã thi công và **đang chạy**, nên mục này còn tả đúng thứ trên màn
+> hình hôm nay. Nhưng nhìn chúng chạy thì thấy chúng không phải ba chế độ mà là
+> **một nút bật/tắt chat đóng gói thành ba**: `incident` = `monitor` + chat,
+> `chat` = `incident` kéo sơ đồ về 0.
+>
+> Người dùng chốt 2026-08-07: bỏ ba nút mode, còn **một bố cục** — chat là cột
+> thường trực thu gọn được, bên phải là **sơ đồ trên + thanh tab dưới**
+> (Trạng thái · Số đo · Mang điện · Bất thường · Bằng chứng · … ).
+>
+> Ràng buộc khoá đi kèm, đọc kỹ trước khi thi công: **cái phải đến với người trực
+> không được nằm sau một tab không active.** Badge số luôn hiện trên tab Bất
+> thường / Alarm; nhóm C mức ERROR thì tự chuyển tab. Chôn nhóm C sau tab không
+> active là lặp lại đúng lỗi đã sửa ở lô 3, chỉ tinh vi hơn.
+>
+> Làm ở **đầu GĐ 2, sau khi `ChatPane` chạy thật** — đóng bề ngang cột chat khi
+> trong đó còn là `PaneLater.vue` là đoán, và ba preset bị bỏ ở đây chính là kết
+> quả của một lần đoán như thế.
+
 Ba cái. Không làm trình soạn bố cục tự do — lý do ở ADR-0014 phương án B.
 
 ### 3.1 `monitor` — Giám sát

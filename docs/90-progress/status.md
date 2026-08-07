@@ -5,7 +5,7 @@
 
 **Cập nhật lần cuối**: 2026-08-07 · phiên: **soát lại lô 0–3 trước khi mở GĐ 2** —
 bịt rò định danh thô sang bề mặt operator, vá một test xanh rỗng, commit toàn bộ
-GĐ 0 + 1 + 1.5.
+GĐ 0 + 1 + 1.5, và **ADR-0018: bỏ ba preset, hội thoại thành bố cục**.
 
 ---
 
@@ -14,9 +14,11 @@ GĐ 0 + 1 + 1.5.
 **GĐ 1.5 xong (lô 0–3), đã soát lại và đã commit.** Kế tiếp: **GĐ 2** —
 BlackCore (agent), pane `chat`, alarm.
 
-> `chat` đã là một `PaneKind` và đã có trong hai preset, nên GĐ 2 chỉ cần thay
-> `PaneLater.vue` bằng component thật — **không** đụng vào hợp đồng pane. Đó
-> chính là thứ GĐ 1.5 được chèn vào để mua.
+> **Thứ tự GĐ 2 đã chốt** (người dùng, 2026-08-07):
+> 1. `agent/` + 2 tool (`resolve`, `summary`) + `LLMProvider` + streaming
+> 2. `ChatPane` thật, cắm vào `PANE_COMPONENTS.chat` (đã có chỗ, không đụng hợp đồng)
+> 3. **Nhìn nó chạy**, rồi mới bỏ ba preset và dựng vỏ mới theo
+>    [ADR-0018](../10-architecture/adr/0018-conversation-first-workspace.md)
 
 > **Việc rẻ nhất và quyết định nhất hiện nay không phải viết code**: xin một dump
 > của **trạm thứ hai** (Q4) và chạy `tools/probe_dataserver.py --dump` lên nó.
@@ -244,6 +246,7 @@ MW, MVAR`), không phải câu văn → chính tác giả nghiệp vụ đã t�
 | [0014](../10-architecture/adr/0014-frontend-workspace.md) | shadcn-vue, workspace nhiều pane, nhiều hội thoại, i18n | chặn toàn bộ frontend |
 | [0015](../10-architecture/adr/0015-engineer-authored-templates.md) | **thêm 2026-08-06** — template do engineer soạn, có phiên bản, phải chứng minh trước khi dùng | chặn GĐ 2.5; làm sống lại «chốt bản»; nâng **Q4** lên chặn |
 | [0016](../10-architecture/adr/0016-roles-and-capabilities.md) | **thêm 2026-08-06** — vai và quyền: quyền là đơn vị, vai chỉ là gói; kiểm ở tầng facet; agent mượn quyền người hỏi | chạm **mọi** route, agent, evidence, giao diện → phải cắm chỗ ngay ở GĐ 1.5; **đổi cửa vào mặc định** từ SLD sang tóm tắt AI |
+| [0018](../10-architecture/adr/0018-conversation-first-workspace.md) | **thêm 2026-08-07** — hội thoại là bố cục, không phải một chế độ: bỏ ba preset, còn một bố cục (chat thường trực + sơ đồ trên + tab dưới) | thay **ADR-0014 §3 phần preset**; thi công ở **đầu GĐ 2**, sau khi `ChatPane` chạy thật |
 
 ### Thứ tự thi công
 

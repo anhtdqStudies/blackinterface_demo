@@ -1,6 +1,8 @@
 # ADR-0014 — Frontend: shadcn-vue, workspace nhiều pane, nhiều hội thoại, i18n
 
-- **Status**: Accepted
+- **Status**: Accepted — **§3 phần ba preset đã bị
+  [ADR-0018](0018-conversation-first-workspace.md) thay thế** (2026-08-07). Mọi
+  phần khác còn hiệu lực.
 - **Date**: 2026-08-05
 - **Bổ sung** ADR-0009 (Vite + Vue 3 + TS). **Không supersede** — nền tảng build
   giữ nguyên, ADR này chỉ thêm lớp trên.
