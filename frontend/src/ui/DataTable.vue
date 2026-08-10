@@ -1,13 +1,9 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import { computed, ref } from 'vue'
 import { cn } from '@/lib/utils'
+import { Button } from '@/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/table'
 
-/**
- * A scrollable table with optional client-side sorting.
- *
- * Cell content is always a slot — this component owns layout and sort chrome
- * only, not domain columns.
- */
 export type DataTableColumn<T> = {
   id: string
   label: string
@@ -62,13 +58,15 @@ function sortLabel(columnId: string): string {
 
 <template>
   <div :class="cn('overflow-x-auto', props.class)">
-    <table class="w-full min-w-full text-sm">
-      <thead>
-        <tr class="border-b border-line text-xs tracking-[0.06em] text-dim uppercase">
-          <th
+    <Table class="text-sm">
+      <TableHeader>
+        <TableRow class="hover:bg-transparent">
+          <TableHead
             v-for="column in columns"
             :key="column.id"
-            :class="cn('py-1 pr-2 font-semibold', column.align === 'right' && 'text-right')"
+            :class="
+              cn('text-xs tracking-wide uppercase', column.align === 'right' && 'text-right')
+            "
             :aria-sort="
               sortColumnId === column.id
                 ? sortDirection === 'asc'
@@ -77,36 +75,33 @@ function sortLabel(columnId: string): string {
                 : undefined
             "
           >
-            <button
+            <Button
               v-if="column.sortable"
-              type="button"
-              class="inline-flex items-center gap-1 border-0 bg-transparent p-0 text-inherit"
+              variant="ghost"
+              size="xs"
+              class="h-auto px-0 text-inherit hover:bg-transparent"
               @click="toggleSort(column.id)"
             >
               {{ column.label }}
               <span class="text-2xs text-sys-idle" aria-hidden="true">{{
                 sortLabel(column.id)
               }}</span>
-            </button>
+            </Button>
             <span v-else>{{ column.label }}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="row in sortedRows"
-          :key="rowKey(row)"
-          class="align-baseline border-b border-line/40 last:border-0"
-        >
-          <td
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="row in sortedRows" :key="rowKey(row)">
+          <TableCell
             v-for="column in columns"
             :key="column.id"
-            :class="cn('py-[3px] pr-2', column.align === 'right' && 'text-right')"
+            :class="cn('py-1', column.align === 'right' && 'text-right')"
           >
             <slot :name="`cell-${column.id}`" :row="row" />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   </div>
 </template>

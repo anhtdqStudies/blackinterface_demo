@@ -24,6 +24,9 @@ export const CAPABILITIES = [
   'knowledge.write',
   'protection.read',
   'agent.ask',
+  // Choosing the language model and holding its key. Not one of the `model.*`
+  // three below — those mean the *station* model.
+  'assistant.config',
   'control.draft',
   'control.sign',
   'model.connect',

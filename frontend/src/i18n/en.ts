@@ -32,7 +32,6 @@ export default {
   /** Pane titles. The keys are spelled out in `app/layout/panes.ts`. */
   pane: {
     sld: 'Single-line diagram',
-    inspector: 'Details',
     state: 'Switch state',
     measurements: 'Measurements',
     energization: 'Energisation',
@@ -53,13 +52,6 @@ export default {
     noEvidence: 'No evidence for this scope yet.',
     noMeasurements: 'This scope has no measurements — pick a bay or device with an MMXU.',
     noModel: 'No model loaded. Open or create a project.',
-  },
-  /** The three shipped layouts (ADR-0014 §3). */
-  preset: {
-    label: 'Layout',
-    monitor: 'Monitor',
-    chat: 'Conversation',
-    incident: 'Incident',
   },
   station: {
     bays: 'bays',
@@ -85,6 +77,7 @@ export default {
     wholeStation: 'Whole station',
     stationMeta: '{bays} bays · {devices} devices',
     backToStation: '← Back to station',
+    backToBay: '← Back to bay {bay}',
   },
   anomalies: {
     none: 'No runtime anomalies.',
@@ -189,6 +182,11 @@ export default {
     OPEN: 'OPEN',
     INTERMEDIATE: 'INTERMEDIATE',
     UNDETERMINED: 'UNDETERMINED',
+    stationOverview: 'Whole station',
+    openSld: 'Open single-line diagram',
+    baysAtLevel: '{level} — {count} bays',
+    bayOverview: 'Bay {bay}',
+    scopeUnsupported: 'Pick the station, a bay, or a device to see switch state.',
   },
   liveState: {
     LIVE: 'LIVE',
@@ -230,11 +228,12 @@ export default {
   evidence: {
     title: 'Evidence',
     clean: 'complete',
+    noPoints: 'no points read',
     coverage: 'Coverage',
     points: 'points',
     source: 'Source',
     at: 'At',
-    tool: 'Tool',
+    subject: 'Subject',
   },
   sourceKind: {
     opcua: 'read live from the DataServer',
@@ -253,6 +252,86 @@ export default {
     no_history: 'The window asked for predates what is stored',
     unit_unverified: 'The number is real, its scale is not measured — no unit is printed',
   },
+  /** Choosing the language model — engineer surface (ADR-0020). */
+  assistant: {
+    title: 'Language model',
+    intro:
+      'Choose the model behind the assistant. The station still answers with this off — ' +
+      'figures and evidence come from tools; the model only decides what to read and how ' +
+      'to word it. The key is stored encrypted in SQLite and never returned by the API.',
+    fromEnv: 'coming from the environment',
+    provider: 'Provider',
+    providerOff: 'Off — computed answers only',
+    providerOpenai: 'OpenAI-compatible endpoint (OpenRouter, Ollama…)',
+    baseUrl: 'Endpoint',
+    model: 'Model name',
+    apiKey: 'API key',
+    keyStored: '•••••••• stored — leave blank to keep it',
+    keyPlaceholder: 'paste the key here',
+    noSecretKey:
+      'BI_SECRET_KEY is not set, so no key can be stored. Generate a random string and set ' +
+      'that variable, or use BI_LLM_API_KEY.',
+    save: 'Save',
+    saving: 'Saving…',
+    test: 'Test connection',
+    testing: 'Calling the model…',
+    clearKey: 'Remove key',
+    confirmClearKey: 'Remove the stored key?',
+    // Saved is not working. Only a real call can set this.
+    verified: 'Last reached a model',
+    neverVerified: 'never — press "Test connection"',
+    updated: 'Last changed',
+    probeOk: 'Reached {provider}. It replied: "{reply}"',
+    probeFailed: 'Could not reach it: {error}',
+  },
+  /** The chat pane's own chrome. Its answers live under `agent.answer`. */
+  scope: {
+    chip: 'About {scope}',
+    chipHint: 'Questions without a name resolve against this scope. Click to widen.',
+  },
+  chat: {
+    empty:
+      'Ask about this station. Name a device or its designation — "how is 271?". ' +
+      'A question that names nothing is taken to be about the scope on screen.',
+    placeholder: 'Ask about the station…',
+    send: 'Ask',
+    sending: 'Asking…',
+    thinking: 'Reading the station…',
+    status: {
+      callingModel: 'Calling the model…',
+      resolving: 'Looking up the name…',
+      reading: 'Reading {scope}…',
+      readingGeneric: 'Reading station data…',
+      writing: 'Writing interpretation…',
+    },
+    // Says what a nameless question resolves against, before it is sent.
+    about: 'about {scope}',
+    // Conversations store **words**, never readings (ADR-0022 §2). Said out
+    // loud, because an old turn shown without evidence looks exactly like one
+    // whose evidence went missing.
+    historical:
+      'Asked at {at} — figures and evidence are not stored. Ask again for current values.',
+    threads: {
+      new: 'New conversation',
+      recent: 'Recent',
+      none: 'No conversations stored yet.',
+      untitled: 'New conversation',
+      delete: 'Delete conversation',
+      turns: 'no turns | {n} turn | {n} turns',
+    },
+    // Model prose always sits in its own labelled block, never mixed with facts (I3).
+    interpretation: 'Interpretation',
+    model: 'Model: {provider}',
+    noModel: 'No language model — this answer is computed.',
+    modelFailed: 'The model could not write an explanation ({error}). The figures above stand.',
+    notAllowed: 'Your account may not talk to the assistant.',
+    collapse: 'Collapse chat',
+    expand: 'Expand chat',
+    openTab: {
+      sld: 'View on diagram',
+      measurements: 'Open measurements',
+    },
+  },
   /** The assistant's **computed** answers — see the note in `vi.ts`. */
   agent: {
     answer: {
@@ -260,10 +339,9 @@ export default {
         '{label} — {devices} devices: {closed} closed, {opened} open, {undetermined} undetermined. ' +
         '{live} sections live, {dead} dead, {unknown} not known. ' +
         '{measurements} readings, {issues} issues.',
-      ambiguous: '“{query}” matches {count} things: {options}. Which one do you mean?',
-      unknown: 'Nothing in this station is called “{query}”.',
-      denied:
-        'This account lacks the “{missing}” permission, so that question cannot be answered.',
+      unconfigured:
+        'No language model is configured, so the conversation tab cannot answer. ' +
+        'The diagram and the monitoring panels are unaffected.',
     },
   },
   common: {

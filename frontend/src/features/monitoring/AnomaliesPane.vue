@@ -24,7 +24,7 @@ import IssueList from '@/features/shared/IssueList.vue'
 import { formatScope } from '@/scope'
 import { useStructureStore } from '@/stores/structure'
 import Empty from '@/ui/Empty.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const props = defineProps<PaneProps>()
 
@@ -44,7 +44,7 @@ const ignoring = computed(() =>
     <p v-if="ignoring" class="mb-2 text-2xs text-dim">
       {{ t('anomalies.stationWide', { scope: ignoring }) }}
     </p>
-    <Skeleton v-if="structure.loading" variant="row" :count="3" />
+    <PaneSkeleton v-if="structure.loading" variant="row" :count="3" />
     <IssueList v-else-if="structure.station" :issues="anomalies" :empty="t('anomalies.none')" />
     <Empty v-else :reason="t('pane.noModel')" />
   </div>

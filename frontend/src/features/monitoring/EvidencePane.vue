@@ -8,7 +8,7 @@ import { useSummaryStore } from '@/stores/summary'
 import Empty from '@/ui/Empty.vue'
 import ErrorBox from '@/ui/ErrorBox.vue'
 import EvidenceBlock from '@/ui/EvidenceBlock.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 defineProps<PaneProps>()
 
@@ -30,7 +30,7 @@ function retry(): void {
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="summary.loading" variant="block" :count="3" />
+    <PaneSkeleton v-if="summary.loading" variant="block" :count="3" />
     <ErrorBox
       v-else-if="summary.error"
       :code="summary.error.code"

@@ -11,7 +11,7 @@ import { useMeasurementsStore } from '@/stores/measurements'
 import DataTable, { type DataTableColumn } from '@/ui/DataTable.vue'
 import Empty from '@/ui/Empty.vue'
 import Panel from '@/ui/Panel.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 import ValueCell from '@/ui/ValueCell.vue'
 
 const props = defineProps<PaneProps>()
@@ -43,7 +43,7 @@ const columns = computed<DataTableColumn<Reading>[]>(() => [
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="!measurements.loaded" variant="row" :count="5" />
+    <PaneSkeleton v-if="!measurements.loaded" variant="row" :count="5" />
     <Panel v-else-if="readings.length" :title="t('measurement.title')">
       <p v-if="fromParentScope" class="mb-2 text-xs text-dim">
         {{ t('measurement.fromScope', { scope: readingScopeKey }) }}

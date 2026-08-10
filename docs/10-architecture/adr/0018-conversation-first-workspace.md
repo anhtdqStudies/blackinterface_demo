@@ -37,31 +37,34 @@ của việc dựng mỏng trước.
 
 ### 1. Một bố cục, không có preset
 
-`presets.ts` còn **một** `Layout`. Không còn `PRESET_NAMES`, không còn ba nút trên
-header, không còn `?l=`.
+`presets.ts` còn **một** `OPERATOR_LAYOUT`. Không còn `PRESET_NAMES`, không còn ba
+nút trên header, không còn `?l=`.
 
 ```
-┌──────────────┬──────────────────────────────┐
-│              │  ┌────────────────────────┐  │
-│   HỘI THOẠI  │  │     SƠ ĐỒ MỘT SỢI      │  │
-│              │  └────────────────────────┘  │
-│  ‹thu gọn›   │  ┌─────┬─────┬──────┬──────┐ │
-│              │  │Trạng│ Số  │ Bất  │ Bằng │ │
-│              │  │thái │ đo  │thg ❷ │chứng │ │
-│  ___________ │  └─────┴─────┴──────┴──────┘ │
-│  [ hỏi... ]  │   XSWI22 · MỞ · GOOD         │
-└──────────────┴──────────────────────────────┘
+┌──────────────┬──────────────────────────────────────────────┐
+│   HỘI THOẠI  │  NGĂN D03 — Hóc Môn                          │
+│  ‹thu gọn›   │  [Sơ đồ][Trạng thái][Số đo][Bất thường❷]…   │
+│              │  ┌──────────────────────────────────────────┐ │
+│  transcript  │  │  tab active — full height (SLD hoặc bảng)│ │
+│              │  └──────────────────────────────────────────┘ │
+│  [ scope ]   │                                               │
+│  [ hỏi... ]  │                                               │
+└──────────────┴──────────────────────────────────────────────┘
 ```
 
 Yêu cầu cũ của ADR-0014 *"phải ẩn được sơ đồ để chỉ còn chat"* vẫn được đáp ứng —
-bằng **kéo splitter**, một hành động, không phải một preset. Yêu cầu ngược lại
-(chỉ còn sơ đồ, không chat) cũng thế.
+bằng **kéo splitter** thu gọn cột chat (hoặc phóng to chat), không phải preset.
+
+> **Sửa 2026-08-10:** wireframe ban đầu (2026-08-07) đặt sơ đồ **cố định trên** +
+> tab dưới. Sau review thực tế: sơ đồ chiếm diện tích lớn nên **SLD là tab đầu
+> tiên** cùng Trạng thái · Số đo · … — tab active luôn full height. Mục tiêu
+> tối ưu diện tích và cảm giác agent workspace (tham chiếu Cursor).
 
 ### 2. Bên phải là tab, không phải accordion
 
-Người dùng chốt 2026-08-07. Sơ đồ nằm trên, cố định. Dưới là một thanh tab:
-Trạng thái · Số đo · Mang điện · Bất thường · Bằng chứng, và về sau Alarm · SOE ·
-Trend · Báo cáo.
+Người dùng chốt 2026-08-07; bổ sung 2026-08-10: **Sơ đồ nằm trong tab bar**, tab
+mặc định `sld`. Các tab: Sơ đồ · Trạng thái · Số đo · Mang điện · Bất thường ·
+Bằng chứng, và về sau Alarm · SOE · Trend · Báo cáo.
 
 Tab thắng accordion ở một điểm cụ thể: danh mục pane sẽ còn dài ra (module B, D,
 E, F đều thêm pane). Accordion năm mục thì đọc được; accordion mười mục là một

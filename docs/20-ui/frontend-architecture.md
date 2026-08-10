@@ -102,9 +102,18 @@ export type Pane = {
 }
 
 export type Layout = {
-  cols: Array<{ size: number; rows: Array<{ size: number; pane: Pane }> }>
+  cols: Array<{
+    size: number
+    rows: Array<
+      | { size: number; pane: Pane }
+      | { size: number; slot: { kind: 'tabs'; panes: Pane[] } }
+    >
+  }>
 }
 ```
+
+Tab workspace bên phải (ADR-0018): `sld` · `state` · `measurements` · … — SLD là
+tab đầu tiên, mặc định `?tab=sld`. Chat cột trái thường trực.
 
 ### `pane.scope` là **override tuỳ chọn**, không phải trường bắt buộc
 
@@ -133,32 +142,29 @@ export const PANE_COMPONENTS: Record<PaneKind, Component> = {
 `PaneHost` tra bảng này. **`PaneHost` không được có `v-if` theo `kind`.** Đó là
 thước đo: nếu phải sửa `PaneHost` để thêm pane thì hợp đồng đã hỏng.
 
-### Preset
+### Layout (ADR-0018)
 
 ```ts
-// app/layout/presets.ts — MỘT CHỖ DUY NHẤT. Không rải định nghĩa bố cục ra view.
-export const PRESETS = { monitor, chat, incident } as const
-export type PresetName = keyof typeof PRESETS
-export const DEFAULT_PRESET: PresetName = 'monitor'
+// app/layout/presets.ts — MỘT CHỖ DUY NHẤT
+export const OPERATOR_LAYOUT: Layout = { … }
+export const DEFAULT_TAB = 'sld'
 ```
-
-`chat` khai sẵn ở GĐ 1.5 nhưng ô chat hiện `Empty` với dòng *"Có ở giai đoạn
-sau"* — để GĐ 2 chỉ việc cắm component vào, không phải sửa hợp đồng.
 
 ---
 
 ## 4. Hợp đồng URL
 
 ```
-#/ops/<scope>?l=<preset>          vận hành
+#/ops/<scope>?tab=<kind>          vận hành (ADR-0018)
 #/eng                             kỹ thuật
 ```
 
 | Luật | Vì sao |
 |---|---|
 | Scope không parse được → **redirect** về station | Thanh địa chỉ và màn hình không bao giờ được nói khác nhau. Đã có ở `router.beforeEach`, giữ nguyên |
-| `?l=` sai tên → dùng `DEFAULT_PRESET`, **không** redirect | Bố cục sai chỉ là hiển thị, không phải câu trả lời sai về trạm. Xử lý nhẹ hơn scope sai — đây là khác biệt có chủ ý |
-| Bố cục tuỳ biến (kéo giãn) → `localStorage`, khoá theo preset | Không nhét cả `Layout` vào URL ở GĐ 1.5. Chia sẻ link mang **preset**, không mang từng pixel |
+| `?tab=` sai tên → dùng `DEFAULT_TAB` (`sld`), **không** redirect | Tab sai chỉ là hiển thị, không phải câu trả lời sai về trạm |
+| Legacy `?l=` → strip query | Ba preset đã bỏ (ADR-0018) |
+| Bố cục tuỳ biến (kéo giãn) → `localStorage`, khoá `ops` | Không nhét cả `Layout` vào URL |
 | Chỉ `@/scope` sinh chuỗi scope | AGENTS.md I8 |
 
 ---
@@ -172,7 +178,7 @@ sau"* — để GĐ 2 chỉ việc cắm component vào, không phải sửa h�
 | `measurements` | số đo | thay mỗi lần đẩy `measurement` |
 | `stream` | **một** EventSource, chính sách nối lại | suốt phiên |
 | `summary` | câu trả lời + evidence theo scope | theo scope đang xem |
-| `workspace` | **scope + preset + bố cục tuỳ biến** | theo người dùng; sống qua F5 |
+| `workspace` | **scope + tab + chat collapse** | theo người dùng; sống qua F5 |
 | `connections` | danh sách trạm đã nối *(đổi tên từ `projects`)* | ít khi đổi |
 
 **`workspace` mọc thêm phần bố cục, giữ nguyên phần scope.** Scope vẫn suy từ URL
@@ -184,28 +190,42 @@ Không store nào được giữ **bản sao** dữ liệu của store khác. C�
 
 ---
 
-## 6. `ui/` — 10 component, không cái nào biết về trạm điện
+## 6. `ui/` — shadcn-vue + domain wrappers
 
-| Component | Có | Nhiệm vụ |
-|---|---|---|
-| `Panel` | ✅ | khung có tiêu đề |
-| `Badge` | ✅ | nhãn nhỏ |
-| `StatusDot` | ✅ | trạng thái **hệ thống** (kết nối). ADR-0014 gọi là `StateDot` — **thống nhất lấy tên `StatusDot`**, và nó **không** dùng cho trạng thái thiết bị; cái đó là `DeviceSymbol` |
-| `EvidenceBlock` | ✅ | khối bằng chứng |
-| `Field` | ✅ | cặp nhãn–giá trị |
-| `ValueCell` | ✅ | **một con số + đơn vị + chất lượng**. Chỗ duy nhất được quyết định in hay không in đơn vị (Q7) và hiện gạch ngang khi không đọc được (I2) |
-| `DataTable` | ✅ | bảng có sắp xếp, cuộn ngang trong khung của nó |
-| `Empty` | ✅ | rỗng **có lý do** + việc làm tiếp |
-| `Skeleton` | ✅ | đang tải, **giữ đúng chỗ** |
-| `ErrorBox` | ✅ | lỗi + mã + nút thử lại |
+### Luật bắt buộc (2026-08-10)
 
-Luật khoá: **không component nào trong `ui/` được import từ `stores/` hay
-`api/`.** Nhận props, phát event. Đó là điều kiện để chia việc song song mà không
-giẫm chân nhau.
+**Tailwind v4 + shadcn-vue đã cài.** Mọi pane/feature mới:
 
-`ValueCell` là chỗ tập trung một quyết định an toàn: hiện chỉ `Hz`, nấc MBA và hệ
-số công suất có đơn vị; còn lại in số trần. Để rải quyết định đó ra từng pane thì
-sớm muộn có pane in `kV` (xem Q7).
+1. Import chrome từ `@/ui/*` (Button, Card, Input, Table, Tabs, Alert, …).
+2. Style bằng utility Tailwind từ token (`bg-card`, `text-muted-foreground`, …).
+3. Thiếu component → `npx shadcn-vue@latest add <name>` **trước** khi viết markup mới.
+4. **Cấm** trong `features/`: hex màu, `<button>`/`<input>` styled tay, scoped CSS màu chrome mới.
+5. `DESIGN.md` = **theme spec only** — không copy layout marketing thành Vue thủ công.
+
+Xem [`frontend/README.md`](../../frontend/README.md) · [`tokens.md`](tokens.md) §Luật UI.
+
+---
+
+**shadcn-vue** (CLI, `src/ui/button/`, `card/`, `tabs/`, …) cung cấp chrome:
+Button, Input, Card, Table, Tabs, Alert, Skeleton, Select… Theme map từ
+[frontend/DESIGN.md](../../frontend/DESIGN.md) → `styles.css` → xem
+[docs/20-ui/tokens.md](tokens.md).
+
+**Domain wrappers** (giữ vì quy tắc an toàn / API ổn định):
+
+| Component | Nhiệm vụ |
+|---|---|
+| `SysBadge` | nhãn sys-* (warn/down) — không lẫn shadcn Badge marketing |
+| `StatusDot` | trạng thái **hệ thống** (kết nối) |
+| `EvidenceBlock` | khối bằng chứng (I3) |
+| `Field` | cặp nhãn–giá trị |
+| `ValueCell` | số + đơn vị + chất lượng (I2, Q7) |
+| `DataTable` | sort client-side trên shadcn Table |
+| `Empty` / `ErrorBox` / `Panel` / `PaneSkeleton` | mỏng, wrap Alert/Card/Skeleton |
+
+Luật khoá: **`ui/` root wrappers** và **shadcn subdirs** không import `stores/` hay
+`api/` (trừ `import type`). `features/` compose shadcn + wrappers; cấm hex thô
+(`check.py` mục 5).
 
 ---
 
@@ -232,8 +252,9 @@ thật, và là lý do `EvidenceBlock` tồn tại.
 
 ## 8. Token tối thiểu
 
-Chưa làm `tokens.md` đầy đủ, nhưng **phải** có đủ ba thứ này trước khi ai viết
-component, nếu không mỗi người tự chế khoảng cách:
+Chi tiết đầy đủ: [`docs/20-ui/tokens.md`](tokens.md) (map DESIGN → shadcn → Tailwind).
+
+Trước khi viết component, **bắt buộc** dùng:
 
 - **Thang khoảng cách**: 4 8 12 16 24 32 (px, qua Tailwind)
 - **Thang cỡ chữ**: `xs sm base lg xl` — số đo dùng `tabular-nums`

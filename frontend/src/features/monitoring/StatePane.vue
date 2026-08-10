@@ -4,18 +4,22 @@
  *
  * Reads **its own `scope` prop**, not `workspace.scope` — a pinned pane must
  * not silently ignore its pin (ADR-0014 §3).
+ *
+ * Navigation: station/vl → bay list · bay → device list · device → detail.
  */
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ApiError, api, type BayDetail } from '@/api/client'
+import BayStateContent from '@/features/monitoring/BayStateContent.vue'
 import DeviceStateContent from '@/features/monitoring/DeviceStateContent.vue'
+import StationStateContent from '@/features/monitoring/StationStateContent.vue'
 import type { PaneProps } from '@/app/layout/panes'
 import { device as deviceScope, parentScope } from '@/scope'
 import { useStructureStore } from '@/stores/structure'
 import { useWorkspaceStore } from '@/stores/workspace'
 import Empty from '@/ui/Empty.vue'
 import ErrorBox from '@/ui/ErrorBox.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const props = defineProps<PaneProps>()
 
@@ -32,9 +36,19 @@ const bayId = computed<string | null>(() => {
   return parent?.kind === 'bay' ? parent.id : null
 })
 
-const deviceId = computed<string | null>(() =>
-  props.scope.kind === 'device' ? props.scope.id : null,
-)
+const deviceId = computed<string | null>(() => {
+  const s = props.scope
+  if (s.kind === 'device') return s.id
+  if (s.kind === 'point') {
+    const parent = parentScope(s)
+    return parent?.kind === 'device' ? parent.id : null
+  }
+  return null
+})
+
+const showStation = computed(() => props.scope.kind === 'station' || props.scope.kind === 'vl')
+
+const voltageFilter = computed(() => (props.scope.kind === 'vl' ? props.scope.id : null))
 
 const bay = ref<BayDetail | null>(null)
 const loading = ref(false)
@@ -77,15 +91,25 @@ function retry(): void {
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="loading" variant="row" :count="6" />
-    <ErrorBox v-else-if="error" :code="error.code" :message="error.message" @retry="retry" />
-    <DeviceStateContent
-      v-else-if="bay && device"
-      :bay="bay"
-      :device="device"
-      @select="workspace.go(deviceScope($event))"
+    <StationStateContent
+      v-if="showStation && structure.bays.length"
+      :voltage-filter="voltageFilter"
     />
-    <Empty v-else-if="bay" :reason="t('pane.pickDevice', { bay: bay.id })" />
-    <Empty v-else :reason="t('pane.pickBay')" />
+    <Empty v-else-if="showStation" :reason="t('pane.noModel')" />
+
+    <template v-else-if="props.scope.kind === 'bay' || deviceId">
+      <PaneSkeleton v-if="loading" variant="row" :count="6" />
+      <ErrorBox v-else-if="error" :code="error.code" :message="error.message" @retry="retry" />
+      <DeviceStateContent
+        v-else-if="bay && device"
+        :bay="bay"
+        :device="device"
+        @select="workspace.go(deviceScope($event))"
+      />
+      <BayStateContent v-else-if="bay" :bay="bay" />
+      <Empty v-else :reason="t('pane.pickBay')" />
+    </template>
+
+    <Empty v-else :reason="t('state.scopeUnsupported')" />
   </div>
 </template>

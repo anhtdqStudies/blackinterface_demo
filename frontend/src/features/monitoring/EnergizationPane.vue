@@ -10,7 +10,7 @@ import { useLiveStore } from '@/stores/live'
 import { useStructureStore } from '@/stores/structure'
 import Empty from '@/ui/Empty.vue'
 import Panel from '@/ui/Panel.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const { t } = useI18n()
 const live = useLiveStore()
@@ -57,7 +57,7 @@ function where(island: NonNullable<typeof energization.value>['islands'][number]
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="pending" variant="row" :count="4" />
+    <PaneSkeleton v-if="pending" variant="row" :count="4" />
     <template v-else-if="energization">
       <Panel :title="t('energization.title')">
         <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-dim">

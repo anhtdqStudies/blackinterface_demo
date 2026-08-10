@@ -4,6 +4,9 @@ import App from './App.vue'
 import { i18n } from './i18n'
 import { router } from './router'
 import { useSessionStore } from './stores/session'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/500.css'
+import '@fontsource/inter/600.css'
 import './styles.css'
 
 /**

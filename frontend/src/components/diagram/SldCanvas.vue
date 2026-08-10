@@ -141,8 +141,23 @@ function swallowDragClick(event: MouseEvent): void {
 function onKey(event: KeyboardEvent): void {
   if (event.key === 'f' && !(event.target instanceof HTMLInputElement)) fit()
 }
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  window.addEventListener('keydown', onKey)
+  const el = svgEl.value
+  if (el) {
+    resizeObserver = new ResizeObserver(() => fit())
+    resizeObserver.observe(el)
+  }
+  fit()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKey)
+  resizeObserver?.disconnect()
+})
 </script>
 
 <template>

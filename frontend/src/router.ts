@@ -17,15 +17,13 @@ declare module 'vue-router' {
  * hash routing means a refresh on a deep link works without a catch-all route
  * on the server. One fewer thing to get wrong in the installer (ADR-0009).
  *
- * `/ops/:scope?l=<preset>` is the shape that matters (ADR-0010, ADR-0014). The
+ * `/ops/:scope?tab=<kind>` is the shape that matters (ADR-0010, ADR-0018). The
  * scope ref in the path is the *same string* used as a pane key, as an agent
  * tool argument and as an evidence subject — so a screen can be linked to,
  * reloaded into, and later handed to the agent as "what I am looking at".
  *
- * Subject in the path, arrangement in the query, and the two are treated
- * differently on purpose: an unparseable scope is redirected (below), an
- * unknown preset is quietly replaced by the default (`layoutFor`). Only the
- * first can make the address bar and the screen disagree about the station.
+ * Subject in the path, active workspace tab in the query. An unparseable scope
+ * is redirected (below); an unknown tab silently falls back to `DEFAULT_TAB`.
  *
  * Legacy paths redirect rather than 404: bookmarks from before GĐ 1.5 should
  * land somewhere sensible.
@@ -60,7 +58,6 @@ const routes: RouteRecordRaw[] = [
     redirect: (to) => ({
       name: 'ops',
       params: { scope: formatScope(bayScope(String(to.params.bayId))) },
-      query: { l: 'monitor' },
     }),
   },
   {
@@ -68,7 +65,6 @@ const routes: RouteRecordRaw[] = [
     redirect: () => ({
       name: 'ops',
       params: { scope: formatScope(STATION) },
-      query: { l: 'monitor' },
     }),
   },
   { path: '/projects', redirect: ENG_PATH },
@@ -91,9 +87,14 @@ export const router = createRouter({
 router.beforeEach((to) => {
   if (to.name !== 'ops') return true
   const raw = to.params.scope
-  if (typeof raw === 'string' && parseScope(raw)) return true
-  // The query survives the correction: a bad scope is no reason to also throw
-  // away the layout the link was carrying.
+  if (typeof raw === 'string' && parseScope(raw)) {
+    if (typeof to.query.l === 'string') {
+      const rest = { ...to.query }
+      delete rest.l
+      return { name: 'ops', params: to.params, query: rest }
+    }
+    return true
+  }
   return { name: 'ops', params: { scope: formatScope(STATION) }, query: to.query }
 })
 

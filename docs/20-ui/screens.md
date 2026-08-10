@@ -20,9 +20,9 @@
 Không có cây route. Một màn hình được xác định bởi **hai** thứ:
 
 ```
-#/ops/<scope>?l=<preset>
+#/ops/<scope>?tab=<kind>
       ▲          ▲
-      │          └── bố cục: monitor | chat | incident
+      │          └── tab workspace: sld | state | measurements | …
       └── đang nói về cái gì (ADR-0010): station · vl:220kV · bay:D03 · device:D03.XCBR1
 ```
 
@@ -119,141 +119,32 @@ trong tab engineer là để người trực không bao giờ nhìn thấy.
 
 ---
 
-## 3. Bố cục (preset)
+## 3. Bố cục vận hành (ADR-0018 — thi công 2026-08-10)
 
-> ### ⚠ Mục này sẽ bị thay ở đầu GĐ 2 — [ADR-0018](../10-architecture/adr/0018-conversation-first-workspace.md)
->
-> Ba preset đã thi công và **đang chạy**, nên mục này còn tả đúng thứ trên màn
-> hình hôm nay. Nhưng nhìn chúng chạy thì thấy chúng không phải ba chế độ mà là
-> **một nút bật/tắt chat đóng gói thành ba**: `incident` = `monitor` + chat,
-> `chat` = `incident` kéo sơ đồ về 0.
->
-> Người dùng chốt 2026-08-07: bỏ ba nút mode, còn **một bố cục** — chat là cột
-> thường trực thu gọn được, bên phải là **sơ đồ trên + thanh tab dưới**
-> (Trạng thái · Số đo · Mang điện · Bất thường · Bằng chứng · … ).
->
-> Ràng buộc khoá đi kèm, đọc kỹ trước khi thi công: **cái phải đến với người trực
-> không được nằm sau một tab không active.** Badge số luôn hiện trên tab Bất
-> thường / Alarm; nhóm C mức ERROR thì tự chuyển tab. Chôn nhóm C sau tab không
-> active là lặp lại đúng lỗi đã sửa ở lô 3, chỉ tinh vi hơn.
->
-> Làm ở **đầu GĐ 2, sau khi `ChatPane` chạy thật** — đóng bề ngang cột chat khi
-> trong đó còn là `PaneLater.vue` là đoán, và ba preset bị bỏ ở đây chính là kết
-> quả của một lần đoán như thế.
-
-Ba cái. Không làm trình soạn bố cục tự do — lý do ở ADR-0014 phương án B.
-
-### 3.1 `monitor` — Giám sát
-
-> **Không còn là cửa vào mặc định** (sửa 2026-08-06 theo
-> [ADR-0016 §8](../10-architecture/adr/0016-roles-and-capabilities.md)). Sản phẩm
-> nhắm vào trạm không người trực; cửa vào là bản tóm tắt AI, xem §4.0. Bố cục này
-> là nơi người ta **sang để xác minh bằng mắt** — vẫn quan trọng, chỉ không phải
-> chỗ đầu tiên nhìn thấy.
-
-Sơ đồ chiếm chỗ lớn nhất vì khi đã sang đây thì nó là thứ được liếc nhiều nhất.
+Một layout duy nhất. Không preset, không `?l=`. URL: `#/ops/<scope>?tab=<kind>`.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
-│  BLACK INTERFACE   Trạm Bến Cát        [● Trực tuyến]   [VI|EN]  [bố cục ▾]│
-├──────────────────────────────────────────────┬─────────────────────────────┤
-│                                              │  NGĂN D03 — Hóc Môn         │
-│                    SLD                       │  ─────────────────────────  │
-│                                              │  ▸ Trạng thái               │
-│    ══════════════ BB21 ══════════════        │     MC 271      ĐÓNG        │
-│      │        │         │        │           │     DCL 271-1   ĐÓNG        │
-│    ══╪════════╪══ BB22 ═╪════════╪══         │     DCL 271-2   ĐÓNG        │
-│      │        │         │        │           │     TĐ 271-15   MỞ          │
-│     D01      D03       D04      D17          │  ─────────────────────────  │
-│      │        │         │        │           │  ▸ Số đo                    │
-│     [AT1]   Hóc Môn   Bến Cát   nối TC       │     Công suất P    87,43    │
-│                                              │     Điện áp dây   221,08    │
-│  (click ngăn → scope đổi, bố cục giữ nguyên) │     Tần số         49,98 Hz │
-│                                              │  ─────────────────────────  │
-├──────────────────────────────────────────────┤  ▸ BẰNG CHỨNG        [2]    │
-│  ALARM ĐANG HOẠT                       [3]   │     Độ phủ  12/12 điểm      │
-│  ⚠ 10:42:03  D03  Bảo vệ khoảng cách khởi   │     Nguồn   DataServer v654 │
-│  ⚠ 10:41:58  E07  Mất kênh truyền           │     Lúc     10:42:07        │
-│  ⚠ 09:15:22  BB22 Điện áp thấp              │     ⚠ Số đo đã lọc deadband │
-└──────────────────────────────────────────────┴─────────────────────────────┘
-   pane: sld + alarms                             pane: state + measurements
-                                                        + evidence
-```
-
-Panel phải là **một cột nhiều pane xếp dọc**, không phải một component to. Đó là
-điều kiện để agent đề xuất mở/đóng từng khối.
-
-### 3.2 `chat` — Hội thoại
-
-Hiện thực của yêu cầu *"ẩn luôn sơ đồ, chỉ còn chat"*.
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│  BLACK INTERFACE   Trạm Bến Cát        [● Trực tuyến]   [VI|EN]  [bố cục ▾]│
+│  BLACK INTERFACE   Trạm Bến Cát        [● Trực tuyến]   [VI|EN]  [Kỹ thuật]│
 ├───────────────┬────────────────────────────────────────────────────────────┤
-│ HỘI THOẠI  [+]│  Đang nói về:  [ ngăn D03 — Hóc Môn ▾ ]                    │
-│ ───────────── │  ────────────────────────────────────────────────────────  │
-│ ▸ Sự cố D03   │                                                            │
-│   hôm nay     │   👤  Ngăn D03 đang mang điện không?                       │
-│ ▸ Kiểm tra    │                                                            │
-│   AT1         │   🤖  Có. D03 mang điện từ BB21 qua DCL 271-1 (đóng)      │
-│ ▸ Ca đêm 5/8  │       và MC 271 (đóng).                                    │
-│               │                                                            │
-│               │       ┌─ BẰNG CHỨNG ──────────────────────────┐            │
-│               │       │ tool: summary   scope: bay:D03        │            │
-│               │       │ Độ phủ 12/12 · DataServer v654        │            │
-│               │       │ 10:42:07                              │            │
-│               │       │ ⚠ Thang đo chưa xác minh (Q7)         │            │
-│               │       └───────────────────────────────────────┘            │
-│               │                                                            │
-│               │       [ Mở bảng số đo ngăn D03 ]  ← agent ĐỀ XUẤT,        │
-│               │                                     người BẤM mới mở       │
-│               │  ────────────────────────────────────────────────────────  │
-│               │  ┌──────────────────────────────────────────────┐  [Gửi]  │
-│               │  │ Hỏi về ngăn D03…                             │         │
-│               │  └──────────────────────────────────────────────┘         │
+│ HỘI THOẠI [+] │  NGĂN D03 — Hóc Môn                                        │
+│ ‹thu gọn›     │  [Sơ đồ][Trạng thái][Số đo][Mang điện][Bất thường❷][BC]  │
+│ ───────────── │  ┌──────────────────────────────────────────────────────┐  │
+│ transcript    │  │ tab active — full height (SLD hoặc bảng)             │  │
+│               │  └──────────────────────────────────────────────────────┘  │
+│ [Về D03]      │                                                            │
+│ [ hỏi... ]    │                                                            │
 └───────────────┴────────────────────────────────────────────────────────────┘
 ```
 
-Hai chi tiết **không được bỏ**:
+- **Trái (~32%)**: `chat` thường trực; thu gọn bằng splitter + nút.
+- **Phải**: thanh tab gồm **Sơ đồ** (mặc định) + các pane giám sát; tab active chiếm 100% chiều cao.
+- **Chip scope** trên composer; **nút đề xuất tab** sau câu trả lời agent (người bấm, không tự chuyển).
+- Tab `anomalies`: badge số; nhóm C ERROR → tự chuyển tab (trừ khi người dùng vừa chọn tab khác).
 
-- **Chip "Đang nói về"** ở đầu pane chat. Hội thoại mang ngữ cảnh scope, nên
-  người dùng phải nhìn thấy agent đang nghĩ về cái gì trước khi hỏi *"còn dòng
-  thì sao?"*. Chip này bấm được để đổi scope.
-- **Nút đề xuất pane** là nút, không phải hành động tự động (ADR-0014 §4, cùng
-  nguyên tắc ADR-0011: *agent soạn phiếu, người ký*).
+Legacy `?l=monitor|chat|incident` → bỏ query, layout mới.
 
-### 3.3 `incident` — Phân tích sự cố
-
-Khi có chuyện. Chat bên trái để hỏi liên tục, bên phải là bằng chứng đang được
-nói tới.
-
-```
-┌────────────────────────────────────────────────────────────────────────────┐
-│  BLACK INTERFACE   Trạm Bến Cát     [⚠ Mất kết nối]      [VI|EN] [bố cục ▾]│
-├─────────────────────────┬──────────────────────────────────────────────────┤
-│  Đang nói về: bay:D03   │              SLD (thu nhỏ, focus D03)            │
-│  ─────────────────────  │   ══════ BB21 ══════                             │
-│  👤 Vì sao D03 mất điện?│         │                                        │
-│                         │        D03  ← tô đậm                             │
-│  🤖 MC 271 nhảy lúc     ├──────────────────────────────────────────────────┤
-│     10:42:03. Bảo vệ    │  SOE — 10:41:50 → 10:42:10                       │
-│     khoảng cách vùng 1  │  10:42:03.114  D03  Bảo vệ khoảng cách  KHỞI ĐỘNG│
-│     khởi động trước đó  │  10:42:03.156  D03  MC 271              MỞ       │
-│     42 ms.              │  10:42:03.203  D03  IsLive              FALSE    │
-│                         ├──────────────────────────────────────────────────┤
-│  [ Xem SOE đầy đủ ]     │  BẰNG CHỨNG                                      │
-│                         │  ⚠ Mất kết nối — đây là điều biết được lần cuối, │
-│  ┌───────────────────┐  │    không phải hiện tại                           │
-│  │ Hỏi tiếp…         │  │  Nguồn  event store cục bộ · DataServer v654     │
-│  └───────────────────┘  │  Độ phủ  9/12 điểm  · 3 điểm không đọc được      │
-└─────────────────────────┴──────────────────────────────────────────────────┘
-```
-
-Bố cục này là chỗ khối bằng chứng phải mạnh nhất, vì nó là lúc người ta ra quyết
-định dựa trên câu trả lời của máy.
-
-### 3.4 Bề mặt engineer — `#/eng` (một màn hình, không phải một quy trình)
+### 3.1 Bề mặt engineer — `#/eng` (một màn hình, không phải một quy trình)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐

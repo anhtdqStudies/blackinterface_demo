@@ -37,11 +37,60 @@ export interface paths {
          * Ask Stream
          * @description The same answer, as it is produced (Server-Sent Events).
          *
-         *     Frame types are `turn`, `tool`, `evidence`, `token` and `answer`; the last
-         *     carries the complete `AnswerOut` and supersedes anything accumulated from
-         *     `token`. See `agent/core.py` for why that replacement matters.
+         *     Frame types are `turn`, `tool`, `evidence`, `resolution`, `summary`, `token`
+         *     and `answer`; the last carries the complete `AnswerOut` and supersedes
+         *     anything accumulated from `token`. See `agent/core.py` for why that
+         *     replacement matters.
          */
         post: operations["ask_stream_api_ask_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Config
+         * @description The settings in force. Never the key.
+         */
+        get: operations["read_config_api_assistant_config_get"];
+        /**
+         * Write Config
+         * @description Save the settings.
+         *
+         *     Writes to this installation's own SQLite only. It reaches no OneATS surface
+         *     and is not the write path invariant I1 is about — but it is still a write,
+         *     and it is gated, audited by `updated_by`, and logged without the key.
+         */
+        put: operations["write_config_api_assistant_config_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assistant/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Config
+         * @description Call the model. The only thing that can set `verified_at`.
+         */
+        post: operations["test_config_api_assistant_test_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -94,6 +143,50 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Conversations
+         * @description The caller's own threads, most recent first.
+         */
+        get: operations["list_conversations_api_conversations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read Conversation
+         * @description One thread and what was said in it. No evidence — see the schema.
+         */
+        get: operations["read_conversation_api_conversations__conversation_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Conversation
+         * @description Forget a thread. Returns what is left, so the picker needs no second call.
+         */
+        delete: operations["delete_conversation_api_conversations__conversation_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -491,9 +584,14 @@ export interface components {
          *     Prose and facts are separate fields on purpose (I3). `text` is what a
          *     language model wrote and is labelled as interpretation; `summary`,
          *     `resolution` and `evidence` are computed and are what the interface may
-         *     show as fact. When `generated` is false there is no model in the loop at
-         *     all and `key`/`params` carry a computed statement for the frontend to
-         *     render in its own language.
+         *     show as fact.
+         *
+         *     Since ADR-0021 the backend no longer sends a computed *sentence*: it sends
+         *     the computed *payload*, and the interface writes the sentence in the reader's
+         *     language. Same principle as before (the backend does not know whether the
+         *     reader wants Vietnamese or English) with one fewer indirection, and the
+         *     safety property is unchanged — there is always something measured on screen
+         *     that does not depend on trusting the model's wording.
          */
         AnswerOut: {
             /** Conversation Id */
@@ -505,17 +603,8 @@ export interface components {
             evidence: components["schemas"]["EvidenceRecord"][];
             /** Generated */
             generated: boolean;
-            /** Key */
-            key?: string | null;
             /** Llm Error */
             llm_error?: string | null;
-            /**
-             * Params
-             * @default {}
-             */
-            params: {
-                [key: string]: string | number | boolean | null;
-            };
             /** Provider */
             provider: string;
             /** Question */
@@ -531,7 +620,27 @@ export interface components {
             text: string;
             /** Turn Id */
             turn_id: string;
+            /**
+             * Unconfigured
+             * @default false
+             */
+            unconfigured: boolean;
         };
+        /**
+         * AskFrameOut
+         * @description The `data:` payload of one frame from `POST /api/ask/stream`.
+         *
+         *     OpenAPI has no vocabulary for Server-Sent Events, so the *sequence* of frames
+         *     cannot be described here. The payloads can, and they are the part a client
+         *     has to parse: the `event:` line says which member arrived — `turn`, `tool`,
+         *     `evidence`, `resolution`, `summary`, `token`, `answer`.
+         *
+         *     Its real job is to make `TurnStartOut` and `ToolCallOut` reach
+         *     `openapi.json` at all. Neither appears in a request or a response body, so
+         *     without this they would be the only two API types the frontend had to
+         *     hand-write, which is the thing ADR-0009 exists to prevent.
+         */
+        AskFrameOut: components["schemas"]["TurnStartOut"] | components["schemas"]["ToolCallOut"] | components["schemas"]["EvidenceRecord"] | components["schemas"]["ResolveOut"] | components["schemas"]["SummaryOut"] | components["schemas"]["TokenOut"] | components["schemas"]["AnswerOut"];
         /**
          * AskIn
          * @description A question, and where the person asking was looking when they asked it.
@@ -550,6 +659,118 @@ export interface components {
              * @default station
              */
             scope: string;
+        };
+        /**
+         * AssistantConfigIn
+         * @description New settings.
+         *
+         *     `api_key` absent means *leave the stored key alone*; empty string means
+         *     *remove it*. The two have to be distinguishable, because the screen never
+         *     receives the key and so cannot send it back unchanged.
+         */
+        AssistantConfigIn: {
+            /** Api Key */
+            api_key?: string | null;
+            /**
+             * Base Url
+             * @default
+             */
+            base_url: string;
+            /**
+             * Model
+             * @default
+             */
+            model: string;
+            /**
+             * Provider
+             * @default off
+             * @enum {string}
+             */
+            provider: "off" | "openai";
+            /**
+             * Timeout
+             * @default 120
+             */
+            timeout: number;
+        };
+        /**
+         * AssistantConfigOut
+         * @description How the assistant is set up. **Never carries the API key.**
+         *
+         *     `has_key` is the whole of what the interface is told about the secret. A
+         *     field that returned even a masked prefix would still be the key travelling
+         *     through a browser, a proxy log and a screenshot.
+         *
+         *     `source` says where the settings in force came from — `store` when somebody
+         *     configured it here, `env` when it is falling back to `BI_LLM*`. Without it,
+         *     an engineer who saves settings on a machine whose environment overrides them
+         *     has no way to see why nothing changed.
+         */
+        AssistantConfigOut: {
+            /**
+             * Base Url
+             * @default
+             */
+            base_url: string;
+            /**
+             * Can Store Key
+             * @default false
+             */
+            can_store_key: boolean;
+            /**
+             * Has Key
+             * @default false
+             */
+            has_key: boolean;
+            /**
+             * Model
+             * @default
+             */
+            model: string;
+            /**
+             * Provider
+             * @default off
+             */
+            provider: string;
+            /**
+             * Source
+             * @default env
+             */
+            source: string;
+            /**
+             * Timeout
+             * @default 120
+             */
+            timeout: number;
+            /**
+             * Updated At
+             * @default
+             */
+            updated_at: string;
+            /**
+             * Updated By
+             * @default
+             */
+            updated_by: string;
+            /** Verified At */
+            verified_at?: string | null;
+        };
+        /**
+         * AssistantProbeOut
+         * @description The result of actually calling the model. Not a validation of the form.
+         */
+        AssistantProbeOut: {
+            /** Error */
+            error?: string | null;
+            /** Ok */
+            ok: boolean;
+            /** Provider */
+            provider: string;
+            /**
+             * Reply
+             * @default
+             */
+            reply: string;
         };
         /** BayDetailOut */
         BayDetailOut: {
@@ -648,6 +869,77 @@ export interface components {
             top: number;
             /** X */
             x: number;
+        };
+        /**
+         * ConversationDetailOut
+         * @description One conversation with everything stored about it.
+         */
+        ConversationDetailOut: {
+            /** Id */
+            id: string;
+            /** Last At */
+            last_at: string;
+            /** Started At */
+            started_at: string;
+            /** Title */
+            title: string;
+            /**
+             * Transcript
+             * @default []
+             */
+            transcript: components["schemas"]["ConversationTurnOut"][];
+            /** Turns */
+            turns: number;
+        };
+        /**
+         * ConversationOut
+         * @description A conversation in the picker: enough to choose one, no transcript.
+         */
+        ConversationOut: {
+            /** Id */
+            id: string;
+            /** Last At */
+            last_at: string;
+            /** Started At */
+            started_at: string;
+            /** Title */
+            title: string;
+            /** Turns */
+            turns: number;
+        };
+        /**
+         * ConversationTurnOut
+         * @description One turn as it is remembered — **words, not readings** (ADR-0022 §2).
+         *
+         *     There is no evidence and no summary here, and that is the schema saying so
+         *     rather than an omission. An `EvidenceRecord` is a statement about one
+         *     moment; showing it again three days later, next to a question, under a
+         *     conversation title, invites somebody to read a stale number as a live one.
+         *     A reopened transcript shows what was said and when. For current figures,
+         *     ask again — it is cheap and it is never wrong.
+         */
+        ConversationTurnOut: {
+            /**
+             * Answer
+             * @default
+             */
+            answer: string;
+            /** Asked At */
+            asked_at: string;
+            /**
+             * Asked From
+             * @default
+             */
+            asked_from: string;
+            /** Question */
+            question: string;
+            /**
+             * Scope
+             * @default
+             */
+            scope: string;
+            /** Turn Id */
+            turn_id: string;
         };
         /**
          * Coverage
@@ -1564,6 +1856,33 @@ export interface components {
             y: number;
         };
         /**
+         * TokenOut
+         * @description One piece of generated prose. Only ever a fragment of `AnswerOut.text`.
+         */
+        TokenOut: {
+            /** Text */
+            text: string;
+        };
+        /**
+         * ToolCallOut
+         * @description A frame announcing one tool, before it runs.
+         *
+         *     Emitted rather than merely logged because "reading bay:D03" is the honest
+         *     account of what the assistant is doing, and the alternative — a spinner — is
+         *     where a system stops being inspectable.
+         */
+        ToolCallOut: {
+            /**
+             * Args
+             * @default {}
+             */
+            args: {
+                [key: string]: string | number | boolean | null;
+            };
+            /** Tool */
+            tool: string;
+        };
+        /**
          * TransformerLinkView
          * @description A power transformer drawn between two voltage-level bands.
          *
@@ -1582,6 +1901,23 @@ export interface components {
             x: number;
             /** Y */
             y: number;
+        };
+        /**
+         * TurnStartOut
+         * @description First frame of `POST /api/ask/stream`: what is about to happen.
+         *
+         *     Sent before any tool runs so the interface can show the conversation
+         *     advancing, and can say up front whether a language model is involved at all.
+         */
+        TurnStartOut: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Generated */
+            generated: boolean;
+            /** Provider */
+            provider: string;
+            /** Turn Id */
+            turn_id: string;
         };
         /**
          * Unit
@@ -1679,13 +2015,13 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Answer frames */
+            /** @description One frame payload per SSE event; `event:` says which */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/event-stream": unknown;
+                    "text/event-stream": components["schemas"]["AskFrameOut"];
                 };
             };
             /** @description Validation Error */
@@ -1695,6 +2031,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_config_api_assistant_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConfigOut"];
+                };
+            };
+        };
+    };
+    write_config_api_assistant_config_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantConfigIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantConfigOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    test_config_api_assistant_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantProbeOut"];
                 };
             };
         };
@@ -1766,6 +2175,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BusbarOut"][];
+                };
+            };
+        };
+    };
+    list_conversations_api_conversations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOut"][];
+                };
+            };
+        };
+    };
+    read_conversation_api_conversations__conversation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetailOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_conversation_api_conversations__conversation_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

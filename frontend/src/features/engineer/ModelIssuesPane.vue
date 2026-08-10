@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n'
 import IssueList from '@/features/shared/IssueList.vue'
 import { useStructureStore } from '@/stores/structure'
 import Empty from '@/ui/Empty.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const { t } = useI18n()
 const structure = useStructureStore()
@@ -21,7 +21,7 @@ const modelIssues = computed(() =>
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="structure.loading" variant="row" :count="4" />
+    <PaneSkeleton v-if="structure.loading" variant="row" :count="4" />
     <IssueList
       v-else-if="structure.station"
       :issues="modelIssues"

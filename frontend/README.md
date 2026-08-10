@@ -1,42 +1,72 @@
 # frontend/ — L1 Black Interface Web
 
-**Vite + Vue 3 + TypeScript.** Xem `docs/10-architecture/adr/0009-frontend-vite-vue.md`
-để biết vì sao không dùng Nuxt (ADR-0009 thay phần frontend của ADR-0006).
+**Vite + Vue 3 + TypeScript + Tailwind CSS v4 + shadcn-vue.** ADR-0009 (Vite), ADR-0014 (UI).
+
+## UI — BẮT BUỘC (đọc trước khi sửa giao diện)
+
+**Tailwind và shadcn đã cài sẵn.** Không thêm CSS framework khác, không tự viết component
+chrome từ đầu.
+
+| Việc cần | Làm gì | Cấm |
+|---|---|---|
+| Nút, input, form | `npx shadcn-vue@latest add …` rồi `import { Button } from '@/ui/button'` | `<button class="…">` tự style, global `button {}` |
+| Khung pane, card | `Card`, `CardHeader`, `CardContent` từ `@/ui/card` | `<div class="border … bg-panel">` copy-paste |
+| Bảng | `Table` + wrapper `DataTable.vue` | `<table>` + CSS scoped riêng |
+| Tab / preset | `Tabs`, `TabsList`, `TabsTrigger` | Segmented control tự viết |
+| Màu chrome | Token Tailwind: `bg-background`, `text-muted-foreground`, `border-border` | Hex `#…`, `bg-[#010102]` trong `features/` |
+| Màu trạm (SLD) | `st-*` qua `components/diagram/state.ts` | Dùng `st-*` cho link/lỗi phần mềm |
+| Màu phần mềm | `sys-*` (`text-sys-down`, …) | Đỏ/xanh lá cho online/offline |
+| Theme / spacing | [`DESIGN.md`](DESIGN.md) → [`docs/20-ui/tokens.md`](../docs/20-ui/tokens.md) → `src/styles.css` | Màu/spacing “cho nhanh” trong từng pane |
+| Ghép class | `cn()` từ `@/lib/utils` | Chuỗi class template dài, không merge conflict |
+
+**Thứ tự khi thiếu component:** (1) tìm trong `@/ui/*` đã add — (2) `shadcn-vue add`
+— (3) wrapper mỏng trong `ui/*.vue` (domain only: `ValueCell`, `EvidenceBlock`, …) —
+**(4) không** tạo `<div>` styled trong `features/`.
+
+Chi tiết: [`docs/20-ui/frontend-architecture.md`](../docs/20-ui/frontend-architecture.md) §10,
+[`docs/20-ui/tokens.md`](../docs/20-ui/tokens.md).
+
+### Thêm component shadcn
+
+```bash
+cd frontend
+npx shadcn-vue@latest add dialog sheet   # ví dụ
+```
+
+Cấu hình: [`components.json`](components.json) — alias `"ui": "@/ui"`.
+
+### Tailwind v4 (đã cài)
+
+- Plugin: `@tailwindcss/vite` trong [`vite.config.ts`](vite.config.ts)
+- Token: `@theme` + shadcn vars trong [`src/styles.css`](src/styles.css)
+- **Không** thêm `tailwind.config.js` — cấu hình bằng CSS (ADR-0014)
+
+```bash
+cd frontend && npm install   # tailwindcss, @tailwindcss/vite đã trong package.json
+```
 
 ## Chạy
 
 ```bash
 npm install
-
-# Phát triển: Vite serve, proxy /api sang backend cổng 8080
-npm run dev            # http://localhost:5173
-
-# Đóng gói: FastAPI serve dist/, không cần Node lúc chạy
-npm run build          # -> dist/
+npm run dev            # http://localhost:5173 — proxy /api → :8080
+npm run build          # -> dist/ — FastAPI serve khi production
 ```
 
-Backend đọc `frontend/dist/`. **Chưa build thì không có giao diện** — cố ý,
-xem ADR-0009: một frontend cũ còn sót lại nguy hiểm hơn là không có gì.
+Chưa build → không có giao diện (cố ý, ADR-0009).
 
-Đổi cổng backend khi dev: `BI_API_URL=http://127.0.0.1:8081 npm run dev`
+`BI_API_URL=http://127.0.0.1:8081 npm run dev`
 
-## Type của API là SINH TỰ ĐỘNG
+## Type API — sinh tự động
 
-`src/api/schema.d.ts` **không được sửa tay**. Nó sinh từ OpenAPI của backend:
+`src/api/schema.d.ts` **không sửa tay**:
 
 ```bash
-# 1. backend xuất schema (chạy lại mỗi khi đổi endpoint)
 cd backend && uv run python ../tools/export_openapi.py
-
-# 2. frontend sinh type
 cd frontend && npm run api:types
 ```
 
-Bước 1 được `python tools/check.py` kiểm tra: đổi API mà quên xuất thì repo check đỏ.
-Bước 2 nằm trong `npm run build`.
-
-Nhờ vậy backend đổi tên field → frontend **lỗi biên dịch**, không phải `undefined`
-lúc 2 giờ sáng trong trạm.
+`python tools/check.py` gác openapi.json; `npm run build` gọi `api:types`.
 
 ## Kiểm tra
 
@@ -44,45 +74,21 @@ lúc 2 giờ sáng trong trạm.
 npm run check     # api:types + typecheck + lint + format:check
 ```
 
-## Cấu trúc
+## Cấu trúc (2026-08-10)
 
 ```
 src/
-  api/
-    schema.d.ts     SINH TỰ ĐỘNG - đừng sửa
-    client.ts       nơi duy nhất gọi HTTP
-  stores/           Pinia - state dùng chung
-  components/
-    diagram/        SldCanvas, DeviceSymbol, state.ts (bảng màu)
-    panels/         CoveragePanel, DevicePanel, IssueList
-  views/            StationView, BayView, IssuesView
-  router.ts         hash history (lý do ghi trong file)
-  styles.css        design token
+  app/layout/       Shell, Header, PaneHost, presets
+  features/         pane theo bề mặt — CHỈ compose ui/, không tự style chrome
+  ui/               shadcn CLI (button/, card/, …) + domain wrappers
+  components/diagram/   SLD — bảng màu st-*
+  api/              client.ts, schema.d.ts (generated)
+  stores/           Pinia theo vòng đời
+  styles.css        Tailwind @theme + shadcn CSS variables
 ```
 
-## Quy tắc
+## Quy tắc domain (không đổi)
 
-**Frontend không suy luận về hệ thống điện.** Mang điện hay không, bám thanh cái
-nào, liên động có cho phép không — tất cả tính ở backend (AGENTS.md I4).
-Frontend chỉ vẽ. Thấy mình viết logic điện trong `.vue` là đặt sai chỗ.
-
-**Xám không bao giờ được nhầm với xanh lá.** `UNDETERMINED` nghĩa là quality không
-GOOD và ta từ chối đoán (I2). Tô nó thành xanh lá là nói "không có điện" — câu
-khiến người ta chạm tay vào thiết bị.
-
-**Gọi thẳng Domain API** cho mọi thao tác deterministic. Chỉ gọi BlackCore cho
-lượt hội thoại ngôn ngữ tự nhiên (I5). Phải dùng được khi LLM chết.
-
-## Còn thiếu (theo `docs/90-progress/status.md`)
-
-| Màn hình | Trạng thái |
-|---|---|
-| Sơ đồ trạm + panel thiết bị | ✅ |
-| Bay detail, danh sách cảnh báo | ✅ |
-| Realtime overlay (SSE) | chưa — module #2 |
-| Timeline SOE | chưa — module #3 |
-| Evidence panel | chưa — module #4 |
-| Chat shell | chưa — module #6 |
-
-Một OPC UA subscription phía server → fan-out SSE cho N client.
-Frontend **không** tự tạo kết nối OPC UA.
+- Frontend **không suy luận điện** — backend deterministic (I4).
+- `UNDETERMINED` ≠ xanh lá “hết điện” (I2).
+- Gọi thẳng Domain API; BlackCore chỉ cho hội thoại (I5).

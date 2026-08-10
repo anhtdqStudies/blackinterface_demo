@@ -1,10 +1,7 @@
 <script setup lang="ts">
-/**
- * What the inspector column is describing — human title, not the raw scope ref.
- */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { STATION, formatScope, type ScopeRef } from '@/scope'
+import { formatScope, parentScope, type ScopeRef } from '@/scope'
 import { useStructureStore } from '@/stores/structure'
 import { useWorkspaceStore } from '@/stores/workspace'
 
@@ -14,7 +11,15 @@ const { t } = useI18n()
 const structure = useStructureStore()
 const workspace = useWorkspaceStore()
 
-const canGoUp = computed(() => props.scope.kind !== 'station')
+const parent = computed(() => parentScope(props.scope))
+const canGoUp = computed(() => parent.value !== null)
+
+const backLabel = computed(() => {
+  const p = parent.value
+  if (!p) return ''
+  if (p.kind === 'bay') return t('inspector.backToBay', { bay: p.id })
+  return t('inspector.backToStation')
+})
 
 const primary = computed(() => {
   const s = props.scope
@@ -55,16 +60,16 @@ const secondary = computed(() => {
 </script>
 
 <template>
-  <div class="shrink-0 border-b border-line bg-panel-2 px-3 py-2">
+  <div class="shrink-0 bg-muted/40 px-3 py-2">
     <button
       v-if="canGoUp"
       type="button"
-      class="mb-1 block border-0 bg-transparent p-0 text-2xs text-accent hover:underline"
-      @click="workspace.go(STATION)"
+      class="mb-1 block border-0 bg-transparent p-0 text-2xs text-primary hover:underline"
+      @click="workspace.up()"
     >
-      {{ t('inspector.backToStation') }}
+      {{ backLabel }}
     </button>
-    <h2 class="m-0 text-base font-semibold leading-tight text-fg">{{ primary }}</h2>
-    <p v-if="secondary" class="m-0 mt-0.5 text-2xs text-dim">{{ secondary }}</p>
+    <h2 class="m-0 text-base font-semibold leading-tight text-foreground">{{ primary }}</h2>
+    <p v-if="secondary" class="m-0 mt-0.5 text-2xs text-muted-foreground">{{ secondary }}</p>
   </div>
 </template>

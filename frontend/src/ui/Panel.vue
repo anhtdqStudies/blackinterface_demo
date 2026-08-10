@@ -1,23 +1,20 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
+import { Card, CardHeader, CardTitle } from '@/ui/card'
 
-/**
- * A titled block in a side panel. The heading style was copy-pasted into five
- * components before this existed — same eleven pixels, same letter-spacing,
- * five places to change it.
- */
 defineProps<{ title?: string; class?: string }>()
 </script>
 
 <template>
-  <section :class="cn('mb-4', $props.class)">
-    <h2
-      v-if="title"
-      class="mb-[7px] text-xs font-semibold tracking-[0.08em] text-dim uppercase"
-    >
-      {{ title }}
-      <slot name="title-extra" />
-    </h2>
+  <section :class="cn('mb-3', $props.class)">
+    <Card v-if="title" class="gap-2 border-0 bg-transparent py-0 shadow-none">
+      <CardHeader class="px-0 py-0">
+        <CardTitle class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+          {{ title }}
+          <slot name="title-extra" />
+        </CardTitle>
+      </CardHeader>
+    </Card>
     <slot />
   </section>
 </template>

@@ -11,7 +11,7 @@ import Empty from '@/ui/Empty.vue'
 import ErrorBox from '@/ui/ErrorBox.vue'
 import Field from '@/ui/Field.vue'
 import Panel from '@/ui/Panel.vue'
-import Skeleton from '@/ui/Skeleton.vue'
+import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const { t } = useI18n()
 const structure = useStructureStore()
@@ -24,7 +24,7 @@ function retry(): void {
 
 <template>
   <div class="p-3">
-    <Skeleton v-if="structure.loading" variant="row" :count="5" />
+    <PaneSkeleton v-if="structure.loading" variant="row" :count="5" />
     <ErrorBox
       v-else-if="structure.error"
       :code="structure.error.code"

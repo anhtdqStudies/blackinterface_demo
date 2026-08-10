@@ -1,5 +1,5 @@
 /**
- * The pane contract (ADR-0014 §3, frontend-architecture.md §3).
+ * The pane contract (ADR-0014 §3, ADR-0018, frontend-architecture.md §3).
  *
  * A layout is **data**, not code. That single choice buys four things at once:
  * it survives a reload in `localStorage`, it travels in a URL, the agent can
@@ -16,7 +16,6 @@ import type { ScopeRef } from '@/scope'
 
 export const PANE_KINDS = [
   'sld',
-  'inspector',
   'state',
   'measurements',
   'energization',
@@ -53,11 +52,15 @@ export interface Pane {
   readonly params?: Readonly<Record<string, unknown>>
 }
 
-export interface LayoutRow {
-  /** Percent of the column's height. */
-  readonly size: number
-  readonly pane: Pane
+/** Tab group in the workspace right column (ADR-0018). */
+export interface LayoutTabs {
+  readonly kind: 'tabs'
+  readonly panes: readonly Pane[]
 }
+
+export type LayoutRow =
+  | { readonly size: number; readonly pane: Pane }
+  | { readonly size: number; readonly slot: LayoutTabs }
 
 export interface LayoutColumn {
   /** Percent of the workspace width. */
@@ -82,9 +85,8 @@ export interface PaneProps {
 
 /**
  * Not yet built. Kinds pointing here render "arrives in a later phase" rather
- * than a blank cell, so a preset can name a pane before the pane exists — that
- * is how `chat` ships in the presets at GD 1.5 and gets its component in GD 2
- * without the layout contract changing.
+ * than a blank cell, so a layout can name a pane before the pane exists.
+ * `binding` is the remaining one.
  */
 const later = defineAsyncComponent(() => import('./PaneLater.vue'))
 
@@ -96,7 +98,6 @@ const later = defineAsyncComponent(() => import('./PaneLater.vue'))
  */
 export const PANE_COMPONENTS: Readonly<Record<PaneKind, Component>> = {
   sld: defineAsyncComponent(() => import('@/features/station/SldPane.vue')),
-  inspector: defineAsyncComponent(() => import('@/features/monitoring/InspectorPane.vue')),
   state: defineAsyncComponent(() => import('@/features/monitoring/StatePane.vue')),
   measurements: defineAsyncComponent(() => import('@/features/monitoring/MeasurementPane.vue')),
   energization: defineAsyncComponent(
@@ -105,7 +106,7 @@ export const PANE_COMPONENTS: Readonly<Record<PaneKind, Component>> = {
   evidence: defineAsyncComponent(() => import('@/features/monitoring/EvidencePane.vue')),
   coverage: defineAsyncComponent(() => import('@/features/engineer/CoveragePane.vue')),
   'model-issues': defineAsyncComponent(() => import('@/features/engineer/ModelIssuesPane.vue')),
-  chat: later,
+  chat: defineAsyncComponent(() => import('@/features/assistant/ChatPane.vue')),
   binding: later,
   anomalies: defineAsyncComponent(() => import('@/features/monitoring/AnomaliesPane.vue')),
   connections: defineAsyncComponent(() => import('@/features/engineer/ConnectionsPane.vue')),
@@ -120,7 +121,6 @@ export const PANE_COMPONENTS: Readonly<Record<PaneKind, Component>> = {
  */
 export const PANE_TITLE_KEY: Readonly<Record<PaneKind, string>> = {
   sld: 'pane.sld',
-  inspector: 'pane.inspector',
   state: 'pane.state',
   measurements: 'pane.measurements',
   energization: 'pane.energization',
@@ -138,7 +138,24 @@ export function isPinned(pane: Pane): boolean {
   return pane.scope !== undefined
 }
 
+function rowPanes(row: LayoutRow): Pane[] {
+  if ('pane' in row) return [row.pane]
+  return [...row.slot.panes]
+}
+
 /** Every pane in a layout, in reading order. */
 export function panesOf(layout: Layout): Pane[] {
-  return layout.cols.flatMap((col) => col.rows.map((row) => row.pane))
+  return layout.cols.flatMap((col) => col.rows.flatMap(rowPanes))
+}
+
+export function isLayoutRowPane(
+  row: LayoutRow,
+): row is { readonly size: number; readonly pane: Pane } {
+  return 'pane' in row
+}
+
+export function isLayoutRowTabs(
+  row: LayoutRow,
+): row is { readonly size: number; readonly slot: LayoutTabs } {
+  return 'slot' in row
 }

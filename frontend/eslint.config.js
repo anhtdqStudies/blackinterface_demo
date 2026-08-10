@@ -7,7 +7,7 @@ import prettier from 'eslint-config-prettier'
 // switches off every stylistic rule so the two never disagree - otherwise
 // `npm run format` and `npm run lint` fight and neither can be a gate.
 export default [
-  { ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts'] },
+  { ignores: ['dist/**', 'node_modules/**', 'src/api/schema.d.ts', 'src/ui/*/**'] },
   js.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
   ...vueTsEslintConfig(),

@@ -1,11 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { cn } from '@/lib/utils'
+import { Alert, AlertDescription, AlertTitle } from '@/ui/alert'
+import { Button } from '@/ui/button'
 
-/**
- * A failed load with a code the operator can quote on the phone.
- *
- * System palette only — this is about our software, not the plant (ADR-0014 §2).
- */
 defineProps<{
   code: string
   message: string
@@ -13,27 +11,23 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{ retry: [] }>()
+const { t } = useI18n()
 </script>
 
 <template>
   <div
     :class="
-      cn(
-        'flex h-full flex-col items-center justify-center gap-3 rounded-[var(--radius)] border border-line bg-panel-2 p-4 text-center',
-        $props.class,
-      )
+      cn('flex h-full flex-col items-center justify-center gap-3 p-4 text-center', $props.class)
     "
     role="alert"
   >
-    <p class="m-0 text-sm font-semibold text-fg">{{ $t('ui.errorTitle') }}</p>
-    <p class="m-0 max-w-[42ch] text-sm text-dim">{{ message }}</p>
+    <Alert variant="destructive" class="max-w-md">
+      <AlertTitle>{{ t('ui.errorTitle') }}</AlertTitle>
+      <AlertDescription>{{ message }}</AlertDescription>
+    </Alert>
     <p class="m-0 font-mono text-2xs text-sys-idle">{{ code }}</p>
-    <button
-      type="button"
-      class="rounded-[var(--radius)] border border-line bg-panel px-3 py-1 text-sm text-fg hover:border-accent"
-      @click="emit('retry')"
-    >
-      {{ $t('ui.retry') }}
-    </button>
+    <Button variant="outline" size="sm" @click="emit('retry')">
+      {{ t('ui.retry') }}
+    </Button>
   </div>
 </template>

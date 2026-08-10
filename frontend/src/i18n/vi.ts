@@ -34,7 +34,6 @@ export default {
   /** Tên từng ô trong workspace. Khoá viết thẳng ở `app/layout/panes.ts`. */
   pane: {
     sld: 'Sơ đồ một sợi',
-    inspector: 'Chi tiết',
     state: 'Trạng thái',
     measurements: 'Số đo',
     energization: 'Mang điện',
@@ -55,13 +54,6 @@ export default {
     noEvidence: 'Chưa có bằng chứng cho phạm vi này.',
     noMeasurements: 'Phạm vi này không mang số đo — chọn ngăn hoặc thiết bị có MMXU.',
     noModel: 'Chưa có model. Mở hoặc tạo một project.',
-  },
-  /** Ba bố cục dựng sẵn (ADR-0014 §3). */
-  preset: {
-    label: 'Bố cục',
-    monitor: 'Giám sát',
-    chat: 'Hội thoại',
-    incident: 'Sự cố',
   },
   station: {
     bays: 'ngăn',
@@ -87,6 +79,7 @@ export default {
     wholeStation: 'Toàn trạm',
     stationMeta: '{bays} ngăn · {devices} thiết bị',
     backToStation: '← Về toàn trạm',
+    backToBay: '← Về ngăn {bay}',
   },
   anomalies: {
     none: 'Không có bất thường vận hành.',
@@ -190,6 +183,11 @@ export default {
     OPEN: 'MỞ',
     INTERMEDIATE: 'TRUNG GIAN',
     UNDETERMINED: 'KHÔNG XÁC ĐỊNH',
+    stationOverview: 'Toàn trạm',
+    openSld: 'Mở sơ đồ một sợi',
+    baysAtLevel: '{level} — {count} ngăn',
+    bayOverview: 'Ngăn {bay}',
+    scopeUnsupported: 'Chọn toàn trạm, một ngăn hoặc một thiết bị để xem trạng thái.',
   },
   liveState: {
     LIVE: 'CÓ ĐIỆN',
@@ -233,11 +231,14 @@ export default {
   evidence: {
     title: 'Bằng chứng',
     clean: 'đầy đủ',
+    /** Khác «đầy đủ»: tool này không đọc điểm nào, nên nó không bảo chứng cho
+     * một con số nào — chỉ cho xuất xứ (trạm nào, ModelVersion nào). */
+    noPoints: 'không đọc điểm nào',
     coverage: 'Độ phủ',
     points: 'điểm',
     source: 'Nguồn',
     at: 'Lúc',
-    tool: 'Công cụ',
+    subject: 'Đối tượng',
   },
   sourceKind: {
     opcua: 'đọc trực tiếp từ DataServer',
@@ -257,6 +258,85 @@ export default {
     no_history: 'Khoảng thời gian hỏi nằm ngoài dữ liệu đang lưu',
     unit_unverified: 'Số đúng nhưng thang đo chưa xác minh — không in đơn vị',
   },
+  /** Cài đặt mô hình ngôn ngữ — bề mặt engineer (ADR-0020). */
+  assistant: {
+    title: 'Mô hình ngôn ngữ',
+    intro:
+      'Chọn mô hình cho trợ lý. Trạm vẫn trả lời được khi tắt — số liệu và bằng chứng ' +
+      'do tool tính, mô hình chỉ chọn cách đọc dữ liệu và diễn đạt. Key lưu mã hoá ' +
+      'trong SQLite và không bao giờ được API trả về.',
+    fromEnv: 'đang lấy từ biến môi trường',
+    provider: 'Nhà cung cấp',
+    providerOff: 'Tắt — chỉ dùng câu tính sẵn',
+    providerOpenai: 'Endpoint kiểu OpenAI (OpenRouter, Ollama…)',
+    baseUrl: 'Địa chỉ endpoint',
+    model: 'Tên model',
+    apiKey: 'API key',
+    keyStored: '•••••••• đã lưu — để trống nếu giữ nguyên',
+    keyPlaceholder: 'dán key vào đây',
+    noSecretKey:
+      'Chưa đặt BI_SECRET_KEY nên không lưu được key. Sinh một chuỗi ngẫu nhiên rồi đặt ' +
+      'biến môi trường đó, hoặc dùng BI_LLM_API_KEY.',
+    save: 'Lưu',
+    saving: 'Đang lưu…',
+    test: 'Thử kết nối',
+    testing: 'Đang gọi mô hình…',
+    clearKey: 'Xoá key',
+    confirmClearKey: 'Xoá key đã lưu?',
+    // Lưu được ≠ chạy được. Chỉ một lần gọi thật mới đặt được mốc này.
+    verified: 'Đã gọi thật lần cuối',
+    neverVerified: 'chưa bao giờ — bấm «Thử kết nối»',
+    updated: 'Sửa lần cuối',
+    probeOk: 'Gọi được {provider}. Mô hình trả lời: «{reply}»',
+    probeFailed: 'Không gọi được: {error}',
+  },
+  /** Ô hỏi đáp: phần vỏ. Câu trả lời tính được nằm ở `agent.answer` bên dưới. */
+  scope: {
+    chip: 'Về {scope}',
+    chipHint: 'Câu không nêu tên được hiểu là hỏi về phạm vi này. Bấm để mở rộng.',
+  },
+  chat: {
+    empty:
+      'Hỏi bằng tiếng Việt về trạm này. Nêu tên hoặc số hiệu thiết bị — ví dụ «271 thế nào?». ' +
+      'Câu không nêu tên được hiểu là hỏi về phạm vi đang xem.',
+    placeholder: 'Hỏi về trạm…',
+    send: 'Hỏi',
+    sending: 'Đang hỏi…',
+    thinking: 'Đang đọc trạm…',
+    status: {
+      callingModel: 'Đang gọi mô hình…',
+      resolving: 'Đang tra tên thiết bị / ngăn…',
+      reading: 'Đang đọc {scope}…',
+      readingGeneric: 'Đang đọc dữ liệu trạm…',
+      writing: 'Đang viết diễn giải…',
+    },
+    // Nói trước câu hỏi sẽ được hiểu là hỏi về đâu, để không phải đoán.
+    about: 'về {scope}',
+    // Hội thoại lưu **lời**, không lưu số (ADR-0022 §2). Nói thẳng ra, vì một
+    // lượt cũ hiện không kèm bằng chứng trông y hệt một lượt bị mất bằng chứng.
+    historical:
+      'Đã hỏi lúc {at} — số liệu và bằng chứng không được lưu lại. Hỏi lại để xem số hiện tại.',
+    threads: {
+      new: 'Hội thoại mới',
+      recent: 'Gần đây',
+      none: 'Chưa có hội thoại nào được lưu.',
+      untitled: 'Hội thoại mới',
+      delete: 'Xoá hội thoại',
+      turns: 'không có lượt nào | {n} lượt | {n} lượt',
+    },
+    // Chữ do mô hình viết luôn nằm khối riêng, có nhãn — không trộn vào số liệu (I3).
+    interpretation: 'Diễn giải',
+    model: 'Mô hình: {provider}',
+    noModel: 'Không có mô hình ngôn ngữ — câu trả lời là số liệu đã tính.',
+    modelFailed: 'Mô hình không viết được lời giải thích ({error}). Số liệu ở trên vẫn đúng.',
+    notAllowed: 'Tài khoản của bạn không có quyền hỏi trợ lý.',
+    collapse: 'Thu gọn hội thoại',
+    expand: 'Mở rộng hội thoại',
+    openTab: {
+      sld: 'Xem trên sơ đồ',
+      measurements: 'Mở bảng số đo',
+    },
+  },
   /**
    * Câu trả lời **tính được** của trợ lý, dùng khi không có mô hình ngôn ngữ
    * (`BI_LLM=off`, hoặc mô hình chết). Backend gửi khoá + tham số chứ không gửi
@@ -269,9 +349,9 @@ export default {
         '{label} — {devices} thiết bị: {closed} đóng, {opened} mở, {undetermined} không xác định. ' +
         '{live} đoạn mang điện, {dead} mất điện, {unknown} chưa rõ. ' +
         '{measurements} số đo, {issues} vấn đề.',
-      ambiguous: '«{query}» ứng với {count} thứ: {options}. Bạn hỏi cái nào?',
-      unknown: 'Trạm này không có gì tên «{query}».',
-      denied: 'Tài khoản của bạn không có quyền «{missing}» nên câu này chưa trả lời được.',
+      unconfigured:
+        'Chưa cấu hình mô hình ngôn ngữ, nên tab hội thoại chưa trả lời được. ' +
+        'Sơ đồ và các bảng giám sát vẫn hoạt động bình thường.',
     },
   },
   common: {
