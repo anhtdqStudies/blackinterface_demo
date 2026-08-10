@@ -51,3 +51,4 @@ Mỗi quyết định kiến trúc = một file `NNNN-<slug>.md`.
 | [0020](0020-model-chooses-the-tools.md) | Mô hình chọn tool trong vòng lặp có trần; key mô hình mã hoá trong SQLite | §1, §3, §4 superseded by 0021 |
 | [0021](0021-agent-harness.md) | Harness thật: Pydantic AI, tool ghi sau cổng duyệt, bỏ sàn template | Accepted |
 | [0022](0022-conversation-memory.md) | Trí nhớ hội thoại: mô hình thấy lời, không thấy số; transcript vào SQLite | Accepted |
+| [0023](0023-team-delivery-architecture.md) | Năm module, ba chủ sở hữu; lát cắt dọc là đơn vị giao việc; `status.md` tách ra `log/` | Accepted |

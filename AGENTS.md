@@ -13,6 +13,8 @@
 |---|------|-------------|
 | 1 | `AGENTS.md` (file này) | **Luôn luôn** |
 | 2 | `docs/90-progress/status.md` | **Luôn luôn** — biết đang ở đâu, việc kế tiếp là gì |
+| 2b | `docs/90-progress/team.md` | **Luôn luôn từ 2026-08-10** — ai sở hữu file nào, ai đang làm gì ([ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md)). Sửa file của người khác = sai kể cả khi code đúng |
+| 2c | `docs/00-onboarding.md` | Người mới (không phải agent) vào dự án |
 | 3 | `docs/30-integration/oneats-dataserver.md` | Khi động tới OPC UA / DataServer / alarm |
 | 4 | `docs/20-domain/glossary.md` | Khi gặp thuật ngữ lạ (61850, CIM, EVN) |
 | 5 | `docs/10-architecture/overview.md` | Khi thêm module hoặc đổi ranh giới lớp |
@@ -309,11 +311,20 @@ Chiều phụ thuộc **một chiều**: `api → domain ← integration`, `agen
    để xác nhận các "sự thật đã đo" còn đúng
 
 ### 5.2 Kết thúc mỗi phiên (BẮT BUỘC)
-Cập nhật `docs/90-progress/status.md`:
+*(Đổi 2026-08-10 theo [ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md) §6 —
+trước đây là «cập nhật `status.md`».)*
+
+Viết **một file mới** trong `docs/90-progress/log/`, tên `YYYY-MM-DD-<slug>.md`:
 - việc đã xong (kèm đường dẫn file)
 - việc đang dở + đang vướng ở đâu
+- đo được gì (kèm **cách đo lại** — §5.4)
 - việc kế tiếp
-Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
+
+**Không sửa `status.md`** — đó là file của chủ dự án, tổng hợp mỗi tuần một lần.
+Một luật buộc ba người ghi vào cùng một file là một luật tự phá: nó conflict mỗi
+ngày rồi bị bỏ qua. Khuôn mẫu: `docs/90-progress/log/README.md`.
+
+Không ghi log = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
 ### 5.3 Khi ra quyết định kiến trúc
 Viết ADR mới trong `docs/10-architecture/adr/NNNN-<slug>.md` theo mẫu có sẵn.
@@ -445,7 +456,16 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 
 ## 9. Trạng thái repo
 
-- **Có git** (khởi tạo 2026-08-04, chưa có remote). Branch mặc định `master`.
+- **Có git** (khởi tạo 2026-08-04). Branch mặc định `master`.
   Làm việc trên branch riêng, đừng commit thẳng lên `master` nếu không được yêu cầu.
+- ⚠ **Chưa có remote** (2026-08-10). Toàn bộ dự án tồn tại trên đúng một ổ cứng,
+  trong OneDrive. Đây là rủi ro đang mở, ghi ở `docs/90-progress/risks.md`.
+- **Từ 2026-08-10 repo có ba người** ([ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md)):
+  - `CODEOWNERS` là bản máy đọc được của bảng sở hữu; `docs/90-progress/team.md`
+    là bản người đọc. **Sửa file của người khác = sai kể cả khi code đúng.**
+  - Số migration **cấp trước**: Dev A `006`, `008`… · Dev B `007`, `009`…
+  - `backend/openapi.json` **không bao giờ merge tay** — `git checkout --theirs`
+    rồi chạy lại `tools/export_openapi.py`.
+  - `api/schemas.py`, `api/app.py`: **chỉ thêm vào cuối**.
 - `document/` là tài liệu gốc, **chỉ đọc**, không sửa không xoá.
 - Repo nằm trong OneDrive → xem bẫy về `.venv` ở §7.

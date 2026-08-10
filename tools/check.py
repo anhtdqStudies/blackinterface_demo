@@ -200,7 +200,15 @@ I18N_LITERAL = re.compile(r"'([a-z][A-Za-z0-9]*\.[A-Za-z0-9_.]+)'")
 DATED_DOCS = (
     "docs/30-integration/oneats-dataserver.md",
     "docs/90-progress/status.md",
+    "docs/90-progress/team.md",
+    "docs/90-progress/questions.md",
+    "docs/90-progress/risks.md",
 )
+
+#: Every session log is a dated record too (ADR-0023 §6). Checked as a directory
+#: rather than listed, because the whole point of the directory is that people
+#: add files to it without asking anyone — including without editing this file.
+LOG_DIR = "docs/90-progress/log"
 
 GREEN, RED, YELLOW, DIM, RESET = "\033[32m", "\033[31m", "\033[33m", "\033[2m", "\033[0m"
 if sys.platform == "win32":
@@ -875,6 +883,21 @@ def check_docs_dated(r: Report) -> None:
             r.ok(f"{rel} dated")
         else:
             r.fail(f"{rel} has no YYYY-MM-DD near the top", "see docs/README.md rule 1")
+
+    log_dir = ROOT / LOG_DIR
+    undated = [
+        p.name
+        for p in sorted(log_dir.glob("*.md"))
+        if p.name != "README.md"
+        and not re.search(r"\d{4}-\d{2}-\d{2}", p.read_text(encoding="utf-8", errors="replace")[:2000])
+    ]
+    if undated:
+        r.fail(
+            f"{len(undated)} session log(s) with no YYYY-MM-DD near the top",
+            ", ".join(undated),
+        )
+    else:
+        r.ok(f"{len(list(log_dir.glob('*.md'))) - 1} session logs dated")
 
 
 def _is_onedrive_lock(output: str) -> bool:
