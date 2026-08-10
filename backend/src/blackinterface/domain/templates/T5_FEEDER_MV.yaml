@@ -1,8 +1,11 @@
 id: T5_FEEDER_MV
-version: 2
+version: 3
 title: "MV feeder bay — single busbar, no busbar selector"
 bay_type: FEEDER_MV
-observed_on: [J01]   # DEMO_SAS v654, measured 2026-08-04
+observed_on: [J01,   # DEMO_SAS v654 (2026-08-04) and T220PHOCAO v1052 (2026-08-10)
+              ]
+
+# v3 adds `aliases` — see the note in T1_LINE.yaml. -35 / -38 again.
 
 # 22 kV switchgear: no XSWI1/XSWI2, the incomer is the transformer LV winding.
 #
@@ -19,9 +22,9 @@ nodes:
 slots:
   - {ln: XSWI3,  role: transformer_disconnector, endpoints: [BB, n_a],     order: 0}
   - {ln: XSWI31, role: earth_switch,             endpoints: [n_a, EARTH],  order: 1, side: left,
-     required: false}
+     required: false, aliases: [XSWI35]}
   - {ln: XSWI32, role: earth_switch,             endpoints: [n_a, EARTH],  order: 1, side: right,
-     required: false}
+     required: false, aliases: [XSWI38]}
   - {ln: XCBR1,  role: breaker,                  endpoints: [n_a, n_feed], order: 2}
 
 # ASSUMPTION - DEMO_SAS has no 22 kV busbar object, so `BB` resolves to an

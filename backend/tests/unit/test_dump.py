@@ -57,3 +57,65 @@ def test_read_error_never_becomes_a_good_value() -> None:
     device = parse_dump(records).bays[0].logical_nodes[0]
     assert device.position.value is None
     assert device.position.quality is Quality.BAD
+
+
+def _node(path: str, cls: str = "Object", **extra: Any) -> dict[str, Any]:
+    return {"path": path, "nodeid": f"ns=2;s={path.rsplit('/', 1)[1]}", "class": cls, **extra}
+
+
+#: T220PHOCAO v1052 in miniature, browsed 2026-08-10. Three things differ from
+#: DEMO_SAS: the root is the station itself (no `SAS`), the voltage level is
+#: prefixed, and each bay is wrapped in `<bay>_<label>` beside its IEDs.
+NESTED_DUMP: list[dict[str, Any]] = [
+    _node("/T220PCA/S220kV"),
+    _node("/T220PCA/S220kV/D05_DLL1"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05/XCBR1"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05/XCBR1/Name", "Variable", value="271", quality="Good"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05/XCBR1/PosSt", "Variable", value=2, quality="Good"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05BCU"),
+    _node("/T220PCA/S220kV/D05_DLL1/D05F87L"),
+    _node("/T220PCA/S220kV/DBB_Busbar"),
+    _node("/T220PCA/S220kV/DBB_Busbar/DBB"),
+    _node("/T220PCA/S220kV/DBB_Busbar/DBB/XSWI103"),
+    _node("/T220PCA/S220kV/DBB_Busbar/DBBF87B1"),
+    _node("/T220PCA/Subs/BB21"),
+    _node("/T220PCA/Subs/BB21/PPVmax", "Variable", value=231.4, quality="Good"),
+    _node("/T220PCA/AT1"),
+    _node("/T220PCA/AT1/DT1"),
+    _node("/T220PCA/AT1/DT1/YPTR"),
+    _node("/T220PCA/AT1/DT1/YLTC"),
+    _node("/T220PCA/AT1/DT1/YLTC/TapPos", "Variable", value=9, quality="Good"),
+    _node("/T220PCA/AT1/DT1F87T1"),
+    _node("/T220PCA/ACQUY"),  # a station-level group that is not a transformer
+]
+
+
+def test_a_wrapped_bay_is_read_at_its_own_id_and_voltage() -> None:
+    """The group `D05_DLL1` is scaffolding; `D05` at 220kV is the bay."""
+    obs = parse_dump(NESTED_DUMP)
+    bay = next(b for b in obs.bays if b.id == "D05")
+    assert bay.voltage_level == "220kV"
+    assert bay.source_ref == "ns=2;s=D05"
+    breaker = next(ln for ln in bay.logical_nodes if ln.ln == "XCBR1")
+    assert (breaker.name, breaker.position.value) == ("271", 2)
+
+
+def test_ieds_beside_a_wrapped_bay_still_reach_the_classifier() -> None:
+    """`DBBF87B1` is what makes DBB a busbar protection object, one level up."""
+    obs = parse_dump(NESTED_DUMP)
+    assert "F87B1" in next(b for b in obs.bays if b.id == "DBB").ln_names
+    assert "BCU" in next(b for b in obs.bays if b.id == "D05").ln_names
+
+
+def test_a_transformer_is_found_one_level_below_the_group_that_names_it() -> None:
+    """`/AT1/DT1/YLTC`, not `/AT1/YLTC`. The id must stay AT1 — bays pair on it."""
+    obs = parse_dump(NESTED_DUMP)
+    assert [t.id for t in obs.transformers] == ["AT1"]
+    tap = next(ln for ln in obs.transformers[0].logical_nodes if ln.ln == "YLTC")
+    assert next(m.sample.value for m in tap.measurands if m.da == "TapPos") == 9
+
+
+def test_busbars_are_found_under_a_station_root_that_is_not_called_sas() -> None:
+    obs = parse_dump(NESTED_DUMP)
+    assert [b.id for b in obs.busbars] == ["BB21"]

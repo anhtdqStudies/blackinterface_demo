@@ -4,12 +4,13 @@ READ-ONLY (AGENTS.md I1). This module browses and reads. It never calls a
 OneATS write surface, and the client it builds is never handed outward.
 
 Strategy: targeted browse rather than a full dump. We walk
-`/SAS/<voltage level>/<bay>/<logical node>` and batch-read only the data
+`<station>/<voltage level>/<bay>/<logical node>` and batch-read only the data
 attributes topology needs (`PosSt`, `Name`, `SName`, `IsLive`). On DEMO_SAS
 that is ~500 values instead of ~6000 nodes.
 
-Measured shape, 2026-08-04, DEMO_SAS v654 — see
-docs/30-integration/oneats-dataserver.md.
+How each of those four levels may be spelled differs between projects and lives
+in `integration/naming.py` — measured on DEMO_SAS v654 (2026-08-04) and
+T220PHOCAO v1052 (2026-08-10). See docs/30-integration/oneats-dataserver.md.
 """
 
 from __future__ import annotations
@@ -34,14 +35,15 @@ from blackinterface.domain.observation import (
     StationObs,
     TransformerObs,
 )
+from blackinterface.integration.naming import bay_within, strip_bay_prefix, voltage_level
 from blackinterface.integration.opcua.values import to_sample
 
 #: The DEMO_SAS station root. The path embeds the project name ("PROJECT"),
 #: so it is only a fast path — other projects are found by `_find_station_root`.
 KNOWN_SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
-#: Objects(0) -> Root -> EVN -> RLDC -> <project> -> <station>(5). One spare.
+#: Objects(0) -> Root -> EVN -> <region> -> <project> -> <station>(5). One spare.
+#: T220PHOCAO's station sits at 4 (`Root/EVN/NPT_PTC1/T220PCA`, no `SAS` level).
 MAX_ROOT_SEARCH_DEPTH = 6
-VOLTAGE_LEVEL_RE = re.compile(r"^\d+kV$")
 BUSBAR_RE = re.compile(r"^BB\d{2}$")
 
 POSITION_DA = "PosSt"
@@ -141,14 +143,15 @@ async def discover_station(
 
 
 async def _find_station_root(client: Client) -> Any:
-    """Locate the node whose children are voltage levels (`220kV`, `110kV`…).
+    """Locate the node whose children are voltage levels (`220kV`, `S110kV`…).
 
-    On DEMO_SAS that is `Objects/Root/EVN/RLDC/PROJECT/SAS`, but the path embeds
-    the project name, so it changes with every project loaded into the
-    DataServer. Try the known path first (fast), then breadth-first search the
-    ns=2 object tree. The tree above the station is narrow — a handful of
-    grouping nodes — so the search touches few nodes before it either finds a
-    voltage level or exhausts the depth budget.
+    On DEMO_SAS that is `Objects/Root/EVN/RLDC/PROJECT/SAS`; on T220PHOCAO it is
+    `Objects/Root/EVN/NPT_PTC1/T220PCA`, one level shallower and with no `SAS`
+    node at all. The path embeds the project, so it changes with every project
+    loaded into the DataServer. Try the known path first (fast), then
+    breadth-first search the ns=2 object tree. The tree above the station is
+    narrow — a handful of grouping nodes — so the search touches few nodes
+    before it either finds a voltage level or exhausts the depth budget.
     """
     try:
         return await client.nodes.objects.get_child(KNOWN_SAS_PATH)
@@ -163,7 +166,7 @@ async def _find_station_root(client: Client) -> Any:
             browse_name = await child.read_browse_name()
             if browse_name.NamespaceIndex == 0:
                 continue  # Server, Types… — the standard namespace, never ours
-            if VOLTAGE_LEVEL_RE.match(browse_name.Name):
+            if voltage_level(browse_name.Name):
                 return node
             if await child.read_node_class() == ua.NodeClass.Object:
                 object_children.append(child)
@@ -173,7 +176,7 @@ async def _find_station_root(client: Client) -> Any:
     raise LookupError(
         "no station root found: no node within depth "
         f"{MAX_ROOT_SEARCH_DEPTH} of Objects has a voltage-level child "
-        "(a name like '220kV'). Is a project loaded in this DataServer?"
+        "(a name like '220kV' or 'S220kV'). Is a project loaded in this DataServer?"
     )
 
 
@@ -185,18 +188,45 @@ async def _read_model_attribute(client: Client, attribute: str) -> str | None:
         return None
 
 
+async def _bays_under(level: Any) -> list[tuple[str, Any, tuple[str, ...]]]:
+    """Every bay under one voltage level, however this project nests them.
+
+    Yields the bay's id, the node whose children are its logical nodes, and the
+    names of the IEDs standing *beside* it rather than below. Only the nested
+    shape has those, and `domain/bay_types.py` needs them: a busbar protection
+    object is recognised by its `F87B*` relays, which T220PHOCAO keeps as
+    siblings (`DBB` + `DBBF87B1`) where DEMO_SAS keeps them as children.
+    """
+    result: list[tuple[str, Any, tuple[str, ...]]] = []
+    for group in await _children(level):
+        if await group.read_node_class() != ua.NodeClass.Object:
+            continue
+        group_name = (await group.read_browse_name()).Name
+        objects: dict[str, Any] = {}
+        for child in await _children(group):
+            if await child.read_node_class() == ua.NodeClass.Object:
+                objects[(await child.read_browse_name()).Name] = child
+
+        inner = bay_within(group_name, frozenset(objects))
+        if inner is None:
+            result.append((group_name, group, ()))
+            continue
+        beside = tuple(sorted(strip_bay_prefix(inner, name) for name in objects if name != inner))
+        result.append((inner, objects[inner], beside))
+    return result
+
+
 async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
     """Two passes: browse the tree, then read every value in one batch."""
-    layout: list[tuple[str, str, Any, dict[str, Any]]] = []  # vl, bay, bay node, ln nodes
+    layout: list[tuple[str, str, Any, dict[str, Any], tuple[str, ...]]] = []
     read_nodes: list[Any] = []
     read_keys: list[Key] = []
 
     for level in await _children(sas):
-        level_name = (await level.read_browse_name()).Name
-        if not VOLTAGE_LEVEL_RE.match(level_name):
+        level_name = voltage_level((await level.read_browse_name()).Name)
+        if level_name is None:
             continue
-        for bay in await _children(level):
-            bay_name = (await bay.read_browse_name()).Name
+        for bay_name, bay, beside in await _bays_under(level):
             logical_nodes: dict[str, Any] = {}
             for child in await _children(bay):
                 child_name = (await child.read_browse_name()).Name
@@ -214,13 +244,13 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                     if attribute_name in wanted:
                         read_nodes.append(attribute)
                         read_keys.append((bay_name, child_name, attribute_name))
-            layout.append((level_name, bay_name, bay, logical_nodes))
+            layout.append((level_name, bay_name, bay, logical_nodes, beside))
 
     values, refs = await _read_batch(client, read_nodes, read_keys)
 
     result = []
-    for level_name, bay_name, bay_node, logical_nodes in layout:
-        observations = []
+    for level_name, bay_name, bay_node, logical_nodes, beside in layout:
+        observations = [LogicalNodeObs(ln=name) for name in beside if name not in logical_nodes]
         for ln_name, ln_node in sorted(logical_nodes.items()):
             position_key = (bay_name, ln_name, POSITION_DA)
             observations.append(
@@ -240,12 +270,33 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                 id=bay_name,
                 name=bay_name,
                 voltage_level=level_name,
-                logical_nodes=tuple(observations),
+                logical_nodes=tuple(sorted(observations, key=lambda ln: ln.ln)),
                 is_live=to_sample(values.get((bay_name, LIVE_DA)), refs.get((bay_name, LIVE_DA))),
                 source_ref=bay_node.nodeid.to_string(),
             )
         )
     return result
+
+
+async def _transformer_lns(group: Any) -> dict[str, Any] | None:
+    """The logical nodes of a power transformer, or `None` if this is not one.
+
+    DEMO_SAS hangs `YPTR`/`YLTC` directly off `/SAS/AT1`. T220PHOCAO puts a
+    device between them (`/T220PCA/AT1/DT1/YPTR`) and stands the transformer's
+    relays beside it, so one level of descent is tried before giving up. The
+    test is the logical nodes themselves, not the name — `ACQUY`, `COMM` and
+    `Program` are station-level groups too, and only this rejects them.
+    """
+    children = {(await c.read_browse_name()).Name: c for c in await _children(group)}
+    if any(ln in children for ln in TRANSFORMER_LNS):
+        return children
+    for child in children.values():
+        if await child.read_node_class() != ua.NodeClass.Object:
+            continue
+        inner = {(await c.read_browse_name()).Name: c for c in await _children(child)}
+        if any(ln in inner for ln in TRANSFORMER_LNS):
+            return inner
+    return None
 
 
 async def _discover_transformers(client: Client, sas: Any) -> list[TransformerObs]:
@@ -262,12 +313,12 @@ async def _discover_transformers(client: Client, sas: Any) -> list[TransformerOb
 
     for child in await _children(sas):
         name = (await child.read_browse_name()).Name
-        if VOLTAGE_LEVEL_RE.match(name) or name == "Subs":
+        if voltage_level(name) or name == "Subs":
             continue
         if await child.read_node_class() != ua.NodeClass.Object:
             continue
-        grandchildren = {(await g.read_browse_name()).Name: g for g in await _children(child)}
-        if not any(ln in grandchildren for ln in TRANSFORMER_LNS):
+        grandchildren = await _transformer_lns(child)
+        if grandchildren is None:
             continue
         measuring: dict[str, Any] = {}
         for ln_name, ln_node in sorted(grandchildren.items()):

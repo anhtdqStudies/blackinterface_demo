@@ -1,9 +1,18 @@
 id: T4_BUS_TRANSFER
-version: 1
+version: 2
 title: "Bus transfer bay — ties a main busbar to the transfer busbar"
 bay_type: BUS_TRANSFER
-observed_on: [D12, E04]   # DEMO_SAS v654, measured 2026-08-04
+observed_on: [D12, E04,           # DEMO_SAS v654, measured 2026-08-04
+              D03, E18]           # T220PHOCAO v1052, measured 2026-08-10
 
+# v2 adds `aliases` — see the note in T1_LINE.yaml.
+#
+# ASSUMPTION - NOT VERIFIED (2026-08-10). Unlike the other pairs, nothing in
+# LN_POSITION_HINT says which of T220PHOCAO's -94 / -95 sits on which side of
+# the breaker, and the user confirmed they do not know either. Both earth
+# switches attach to the SAME node (n_b), so the electrical result is identical
+# whichever way round it is — only the left/right drawing differs. Recorded
+# here rather than silently chosen (AGENTS.md §5.4); resolve alongside Q6.
 nodes:
   - {id: n_a, kind: internal, label: "main busbar side"}
   - {id: n_b, kind: internal, label: "transfer busbar side"}
@@ -11,8 +20,8 @@ nodes:
 slots:
   - {ln: XSWI1,  role: busbar_selector,   endpoints: [BB1, n_a],   order: 0}
   - {ln: XSWI2,  role: busbar_selector,   endpoints: [BB2, n_a],   order: 0, required: false}
-  - {ln: XSWI11, role: earth_switch,      endpoints: [n_a, EARTH], order: 1, side: left, required: false}
+  - {ln: XSWI11, role: earth_switch,      endpoints: [n_a, EARTH], order: 1, side: left, required: false, aliases: [XSWI15]}
   - {ln: XCBR1,  role: breaker,           endpoints: [n_a, n_b],   order: 2}
-  - {ln: XSWI91, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: left,  required: false}
-  - {ln: XSWI92, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: right, required: false}
+  - {ln: XSWI91, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: left,  required: false, aliases: [XSWI95]}
+  - {ln: XSWI92, role: earth_switch,      endpoints: [n_b, EARTH], order: 3, side: right, required: false, aliases: [XSWI94]}
   - {ln: XSWI9,  role: transfer_selector, endpoints: [BB9, n_b],   order: 4}

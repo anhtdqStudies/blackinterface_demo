@@ -37,6 +37,15 @@ class TemplateNode(BaseModel):
 
 
 class TemplateSlot(BaseModel):
+    """One logical node's electrical position within a bay.
+
+    `aliases` exist because two measured projects number the same physical
+    device differently: DEMO_SAS calls the busbar-1 earth switch `XSWI11`,
+    T220PHOCAO calls it `XSWI15` after its EVN designation `-15`. Same
+    apparatus, same terminals, so it is one slot with two spellings rather
+    than two templates. See docs/30-integration/oneats-dataserver.md §2.
+    """
+
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     ln: str
@@ -45,6 +54,12 @@ class TemplateSlot(BaseModel):
     order: int = 0
     side: Literal["center", "left", "right"] = "center"
     required: bool = True
+    aliases: tuple[str, ...] = ()
+
+    @property
+    def names(self) -> tuple[str, ...]:
+        """Every spelling this slot answers to, canonical one first."""
+        return (self.ln, *self.aliases)
 
 
 class BayTemplate(BaseModel):
@@ -63,17 +78,28 @@ class BayTemplate(BaseModel):
         return frozenset(n.id for n in self.nodes)
 
     def slot_for(self, ln: str) -> TemplateSlot | None:
-        return next((s for s in self.slots if s.ln == ln), None)
+        return next((s for s in self.slots if ln in s.names), None)
 
     def validate_refs(self) -> list[str]:
-        """Structural self-check: every endpoint resolves to something."""
+        """Structural self-check: every endpoint resolves, every name is unique."""
         known = self.node_ids | frozenset(BUSBAR_REFS) | {EARTH_REF}
-        return [
+        problems = [
             f"{self.id}: slot {slot.ln} references unknown endpoint {ref!r}"
             for slot in self.slots
             for ref in slot.endpoints
             if ref not in known
         ]
+        # An LN claimed by two slots would place one device at two positions,
+        # and which one won would depend on file order.
+        seen: dict[str, str] = {}
+        for slot in self.slots:
+            for name in slot.names:
+                if name in seen:
+                    problems.append(
+                        f"{self.id}: {name} is claimed by both {seen[name]} and {slot.ln}"
+                    )
+                seen[name] = slot.ln
+        return problems
 
 
 class TemplateRegistry(BaseModel):

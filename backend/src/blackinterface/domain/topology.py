@@ -212,7 +212,10 @@ class _Builder:
 
         device_ids: list[str] = []
         for slot in template.slots:
-            found = observed.get(slot.ln)
+            # The device id stays the template's spelling whichever the source
+            # used, so `device:D03.XSWI11` addresses the same apparatus in every
+            # project (I8) — only the observation is looked up by alias.
+            found = next((observed[name] for name in slot.names if name in observed), None)
             if found is None:
                 if slot.required:
                     issues.append(

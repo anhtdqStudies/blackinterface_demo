@@ -1,8 +1,13 @@
 id: T2_TRANSFORMER
-version: 2
+version: 3
 title: "Transformer incoming bay — double busbar + transfer busbar"
 bay_type: TRANSFORMER
-observed_on: [D01, E07]   # DEMO_SAS v654, measured 2026-08-04
+observed_on: [D01, E07,                       # DEMO_SAS v654, measured 2026-08-04
+              D04, D10, E06, E17]             # T220PHOCAO v1052, measured 2026-08-10
+
+# v3 adds `aliases` — see the note in T1_LINE.yaml. Here `-35`/`-38` are the
+# EVN suffixes that DEMO_SAS renumbers to XSWI31/XSWI32, and T220PHOCAO's
+# `231-35` / `231-38` confirm them.
 
 # Ground truth: CheckLiveState in document/DEMO_SAS-MODELExplorer.xlsx.
 #
@@ -22,13 +27,13 @@ slots:
   - {ln: XSWI2,  role: busbar_selector,          endpoints: [BB2, n_bb],   order: 0,
      required: false}
   - {ln: XSWI11, role: earth_switch,             endpoints: [n_bb, EARTH], order: 1, side: left,
-     required: false}
+     required: false, aliases: [XSWI15]}
   - {ln: XCBR1,  role: breaker,                  endpoints: [n_bb, n_mid], order: 2}
   - {ln: XSWI31, role: earth_switch,             endpoints: [n_mid, EARTH], order: 3, side: left,
-     required: false}
+     required: false, aliases: [XSWI35]}
   - {ln: XSWI3,  role: transformer_disconnector, endpoints: [n_mid, n_tr], order: 4}
   - {ln: XSWI32, role: earth_switch,             endpoints: [n_tr, EARTH], order: 5, side: right,
-     required: false}
+     required: false, aliases: [XSWI38]}
   - {ln: XSWI9,  role: transfer_selector,        endpoints: [BB9, n_tr],   order: 6,
      required: false}
 

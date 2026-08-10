@@ -1,8 +1,17 @@
 id: T1_LINE
-version: 2
+version: 3
 title: "Line bay — double busbar + transfer busbar"
 bay_type: LINE
-observed_on: [D03, D04, E01, E02]   # DEMO_SAS v654, measured 2026-08-04
+observed_on: [D03, D04, E01, E02,           # DEMO_SAS v654, measured 2026-08-04
+              D05, D06, D08, D09,           # T220PHOCAO v1052, measured 2026-08-10
+              E08, E09, E10, E11, E19, E20, E21, E22]
+
+# v3 adds `aliases`. T220PHOCAO names each earth switch after its EVN
+# designation (-15, -75, -76) where DEMO_SAS renumbers them (11, 71, 72). Same
+# apparatus, same terminals, so one slot with two spellings — see
+# docs/30-integration/oneats-dataserver.md §2. The mapping is not inferred: it
+# is the suffix already documented in bay_types.LN_POSITION_HINT, and each LN's
+# `Name` on T220PHOCAO spells it out (`271-15`, `271-75`, `271-76`).
 
 # Ground truth for the current path: the CheckLiveState Lua script exported in
 # document/DEMO_SAS-MODELExplorer.xlsx.
@@ -24,13 +33,13 @@ slots:
   - {ln: XSWI1,  role: busbar_selector,   endpoints: [BB1, n_bb],      order: 0}
   - {ln: XSWI2,  role: busbar_selector,   endpoints: [BB2, n_bb],      order: 0, required: false}
   - {ln: XSWI11, role: earth_switch,      endpoints: [n_bb, EARTH],    order: 1, side: left,
-     required: false}
+     required: false, aliases: [XSWI15]}
   - {ln: XCBR1,  role: breaker,           endpoints: [n_bb, n_mid],    order: 2}
   - {ln: XSWI71, role: earth_switch,      endpoints: [n_mid, EARTH],   order: 3, side: left,
-     required: false}
+     required: false, aliases: [XSWI75]}
   - {ln: XSWI7,  role: line_disconnector, endpoints: [n_mid, n_line],  order: 4}
   - {ln: XSWI72, role: earth_switch,      endpoints: [n_line, EARTH],  order: 5, side: right,
-     required: false}
+     required: false, aliases: [XSWI76]}
   - {ln: XSWI9,  role: transfer_selector, endpoints: [BB9, n_line],    order: 6, required: false}
 
 # ASSUMPTION - not proven. The Lua says nothing about earth switches (a closed

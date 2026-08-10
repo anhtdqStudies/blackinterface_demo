@@ -54,6 +54,40 @@ ns=2;s=D03.XCBR1.PosSt
 ```
 Đây là tài sản lớn: evidence tự giải thích, đối chiếu drift dễ.
 
+### ⚠ Hình dạng này KHÔNG cố định giữa các project (đo 2026-08-10)
+
+Trạm thứ hai được đo — **T220PHOCAO v1052** (`T220PCA`, Phố Cao) — khác DEMO_SAS
+ở ba chỗ, và cả ba đều từng làm importer chết hoặc trả về rỗng:
+
+```
+/Root/EVN/NPT_PTC1/T220PCA/S220kV/D03_DBT/D03/XCBR1/PosSt
+      │   │        │       │      │       │   └───── logical node
+      │   │        │       │      │       └───────── ngăn
+      │   │        │       │      └───────────────── NHÓM ngăn  ← cấp thừa
+      │   │        │       └──────────────────────── cấp điện áp, có tiền tố S
+      │   │        └──────────────────────────────── trạm — KHÔNG có node `SAS`
+      └───┴───────────────────────────────────────── region / subregion
+```
+
+| # | DEMO_SAS v654 | T220PHOCAO v1052 | Ai xử lý |
+|---|---|---|---|
+| 1 | `.../PROJECT/SAS/…` | `.../NPT_PTC1/T220PCA/…`, không có `SAS` | `_find_station_root` dò theo **nội dung**, không theo path |
+| 2 | `220kV` | `S220kV` | `naming.voltage_level()` — bỏ tiền tố, domain chỉ thấy `220kV` |
+| 3 | `/220kV/D03/XCBR1`, IED là con của ngăn (`BCU`) | `/S220kV/D03_DBT/D03/XCBR1`, IED là **anh em** của ngăn (`D03BCU`) | `naming.bay_within()` + `strip_bay_prefix()` |
+
+Quy ước nhóm ngăn: tên nhóm là `<ngăn>_<nhãn>` và **có một con trùng tên phần
+đầu** — đó chính là ngăn. Không dùng luật "con nào có XCBR/XSWI thì là ngăn":
+`DBB` của DEMO_SAS không có LN đóng cắt nào (nó là bảo vệ so lệch, xem §7 bẫy)
+và sẽ bị đi sâu nhầm.
+
+Nơi giữ cả ba khác biệt: `backend/src/blackinterface/integration/naming.py`,
+dùng chung cho `dump.py` và `opcua/discovery.py`. Test khoá lại:
+`backend/tests/unit/test_naming.py`, `test_dump.py`.
+
+**Hệ quả cho tool**: `probe_dataserver.py` đã tự dò trạm (`find_station()`),
+không còn hardcode path DEMO. `verify_dataserver.py` thì **vẫn** khẳng định các
+sự thật của DEMO_SAS — chạy nó trên T220PHOCAO sẽ đỏ, và đúng là phải đỏ.
+
 ### Node roots dưới `Objects` (ns=2)
 | Root | Vai trò |
 |---|---|

@@ -1,19 +1,25 @@
 id: T3_BUS_COUPLER
-version: 1
+version: 2
 title: "Bus coupler — ties busbar 1 to busbar 2"
 bay_type: BUS_COUPLER
-observed_on: [D17, E05]   # DEMO_SAS v654, measured 2026-08-04
+observed_on: [D17, E05,           # DEMO_SAS v654, measured 2026-08-04
+              D07, E16]           # T220PHOCAO v1052, measured 2026-08-10
 
 # Symmetric: a selector on each side of the breaker, two earth switches per side.
+#
+# v2 adds `aliases` — see the note in T1_LINE.yaml. Both earth switches of a
+# pair land on the SAME connectivity node here, so which of -14/-15 is drawn
+# left and which right is cosmetic; the electrical result is identical either
+# way. The pairing follows LN_POSITION_HINT: -15 -> XSWI11, -14 -> XSWI12.
 nodes:
   - {id: n_a, kind: internal, label: "busbar-1 side"}
   - {id: n_b, kind: internal, label: "busbar-2 side"}
 
 slots:
   - {ln: XSWI1,  role: busbar_selector, endpoints: [BB1, n_a],   order: 0}
-  - {ln: XSWI11, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: left,  required: false}
-  - {ln: XSWI12, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: right, required: false}
+  - {ln: XSWI11, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: left,  required: false, aliases: [XSWI15]}
+  - {ln: XSWI12, role: earth_switch,    endpoints: [n_a, EARTH], order: 1, side: right, required: false, aliases: [XSWI14]}
   - {ln: XCBR1,  role: breaker,         endpoints: [n_a, n_b],   order: 2}
-  - {ln: XSWI21, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: left,  required: false}
-  - {ln: XSWI22, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: right, required: false}
+  - {ln: XSWI21, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: left,  required: false, aliases: [XSWI25]}
+  - {ln: XSWI22, role: earth_switch,    endpoints: [n_b, EARTH], order: 3, side: right, required: false, aliases: [XSWI24]}
   - {ln: XSWI2,  role: busbar_selector, endpoints: [BB2, n_b],   order: 4}
