@@ -3,23 +3,180 @@
 > **File này là bộ nhớ xuyên phiên.** Mọi AI agent đọc nó đầu phiên và cập nhật cuối phiên.
 > Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
-**Cập nhật lần cuối**: 2026-08-07 · phiên: **GĐ 2 bước 1 — lát cắt dọc của agent**.
-`agent/` chạy đầu-cuối với 2 tool, `POST /api/ask` + stream, bằng chứng đi kèm,
-**không cần mô hình ngôn ngữ nào**. ADR-0019 chốt hình dạng và bác Pydantic AI.
+**Cập nhật lần cuối**: 2026-08-10 (phiên trạm thứ hai) · **Importer chạy được trên
+T220PHOCAO** ✅ — 23 ngăn, 6 thanh cái, 2 MBA. `check.py` xanh.
+
+*Trước đó cùng ngày*: **SLD fit mặc định + tab Trạng thái** · **Chat markdown** · **ADR-0018 layout**.
 
 ---
 
-## Đang ở đâu
+## 🔴 Trạm thứ hai: T220PHOCAO (Phố Cao) — đo 2026-08-10
 
-**GĐ 2 bước 1 XONG.** Kế tiếp: **bước 2 — `ChatPane` thật**.
+DataServer dev **không còn chạy DEMO_SAS**; project hiện tại là `T220PHOCAO`
+v1052, node trạm `T220PCA`. Hình dạng address space khác DEMO ở ba chỗ — đã ghi
+đầy đủ ở `docs/30-integration/oneats-dataserver.md` §2 và xử lý trong
+`integration/naming.py` (mới, dùng chung cho hai importer).
+
+**Đã xong**:
+
+- `discover_station()` và `parse_dump()` cùng ra **23 ngăn / 6 thanh cái / 2 MBA**.
+- `build_station()` phân loại **23/23 ngăn**, đặt hết thiết bị vào template.
+  Ghép MBA: AT1 = D04+E06, AT2 = D10+E17+J01.
+- Còn đúng 3 issue, cả 3 đều đúng: `busbar_not_in_source` cho BB41 (22kV không có
+  object thanh cái — y như DEMO), và `slot_unmapped` cho DBB/EBB (xem T6).
+- `probe_dataserver.py` tự dò trạm, dump được fixture trạm mới (3.287/46.149 node).
+- **Dialect số hiệu LN** đã xử lý bằng `aliases` trong template + `infer_bay_type`
+  đọc **chữ số đầu** của LN tiếp địa thay vì cả hai chữ số:
+
+  | thiết bị EVN | DEMO_SAS | T220PHOCAO |
+  |---|---|---|
+  | -15 / -14 | `XSWI11` / `XSWI12` | `XSWI15` / `XSWI14` |
+  | -25 / -24 | `XSWI21` / `XSWI22` | `XSWI25` / `XSWI24` |
+  | -75 / -76 | `XSWI71` / `XSWI72` | `XSWI75` / `XSWI76` |
+  | -35 / -38 | `XSWI31` / `XSWI32` | `XSWI35` / `XSWI38` |
+  | -95 / -94 | `XSWI91` / `XSWI92` | `XSWI95` / `XSWI94` ⚠ |
+
+  ⚠ **GIẢ ĐỊNH — chưa xác minh** (người dùng xác nhận chưa biết, 2026-08-10):
+  không có bằng chứng nào nói -94 hay -95 nằm phía nào của máy cắt ngăn vòng.
+  Cả hai nối vào **cùng một nút** (`n_b`) nên kết quả điện giống hệt nhau, chỉ
+  khác chỗ vẽ trái/phải. Ghi ở `T4_BUS_TRANSFER.yaml`; giải quyết cùng Q6.
+
+  Id thiết bị vẫn giữ cách viết của template (`device:D03.XSWI11`) để scope ref
+  không đổi theo project (I8) — chỉ lúc **tra observation** mới dùng alias.
+
+**Còn dở:**
+
+1. **Trạm chưa có dữ liệu trường.** Mọi `PosSt`, mọi measurand đọc về
+   `BadWaitingForInitialData`; **không có `IsLive` ở đâu cả** (DEMO có ở
+   `<bay>/IsLive`). Chỉ `Name`, `BAY/Name`, `Subs/BB*/PPVmax`,
+   `IsPowerSource` là Good. Nên sơ đồ sẽ dựng đúng hình nhưng toàn `UNDETERMINED`
+   (xám) — đúng theo I2, không phải lỗi. Đối chiếu energization (`<bay>.IsLive`)
+   **không dùng được** trên trạm này.
+
+---
+
+## ⬅ VIỆC KẾ TIẾP
+
+1. ✅ Refactor frontend UI (shadcn-vue, dense ops, tokens.md)
+2. ✅ **ADR-0018 layout** — chat trái + tab phải, SLD = tab, `?tab=`
+3. ✅ **Model thật đã chạy** — người dùng xác nhận 2026-08-10
+4. ✅ **Trí nhớ hội thoại** (ADR-0022)
+5. ⬅ **Nhìn chat markdown + layout mới bằng mắt** — rồi tiếp tool `trace`
+6. **`trace`** — tool quan trọng nhất còn thiếu
+7. **Eval suite** gọi 27B thật, opt-in env, ngoài `check.py`
+8. **Khung duyệt** + `draft_operation` + `control.sign` ở UI
+9. Dọn legacy CSS (`button {}`, alias `--bg`) khi hết pane dùng class cũ
+
+### Còn chưa xác minh với endpoint thật
+
+- ✅ ~~Chưa gọi OpenRouter lần nào~~ — **đã gọi thật 2026-08-10**.
+  **Còn thiếu và phải hỏi người dùng, đừng đoán** (§5.4): model nào, endpoint
+  nào, câu hỏi nào đã thử, câu trả lời có đúng không, có bao nhiêu lượt tool.
+- **`llm_count_tokens_before_request` vẫn mặc định TẮT.** Giờ đã có endpoint
+  thật để thử — món rẻ nhất còn lại. `llm_max_turn_tokens` vẫn chặn sau khi gửi.
+- Chưa có máy trạm (RTX 5090) để đo tok/s một lượt — ADR-0021 §7, GIẢ ĐỊNH.
+- **Lịch sử hội thoại tốn bao nhiêu token: CHƯA ĐO.** 4 lượt văn xuôi × ~5 câu
+  ước lượng vài trăm token — *ước lượng*, không phải số đo. Đo bằng `tiktoken`
+  như đã làm với `digest`, đừng dùng lại con số ước.
+
+### Bật model thật để thử
+
+`#/eng` → khối **Mô hình ngôn ngữ** → endpoint kiểu OpenAI, model
+`qwen/qwen3.6-27b`, dán key OpenRouter → **Lưu** → **Thử kết nối**. Rồi về
+`#/ops/station?l=chat` và hỏi `so sánh 271 với Ben Cat`.
+
+Chưa cấu hình thì tab hội thoại nói **chưa cấu hình** — không còn trả lời bằng
+template. Sơ đồ và bảng giám sát không phụ thuộc vào model (I5).
+
+### SỰ THẬT ĐÃ ĐO — kích thước payload `summary` (2026-08-07)
+
+**Đo trên**: `DEMO_SAS`, ModelVersion **654**, nguồn `snapshot:opc.tcp://127.0.0.1:48050`,
+13 ngăn / 80 thiết bị. **Đo lại bằng**: gọi thẳng `build_summary(store, scope)`
+sau `await store.startup()`, rồi đếm token bằng **`tiktoken` `cl100k_base`**
+(không phải ước lượng ký tự — xem cảnh báo dưới bảng).
+
+| scope | payload ký tự | payload **token** | `digest` token | giảm |
+|---|---:|---:|---:|---:|
+| `station` | 50.339 | **20.064** | **715** | 96,4% |
+| `bay:E01` | 4.969 | **1.929** | **193** | 90,0% |
+
+Trong payload `station`: số đo 26.231 ký tự (52%), **evidence 25.532 ký tự (51%)**,
+issues 219. Một `ReadingOut` = **313 ký tự**. 79 số đo; `evidence.quality` có
+**159 điểm**, `evidence.limits` có 4 caveat.
+
+> ⚠ **Ước lượng «3,2 ký tự/token» của ADR-0021 §5 là SAI — thực tế ~2,5.**
+> Payload `station` không phải ~15.700 token mà là **20.064**. JSON đầy
+> identifier tokenize tệ hơn tôi giả định. Kết luận không đổi (vẫn phải rút gọn),
+> nhưng **đừng dùng lại con số 3,2** — dùng `tiktoken` để đo.
+
+**Ba kết luận, và cái thứ nhất là cái không ai đoán trước:**
+
+1. **Evidence chiếm ~một nửa payload** — 51% ở `station`, 59% ở một ngăn. Mà
+   evidence **không được** đi vào context của mô hình: I3 nói nó do tool sinh và
+   UI hiện riêng, `loop.py` SYSTEM cũng đã dặn *"Do not list the evidence"*. Bỏ
+   evidence khỏi `digest` là **giảm một nửa mà không mất gì**.
+2. Bỏ evidence thôi thì chưa đủ — phải rút gọn cả số đo. Đã làm trong
+   `agent/digest.py`: một số đo còn ~50 ký tự thay vì 313 (bỏ `raw_value`,
+   `deadband_*`, `source_timestamp`, làm tròn 3 chữ số có nghĩa), cắt ở
+   `MAX_READINGS = 40` kèm câu chỉ cho mô hình cách thu hẹp.
+3. **`source_ref` bị chặn khỏi digest vì I6, không phải vì kích thước** — đó là
+   NodeId thô, không tầng nào ngoài `integration/` được thấy. Một mô hình ngôn
+   ngữ không phải ngoại lệ.
+
+**Kết quả: trần 2k/tool-digest của ADR-0021 §5 đạt được với biên rộng** — 715
+token cho cả trạm. Một lượt 6 bước ≈ 4–5k token tool result, thừa chỗ trong
+40–60k KV của máy trạm.
+
+Còn một luật nữa `digest.py` phải giữ: **đơn vị `?` không bao giờ in như đơn vị.**
+DataServer không công bố `EngineeringUnits` (đo 2026-08-06) nên `Vlin = 221.08`
+có thể là V hoặc kV. Digest in `(thang?)` + chú giải cấm tự suy ra kV/MW.
+
+---
+
+## Đang ở đâu (theo code, chưa tính ADR-0021)
+
+**GĐ 2 bước 1 và 2 XONG + ADR-0020 đã thi công.** Bước 3 cũ (nhìn nó chạy, dựng
+vỏ ADR-0018) **bị chen ngang** bởi ADR-0021 — dựng vỏ trước khi đổi `agent/` là
+dựng hai lần.
 
 > **Thứ tự GĐ 2 đã chốt** (người dùng, 2026-08-07):
 > 1. ✅ `agent/` + 2 tool (`resolve`, `summary`) + `LLMProvider` + streaming
-> 2. ⬅ **ĐANG Ở ĐÂY** — `ChatPane` thật, cắm vào `PANE_COMPONENTS.chat`
->    (đã có chỗ, không đụng hợp đồng). Backend đã sẵn: `POST /api/ask` trả nguyên
->    khối, `POST /api/ask/stream` trả từng khung, cùng một `AnswerOut`
-> 3. **Nhìn nó chạy**, rồi mới bỏ ba preset và dựng vỏ mới theo
->    [ADR-0018](../10-architecture/adr/0018-conversation-first-workspace.md)
+> 2. ✅ `ChatPane` thật, cắm vào `PANE_COMPONENTS.chat` — một dòng, hợp đồng
+>    pane không đụng tới, đúng như ADR-0014 §3 hứa
+> 2b. ✅ **ADR-0020** — mô hình chọn tool (`agent/loop.py`); key + model lưu
+>    trong SQLite, cấu hình ở `#/eng`. Người dùng gọi sớm điều kiện xét lại của
+>    ADR-0019 §2, với lý do đúng: *"như hiện tại toàn là logic, chẳng có tí AI
+>    nào cả"*
+> 3. ✅ **ADR-0018 layout** — chat trái + tab phải (`?tab=`, SLD default)
+> 4. ⬅ **Nhìn nó chạy bằng mắt** trên layout mới
+
+**Bật mô hình thật** — không sửa file nào, làm trên giao diện:
+
+1. Sinh khoá mã hoá rồi khởi động với nó (một lần cho cả máy):
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   BI_SECRET_KEY=<chuỗi vừa sinh> uv run uvicorn blackinterface.api.app:app --port 8080
+   ```
+2. Đăng nhập `engineer` → `#/eng` → khối **Mô hình ngôn ngữ**
+3. Chọn endpoint kiểu OpenAI, dán tên model + key, **Lưu**, rồi **Thử kết nối**
+4. Về `#/ops/station?l=chat` và hỏi `so sánh 271 với Ben Cat` — câu này
+   `plan.py` không trả lời được, chỉ vòng lặp mới làm được
+
+**Mất `BI_SECRET_KEY` = mất key đã lưu**, phải nhập lại. Không thứ gì khác trong
+database phụ thuộc vào nó.
+
+**Thử trên giao diện** — bố cục *Hội thoại* hoặc *Sự cố* (`?l=chat` / `?l=incident`),
+đăng nhập `truc`. Gõ vào ô dưới cùng:
+
+| Gõ | Thấy gì |
+|---|---|
+| `271 đang thế nào?` | vệt tool `resolve → summary`, hai khối bằng chứng, một câu số liệu. Dòng «về device:D03.XCBR1» nói nó đã hiểu hỏi về đâu |
+| `Lai Uyen thế nào?` | **hai nút** E01 / E02 — bấm một nút thì *cả màn hình* nhảy sang ngăn đó (không phải hỏi lại, vì câu hỏi vẫn nhập nhằng) |
+| `trạng thái 999` | «Trạm này không có gì tên «999»» — **không** âm thầm trả lời về toàn trạm |
+| bấm một ngăn trên sơ đồ rồi hỏi `còn số đo thì sao?` | câu không nêu tên → hiểu là hỏi về ngăn đang xem. Dòng «về …» dưới ô nhập nói trước điều đó |
+
+Khi `BI_LLM=off` (mặc định) đầu ô ghi «Không có mô hình ngôn ngữ — câu trả lời là
+số liệu đã tính». Đó là trạng thái đúng, không phải lỗi.
 
 **Thử agent bằng curl** (không cần key, không cần mô hình):
 ```bash
@@ -27,9 +184,8 @@ curl -X POST http://127.0.0.1:8080/api/ask -H 'Content-Type: application/json' \
   -d '{"question":"271 đang thế nào?"}'
 ```
 → `scope: device:D03.XCBR1`, `key: agent.answer.summary`, hai `EvidenceRecord`.
-Hỏi `"Lai Uyen thế nào?"` → `agent.answer.ambiguous`, **không đọc gì cả**, hỏi
-lại E01 hay E02. Hỏi `"trạng thái 999"` → `agent.answer.unknown`, **không** âm
-thầm trả lời về toàn trạm.
+`POST /api/ask/stream` trả cùng nội dung theo 5 loại khung (`turn`, `tool`,
+`evidence`, `token`, `answer`) — **đã chạy thật qua HTTP 2026-08-07**.
 
 **Bật mô hình thật** (tuỳ chọn — mọi thứ trên chạy được khi không bật):
 ```bash
@@ -83,7 +239,8 @@ Hai kịch bản chạy tay, theo thứ tự:
 3. Kéo giãn đường phân cách → F5 → cỡ giữ nguyên (nhớ riêng theo từng preset)
 4. Gõ `?l=linhtinh` → im lặng về *Giám sát*, **không** redirect; còn scope sai
    thì vẫn bị redirect. Khác nhau có chủ ý
-5. Bố cục *Hội thoại* → ô chat hiện «Có ở giai đoạn sau» (GĐ 2 cắm component vào)
+5. Bố cục *Hội thoại* → ô hỏi đáp thật (GĐ 2 bước 2). Chỉ còn ô *Gán điểm* là
+   «Có ở giai đoạn sau»
 
 Đáng thử tay nhất:
 1. Chưa đăng nhập → mọi URL đều đưa về `#/login`, và link sâu được giữ để quay lại
@@ -724,6 +881,71 @@ Cấu hình mới: `BI_REALTIME` (mặc định bật), `BI_OPCUA_PUBLISH_MS` (m
 
 ## Nhật ký phiên gần nhất
 
+### 2026-08-10 — Trí nhớ hội thoại (ADR-0022) ✅
+
+Người dùng chạy được agent với model thật, rồi hỏi đúng ba lỗ cùng lúc:
+
+> «thế hoàn thành phần memory cho hệ thống, hiện tại cũng chưa làm theo
+> conversation, thấy tất cả chỉ là 1 session thì phải?»
+
+Đúng cả ba, và chúng là **ba lỗ khác nhau** bị gộp thành một triệu chứng:
+
+| Lỗ | Trước | Sau |
+|---|---|---|
+| Mô hình nhớ câu trước? | `message_history=None` — `Conversation.history()` viết từ 2026-08-07, **chưa ai gọi lần nào** | `harness.history()` → 4 lượt văn xuôi gần nhất |
+| Nhiều hội thoại? | frontend giữ đúng một id, không danh sách | `GET/DELETE /api/conversations`, menu chọn trên `ChatPane` |
+| Sống qua restart? | `OrderedDict` trong process | bảng `conversations` + `conversation_turns` (migration 005) |
+
+**Quyết định trọng tâm, và nó là quyết định an toàn chứ không phải ngân sách:
+mô hình đọc LỜI, không đọc SỐ.** `message_history` chỉ mang cặp `(câu hỏi, văn
+xuôi)`. Không tool call, không digest, không evidence — dù Pydantic AI sẵn sàng
+nhận lại nguyên khối `ModelMessage` và mọi harness chat đều làm thế.
+
+Lý do riêng của trạm biến áp: **trạm đổi trạng thái trong lúc người ta đang nói
+về nó.** Nếu lượt 5 còn nhìn thấy `271 CLOSED` mà tool trả về ở lượt 1, thì
+đường trả lời rẻ nhất là đọc trí nhớ thay vì gọi tool — và mô hình sẽ đi đường
+rẻ nhất. Ra một câu trôi chảy, đúng-lúc-mười-phút-trước, và **không có gì trên
+màn hình nói rằng nó cũ**. I2 không bắt được: quality vẫn GOOD, timestamp vẫn
+mới, chỉ có điều con số không đến từ lần đọc này.
+
+Hệ quả tự bảo vệ: **`ctx.seen` không thừa kế.** Mỗi lượt bắt đầu với đúng một
+ref — scope của pane. Nhớ *«lượt trước nói về Bến Cát»* vẫn phải `resolve` lại
+trước khi `summary` chịu chạy. **Trí nhớ để hiểu câu hỏi, không bao giờ để trả
+lời.** Có test riêng cho điều này.
+
+**Transcript chỉ lưu lời.** Không evidence, không payload `summary`. Một
+`EvidenceRecord` là phát biểu về *một khoảnh khắc*; đọc lại ba ngày sau dưới một
+tiêu đề hội thoại là mời người ta đọc số cũ như số đang sống. Mở lại hội thoại
+hiện câu hỏi + văn xuôi + dấu thời gian, và **giao diện nói thẳng là không có
+bằng chứng** — một lượt cũ hiện trống trơn trông y hệt một lượt bị mất bằng
+chứng. Muốn số hiện tại thì hỏi lại: rẻ, và luôn đúng.
+
+Cũng vì thế transcript **không phải audit log**. Audit là `control/audit.py`,
+chỉ-append, cho hành động. Hội thoại là thứ để cuộn lại, và xoá được.
+
+**Cách ly tài khoản**: hội thoại thuộc về người mở nó. Của người khác → `resume`
+im lặng mở luồng mới; `GET`/`DELETE` trả **404, không phải 403** — 403 xác nhận
+id đó tồn tại. Khoá ở tầng SQL (`WHERE actor = ?` trên cả `append`), không ở
+tầng người gọi cẩn thận.
+
+**Trần**: 4 lượt vào context (`llm_history_turns`, đặt được), 40 lượt mỗi hội
+thoại, **50 hội thoại mỗi tài khoản** — theo tài khoản chứ không toàn cục, để
+một người trực hỏi nhiều không đẩy được luồng của kỹ sư ra ngoài.
+
+**File mới**: `store/conversations.py` · `store/migrations/005_conversations.sql`
+· `api/conversations.py` (nối protocol của `agent/` với `store/` — `agent/` không
+import được `store/`) · `api/routers/conversations.py` ·
+`features/assistant/ConversationMenu.vue` · `tests/unit/test_conversation_memory.py`.
+
+**Kiểm chứng**: `check.py` xanh 9/9 · **418 test** (396 → 418, 22 test mới) ·
+mypy strict 75 file · 231 khoá i18n khớp vi/en. Hai test đáng đọc nếu chỉ đọc
+hai: `test_the_model_is_not_told_last_turns_readings` (digest lượt trước **không**
+lọt vào lịch sử) và `test_a_remembered_scope_still_has_to_be_resolved_again`.
+
+**Còn nợ, cố ý**: chưa đo lịch sử tốn bao nhiêu token thật; chưa có nút đổi tên
+hội thoại (tiêu đề suy từ câu hỏi đầu — bắt đặt tên trước khi biết luồng đi đâu
+là ô nhập không ai điền); `binding` vẫn là pane duy nhất chưa có ruột.
+
 ### 2026-08-07 — GĐ 2 bước 1: lát cắt dọc của agent ✅
 
 Hình dạng viết thành [ADR-0019](../10-architecture/adr/0019-agent-shape.md).
@@ -789,6 +1011,117 @@ luận, không phải tiện lợi.
 - `AnswerOut.text` chỉ có chữ khi `BI_LLM=openai`. Chưa ai chạy thử với mô hình
   thật — `OpenAIProvider` mới có test bằng `ScriptedProvider`, **chưa gọi mạng
   lần nào**. Đây là thứ đầu tiên nên thử tay khi có key.
+
+### 2026-08-07 — ADR-0020: mô hình chọn tool, key vào SQLite ✅
+
+Người dùng nêu ba ý, và ý thứ ba là **một sự thật, không phải một ý kiến**:
+
+> «phải dùng AI vào chứ, còn quyết định là do người phụ trách cơ mà?»
+> «như hiện tại nó đơn giản toàn là logic, chẳng có tí AI nào cả»
+
+Đúng: `BI_LLM=off` mặc định, planner là regex, resolver là so chuỗi. Không có
+một dòng mô hình nào chạy.
+
+**Một chỗ tôi đã hiểu sai I4 và cần ghi lại để phiên sau không lặp**: I4 nói LLM
+không được **khẳng định** sự thật và hệ phải test được không cần LLM. `AGENTS.md`
+§2 I4 vốn đã viết rõ *"LLM chỉ: hiểu ý định, **chọn tool**, chọn view, diễn đạt"*.
+ADR-0019 §2 (mô hình không chọn tool) là quyết định của phiên viết nó, **chặt hơn
+mức invariant đòi**. ADR-0020 nới đúng phần dư.
+
+**Và lập luận «AI không thêm khả năng nào» của ADR-0019 §2 sai ở một chỗ cụ thể**:
+`plan.py` chọn *một* scope và đọc *một* lần. Đó là giới hạn của **hình dạng**,
+không phải của số lượng tool — nên «đợi tới module B» là đợi nhầm thứ.
+
+| Câu hỏi | `plan.py` | `loop.py` |
+|---|---|---|
+| `271 thế nào?` | ✅ | ✅ |
+| `ngăn Lai Uyên bên 110 có điện không?` | ❌ regex không bắt được | ✅ |
+| `so sánh 271 với 272` | ❌ chỉ gọi summary một lần | ✅ |
+| `tại sao E01 mất điện?` | ❌ | ✅ |
+
+**Bốn thứ mô hình vẫn không làm được, không thứ nào dựa vào prompt:**
+
+1. Tool nào cũng chỉ-đọc — không có tool ghi để chọn (I1).
+2. `tools.call()` từ chối theo quyền **người hỏi**; danh mục đưa cho mô hình cũng
+   đã lọc theo quyền (ADR-0016 §5).
+3. **Scope ref phải đã được trả về cho nó.** Gõ `bay:E01` từ trí nhớ → bị từ
+   chối kèm câu «gọi resolve trước». Đây là điểm mới đáng giá nhất: `bay:E01`
+   **có tồn tại**, nên không tầng nào phía dưới phản đối — một câu trả lời tự tin
+   về **nhầm ngăn** nhìn y hệt một câu đúng.
+4. Mọi con số hiển thị lấy từ payload tool; chữ mô hình nằm field riêng (I3).
+
+**Đường deterministic là SÀN, không phải chế độ hỏng.** Chạy khi không cấu hình,
+mô hình chết, không parse được, **và khi mô hình trả lời mà chưa đọc gì**. Điều
+kiện cuối đáng ghi: chữ không có bằng chứng là phỏng đoán, tệ hơn câu tính được.
+**53 test agent vẫn chạy không mô hình nào** — I4 nguyên vẹn.
+
+**Key vào SQLite** (`004_assistant.sql`, bảng riêng — không nhét `app_meta`):
+
+- Fernet, khoá dẫn xuất từ `BI_SECRET_KEY`. **DB thắng env.**
+- Quyền thứ 20 `assistant.config` — **không** dùng `model.*`, vì `model` ở đó
+  nghĩa là *model trạm*; một chữ hai nghĩa trong tên quyền là bẫy.
+- **API không bao giờ trả key**; test tìm chuỗi key trong *toàn bộ* body chứ
+  không kiểm từng field.
+- **Lưu ≠ chạy được.** Chỉ nút «Thử kết nối» gọi thật mới đặt `verified_at`, và
+  mọi lần lưu đều xoá nó.
+- `store/secrets.py` nói rõ nó **không** chống được người có shell trên máy đang
+  chạy — nói thẳng còn hơn để chữ «đã mã hoá» làm việc nó không làm được.
+
+**Máy dò mới ở `check.py` mục 3**: mọi `Tool(...)` phải khai `parameters=`. Đã bẻ
+thử (xoá schema của `summary`) → đỏ đúng chỗ → phục hồi.
+
+**Kiểm chứng qua HTTP thật** (server tạm, dữ liệu tạm, 2026-08-07):
+
+| Kiểm | Kết quả |
+|---|---|
+| key có nằm plaintext trong file SQLite/WAL? | **không** — chỉ có token `gAAAAA…` trong WAL |
+| GET config có trả key không? | không; `has_key: true` |
+| «Thử kết nối» tới endpoint chết | `ok:false` + lý do thật, không im lặng |
+| `operator` gọi `/api/assistant/config` | **403** |
+| `operator` gọi `/api/ask` | 200 — hỏi được, không cấu hình được |
+
+**Còn nợ, cố ý**: câu trả lời cuối của vòng lặp về nguyên khối, chưa chảy từng
+chữ (ADR-0020 §4); `OpenAIProvider` **vẫn chưa gọi mạng lần nào** — nay đã có nút
+để trả món nợ đó ngay khi có key.
+
+### 2026-08-07 — GĐ 2 bước 2: ô hỏi đáp thật ✅
+
+`PANE_COMPONENTS.chat` đổi từ `PaneLater.vue` sang `ChatPane.vue`. **Một dòng.**
+Không sửa `PaneHost`, không sửa presets, không sửa hợp đồng pane — đây là lần đầu
+lời hứa của ADR-0014 §3 được thử bằng một pane thật, và nó đứng.
+
+**Năm file mới**, không cái nào quá 130 dòng:
+
+| File | Việc |
+|---|---|
+| `stores/chat.ts` | Hội thoại. Là store chứ không phải ref trong component vì pane bị unmount mỗi lần đổi bố cục — luồng reset theo bố cục thì không phải luồng |
+| `features/assistant/ChatPane.vue` | Vỏ: cổng quyền, transcript, tự cuộn |
+| `features/assistant/TurnBlock.vue` | Một lượt: câu hỏi → vệt tool → bằng chứng → câu trả lời |
+| `features/assistant/AnswerBody.vue` | Câu tính được, nút chọn khi nhập nhằng, khối *Diễn giải*, bằng chứng |
+| `features/assistant/AskBox.vue` | Ô nhập. Enter gửi, Shift+Enter xuống dòng |
+
+**Ba chỗ đáng đọc lại:**
+
+1. **Số liệu và chữ không bao giờ nối vào nhau.** `key`/`params` ra trước, luôn
+   luôn — kể cả khi có mô hình. Chữ của mô hình nằm khối riêng, có nhãn *Diễn
+   giải*, màu nhạt hơn. Nối hai thứ vào một đoạn là lúc màn hình không còn nói
+   được nửa nào đo được (I3).
+2. **Bằng chứng hiện trước khi chữ hiện xong.** Khung `evidence` về ngay sau mỗi
+   tool; khung `token` còn đang chảy. Thứ tự đó là chủ ý.
+3. **Bấm một ứng viên khi nhập nhằng thì *cả màn hình* nhảy sang đó**, chứ không
+   hỏi lại. Câu hỏi vẫn chứa cái tên nhập nhằng — hỏi lại thì lại nhập nhằng.
+   Chuyển scope mới là cách giải thật, và câu sau chỉ cần nói "thế nào?".
+
+**Một thứ phải sửa ở backend**: `TurnStartOut` và `ToolCallOut` không nằm trong
+request lẫn response body nào nên **không lọt vào `openapi.json`** — frontend sẽ
+phải gõ tay hai type, đúng thứ ADR-0009 sinh ra để chặn. Thêm `AskFrameOut`
+(RootModel hợp của 5 payload khung) vào `responses` của `/api/ask/stream`, cộng
+một lớp `EventStream` khai `media_type` để tài liệu không nói dối là endpoint trả
+`application/json`. Giờ cả 5 loại khung sinh type tự động.
+
+**Kiểm chứng**: `check.py` xanh 9/9 · 199 khoá i18n · `POST /api/ask/stream` chạy
+thật qua HTTP trên server dev, đủ 5 loại khung, `271` → `device:D03.XCBR1`.
+**Chưa xem bằng mắt trên trình duyệt** — đó là việc của bước 3.
 
 ### 2026-08-06 — Tài khoản trong SQLite + màn hình đăng nhập ✅
 

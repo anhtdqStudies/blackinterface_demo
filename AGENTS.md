@@ -49,15 +49,22 @@ Vi phạm bất kỳ luật nào dưới đây = sai, kể cả khi code chạy 
 Nếu bạn nghĩ cần phá luật, **dừng lại và hỏi người dùng**, đừng tự quyết.
 
 ### I1. Một đường ghi duy nhất, qua `control/`. Cưỡng chế bằng cấu trúc, không bằng prompt.
-*(Phát biểu lại 2026-08-05 theo ADR-0011 — module C nằm trong MVP nhưng làm sau cùng.)*
+*(Phát biểu lại 2026-08-05 theo ADR-0011; phát biểu lại lần hai 2026-08-07 theo
+[ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §2.)*
 
 - **Không module nào ngoài `control/` được chạm bề mặt ghi của OneATS.**
 - **`control/registry.py` RỖNG** cho tới khi có ADR riêng mở từng lệnh một.
   Tới lúc này, trên thực tế hệ vẫn read-only — chỉ khác là chỗ để mở đã có sẵn.
-- **Agent KHÔNG BAO GIỜ có tool ghi.** Vĩnh viễn, kể cả sau khi module C mở.
-  Agent được *chuẩn bị* thao tác (kiểm tra interlock, dựng checklist, đọc trình
-  tự, giải thích hậu quả — đều là đọc). Nút bấm ở UI, người bấm, có xác nhận.
+- **Agent KHÔNG BAO GIỜ có tool TỰ THỰC THI.** Tool ghi được phép nằm trong danh
+  mục, nhưng mọi tool chạm bề mặt ghi **bắt buộc** dừng ở khung duyệt và chỉ chạy
+  tiếp sau một chữ ký của người. Quyền **`control.sign` không bao giờ** nằm trong
+  tập quyền agent mượn được (agent mượn quyền người hỏi — ADR-0016 §5).
   **Agent soạn phiếu, người ký.**
+  - Tool khai capability ngoài `READ_ONLY` mà thiếu `requires_approval=True` →
+    lỗi ngay lúc import, và `check.py` mục 3 bắt lại bằng `ast`.
+  - Đây **chặt hơn** phát biểu cũ («tool ghi không tồn tại»), không phải nới:
+    cũ là khẳng định về *danh mục* và sẽ phải nới vào ngày module C mở; mới là
+    khẳng định về *đường thi hành*, và đường thi hành thì test được.
 - `agent/` **không được import** `control/`.
 - Client OPC UA phải dùng account read-only, không Anonymous.
 - Bề mặt ghi: `*.PosCtl`, `SysCommon.Force/Unforce`, `OADataModel.Restart`,
@@ -74,10 +81,24 @@ Mọi phát biểu về trạng thái thiết bị **bắt buộc** kèm `(value
 LLM **không được** tự soạn phần evidence. Tool trả `(payload, EvidenceRecord)`.
 Prose của LLM nằm cạnh block evidence và được label rõ là *diễn giải*.
 
+*(Siết thêm 2026-08-07, [ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §4.)*
+Mọi con số xuất hiện trong prose của mô hình phải **truy được về `metadata` của
+một `ToolReturn`** trong chính lượt đó. Hai đường tách vật lý: `metadata` mang
+`EvidenceRecord` + payload đầy đủ và **mô hình không nhìn thấy**; `content` mang
+bản gọn cho mô hình. Tách bằng cấu trúc, không bằng kỷ luật.
+
 ### I4. LLM không nằm trên đường đi của tính đúng đắn.
 - Topology, layout, energization, chuỗi nhân quả sự cố → **backend deterministic**.
+  Đây là mệnh đề lõi (ADR-0005) và nó **không đổi**.
 - LLM chỉ: hiểu ý định, chọn tool, chọn view, diễn đạt kết quả.
-- Hệ phải test được end-to-end **không cần LLM**. UI phải dùng được khi LLM chết.
+- Domain API, facet, sơ đồ, SSE và **toàn bộ giao diện giám sát** phải chạy đúng
+  khi không có mô hình nào. Thứ giữ lời hứa này là **I5** (frontend gọi thẳng
+  Domain API), không phải một câu trả lời template.
+
+*(Thu hẹp 2026-08-07, [ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §3.)*
+Riêng **lượt hội thoại** thì cần mô hình: không cấu hình mô hình → tab hội thoại
+báo chưa cấu hình, **không** trả lời bằng template. Sàn `plan → read → template`
+đã bị xoá. Test tầng 1 vẫn chạy không cần key, bằng `TestModel`/`FunctionModel`.
 
 ### I5. Frontend gọi thẳng Domain API. BlackCore không phải proxy.
 ```
@@ -122,8 +143,8 @@ mỗi phạm vi.
 | API | **FastAPI** + SSE | |
 | OPC UA | **asyncua** | client-server, KHÔNG phải PubSub |
 | Store | **SQLite** | config, release, topology, event store. **Không dùng MongoDB** |
-| Agent | **`LLMProvider` tự viết** (ADR-0019) | một phương thức, không SDK mô hình. Pydantic AI đã bác — xem ADR-0019 phương án A, kèm đường lui |
-| LLM | OpenRouter (dev) → Ollama (trạm) | cùng một hiện thực: endpoint OpenAI-compatible qua `httpx`. **Mặc định `BI_LLM=off`** — không mô hình, câu trả lời vẫn đúng và vẫn có bằng chứng (I4) |
+| Agent | **Pydantic AI**, pin cứng (ADR-0021) | *thuê cơ chế, giữ chính sách*: vòng lặp / schema / validate / usage / approval là của nó; capability gating, witnessed scope, evidence là code của ta trong thân tool. Đảo quyết định ADR-0019 phương án A — lý do ghi ở ADR-0021 §Bối cảnh |
+| LLM | OpenRouter `qwen/qwen3.6-27b` (dev) → **vLLM** (trạm) | **dev đúng con sẽ deploy.** vLLM chứ không Ollama: prefix caching, guided decoding, tool-call parser (ADR-0021 §7). Pin provider trên OpenRouter. Chọn model + key ở `#/eng`, lưu mã hoá trong SQLite (ADR-0020 §5); `BI_LLM*` là dự phòng. **Không cấu hình = tab hội thoại báo chưa cấu hình**, giám sát vẫn chạy (I4, I5) |
 | Frontend | **Vite + Vue 3 + TypeScript** (ADR-0009) | build tĩnh → FastAPI serve → 1 process, không cần Node runtime |
 | UI kit | **shadcn-vue** + Tailwind v4 + reka-ui (ADR-0014) | cài theo đường **Vite**, KHÔNG dùng Nuxt. MCP: `npx shadcn-vue@latest mcp init --client claude` |
 | i18n | **vue-i18n** — `vi` mặc định + `en` | ngôn ngữ UI ≠ ngôn ngữ câu trả lời của LLM |
@@ -131,7 +152,11 @@ mỗi phạm vi.
 | Đóng gói | embedded CPython + Inno Setup → Windows Service | |
 
 **Không được thêm** vào stack mà không có ADR: MongoDB, Postgres, Docker, Redis,
-Node runtime ở production, message broker, **Nuxt** (ADR-0009 đã bác, ADR-0014 xác nhận lại).
+Node runtime ở production, message broker, **Nuxt** (ADR-0009 đã bác, ADR-0014 xác nhận lại),
+**LangChain / LangGraph** (ADR-0021 phương án B).
+
+**Air-gapped**: Pydantic AI phải **pin cứng** trong `uv.lock` và **vendor wheel**
+cho lần cài offline. Xác định bản ở trạm có thể không bao giờ nâng (ADR-0021 §8).
 
 ---
 
@@ -174,7 +199,10 @@ backend/src/blackinterface/
                      get_store() — test đổi bằng deps.use()
     schemas.py       MỌI response model. Tên = tên schema trong openapi.json
     mappers.py       domain -> schema, hàm thuần, không đọc state toàn cục
-    routers/         health · projects · station · live · summary · diagram · agent
+    routers/         health · projects · station · live · summary · diagram ·
+                     agent · conversations · assistant · auth · me · issues
+    conversations.py StoredConversations: nối protocol của agent/session.py với
+                     store/conversations.py. agent/ không import được store/
     summary.py       facet `summary`: một scope -> câu trả lời + EvidenceRecord.
                      Khuôn mẫu cho mọi facet sau
     source.py        StationStore: model nào đang hiện hành và đổi lúc nào
@@ -185,18 +213,29 @@ backend/src/blackinterface/
     throttle.py      giảm nhịp `measurement`, có sườn xuống nên số đo cuối của
                      một chùm không bao giờ mất
     errors.py        exception -> JSON {"error": {code, message, detail}}
-  agent/         # L2 BlackCore (ADR-0019) — lập kế hoạch → đọc → diễn đạt
-    core.py          một lượt hội thoại; MỘT generator phục vụ cả hai endpoint
-    plan.py          chọn scope nào để đọc. DETERMINISTIC — đây là chỗ I4 đứng
+  agent/         # L2 BlackCore — Pydantic AI (ADR-0021)
+    core.py          một lượt hội thoại; MỘT generator phục vụ cả hai endpoint.
+                     Dịch event Pydantic AI -> khung SSE (turn/tool/evidence/
+                     token/answer). KHÔNG còn sàn template: không có mô hình thì
+                     tab hội thoại nói CHƯA CẤU HÌNH (I4 sau ADR-0021 §3)
+    harness.py       dựng Agent theo TỪNG NGƯỜI HỎI (danh mục tool lọc theo
+                     quyền trước khi mô hình nhìn thấy); SYSTEM prompt;
+                     UsageLimits đọc từ config; model_for() + pin provider
+    digest.py        payload -> bản gọn cho mô hình. Bỏ evidence (I3), bỏ
+                     source_ref (I6), làm tròn số. Đo 2026-08-07: 20.064 -> 715
+                     token cho `station`. KHÔNG có nó thì context window vỡ
     resolve.py       "271" -> device:D03.XCBR1; nhiều kết quả thì HỎI LẠI, cấm đoán
-    brief.py         cái tool tìm được, nói hai lần: `facts` cho mô hình, khoá
-                     i18n + tham số cho người (backend không viết câu)
-    provider.py      LLMProvider: `off` (mặc định) | endpoint OpenAI-compatible
+    provider.py      LLMChoice (lựa chọn đến từ đâu) + probe() (nút Thử kết nối).
+                     Client HTTP tự viết đã bỏ — Pydantic AI làm
     session.py       lịch sử hội thoại; protocol + bản trong-tiến-trình. agent/
-                     KHÔNG import được store/, bản SQLite sẽ do api/ tiêm vào
-    tools/           registry CHỈ ĐỌC, mỗi tool trả (payload, EvidenceRecord).
-                     Capability của mọi tool phải nằm trong READ_ONLY — check.py
-                     mục 3 đọc bằng ast, không tin `register()` lúc chạy
+                     KHÔNG import được store/, bản SQLite do api/ tiêm vào
+                     (ADR-0022). `history()` chỉ trả VĂN XUÔI — không tool call,
+                     không số đo: một trạm đổi trạng thái trong lúc người ta nói
+                     về nó, và số của bốn lượt trước đọc y hệt số của bây giờ
+    tools/           mỗi tool trả (payload, EvidenceRecord). Capability trong
+                     READ_ONLY -> chạy thẳng; capability ghi -> BẮT BUỘC
+                     requires_approval=True, dừng ở khung duyệt (I1, ADR-0021 §2).
+                     check.py mục 3 đọc bằng ast, không tin `register()` lúc chạy
   control/       # đường ghi DUY NHẤT (I1, ADR-0011) — hình dạng đã có, cửa đóng
     registry.py      lệnh được phép — `COMMANDS = {}`, check.py parse bằng ast
     guard.py         tiền điều kiện; đồng thời là hiện thực C-01 (đọc thuần).
@@ -206,6 +245,11 @@ backend/src/blackinterface/
     db.py            connection, WAL, migration tiến-một-chiều
     meta.py          repository app_meta — mẫu cho các repository sau
     projects.py      repository projects + snapshot (StationObs JSON, opaque)
+    assistant.py     model nào + key (mã hoá). DB THẮNG env (ADR-0020 §5)
+    conversations.py transcript hội thoại. **Chỉ lời**: câu hỏi, văn xuôi, scope
+                     đã chốt. KHÔNG evidence, KHÔNG số đo (ADR-0022 §2)
+    secrets.py       Fernet, khoá dẫn xuất từ BI_SECRET_KEY. Docstring nói rõ
+                     nó KHÔNG chống được gì — đọc trước khi tin chữ "mã hoá"
     migrations/      NNN_name.sql, đánh số liên tục từ 001
 backend/openapi.json  # HỢP ĐỒNG API. Sinh ra, được check.py gác
 frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009) + shadcn-vue (ADR-0014)
@@ -218,10 +262,19 @@ frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009) + shadcn-vue (ADR-0014)
   src/i18n/            # vi (mặc định) + en. Nhãn của MỌI code từ backend ở đây
   src/lib/utils.ts     # cn() cho shadcn-vue
   src/ui/              # design system; hai bảng màu tách bạch (ADR-0014 §2)
+  src/features/        # theo bề mặt: station · monitoring · engineer ·
+                       # assistant (ô hỏi đáp, ADR-0019) · shared
   src/stores/          # tách theo VÒNG ĐỜI: structure · live · measurements ·
-                       # workspace · summary · projects.
+                       # workspace · summary · projects · chat.
                        # stream.ts giữ EventSource DUY NHẤT và phân nhánh theo
-                       # event.type — store giữ dữ liệu, không giữ socket
+                       # event.type — store giữ dữ liệu, không giữ socket.
+                       # chat.ts giữ hội thoại; stream của nó là fetch+POST,
+                       # không phải EventSource (ADR-0019 §7)
+
+**Frontend UI (bắt buộc):** Tailwind v4 + shadcn-vue đã cài — chrome (nút, form,
+pane, bảng) **chỉ** qua `@/ui/*` + utility token; thiếu component thì `shadcn-vue add`.
+Cấm tự viết styled `<button>`/hex trong `features/`. `DESIGN.md` = theme spec, không
+phải danh sách component để code tay. Chi tiết: `frontend/README.md`, `docs/20-ui/tokens.md`.
 tools/           # script vận hành/kiểm chứng — chạy được độc lập
 docs/            # xem §0
 document/        # tài liệu gốc ATS (manual PDF, output service SLD) — CHỈ ĐỌC
@@ -317,7 +370,7 @@ cd backend
 uv sync
 uv run ruff check . && uv run ruff format --check .
 uv run mypy src
-uv run pytest                # 288 test, không cần DataServer
+uv run pytest                # 418 test, không cần DataServer (2026-08-10)
 uv run pytest -m live        # cần DataServer đang chạy
 uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 

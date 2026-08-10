@@ -57,9 +57,12 @@ REGISTRY_SYMBOL = "COMMANDS"
 #: sees files somebody imported, and a tool in a module nobody imports yet is
 #: exactly the one that gets imported later without a second look.
 AGENT_TOOLS_DIR = SRC / "agent" / "tools"
-#: Where the computed answers name themselves. Their i18n keys must exist in
-#: both locale files — see `check_agent_answer_keys_are_translated`.
-AGENT_BRIEF = SRC / "agent" / "brief.py"
+#: There used to be a fifth rule here: `agent/brief.py` composed a computed
+#: *sentence* as an i18n key plus arguments, and this file compared that list of
+#: keys against `i18n/vi.ts` and `en.ts`. Removed 2026-08-07 with `brief.py`
+#: itself (ADR-0021 section 3) — the backend now sends the computed *payload* and
+#: the interface writes the sentence in the reader's language, so there is no
+#: second list to keep in step and nothing left to compare mechanically.
 AGENT_READ_ONLY_SYMBOL = "READ_ONLY"
 #: Capabilities no agent tool may ever demand. Spelled out here as well as in
 #: `registry.py` on purpose: this list is what makes the check independent of the
@@ -370,22 +373,30 @@ def check_write_path(r: Report) -> None:
 
 
 def check_agent_tools_are_read_only(r: Report) -> None:
-    """No tool the agent holds may demand a capability that changes anything.
+    """No tool the agent holds may run itself if it could change something.
 
-    The agent never has a write tool — permanently, including after Module C
-    opens the write path (AGENTS.md I1, ADR-0011 section 3, ADR-0019). Three
-    things are read here, and each catches a different way that could stop being
-    true:
+    Restated 2026-08-07 for ADR-0021 section 2. The rule used to be "no write
+    tool exists" — a claim about the *catalogue*, which had to be widened the day
+    Module C opened. The rule now is **no self-executing tool**: a write tool may
+    be listed, but it must stop at the approval gate and wait for a signature.
+    That is a claim about the *execution path*, and an execution path is testable
+    where a catalogue is only countable.
+
+    Three things are read here, and each catches a different way it could stop
+    being true:
 
       a. `READ_ONLY` in `agent/tools/registry.py` lists no write capability.
          Widening that set is how the rule would be relaxed by accident.
-      b. every `Tool(...)` constructed under `agent/tools/` declares a
-         `requires=` that is not a write capability.
-      c. every one of them declares a `requires=` at all.
+      b. every `Tool(...)` under `agent/tools/` declares a `requires=` at all.
+      c. any that demands a write capability also declares
+         `requires_approval=True`. Missing it is the one that matters: it is the
+         difference between "the agent drafts an operation and a person signs it"
+         and "the agent operated the station".
 
-    (b) is the one the runtime guard cannot do. `register()` raises, but only
-    for tools in a module something imported; a file added and not yet wired up
-    would pass every test and fail nobody, right up until the import lands.
+    The AST scan is the part the runtime guard cannot do. `register()` raises,
+    but only for tools in a module something imported; a file added and not yet
+    wired up would pass every test and fail nobody, right up until the import
+    lands.
     """
     rel = AGENT_TOOLS_DIR.relative_to(ROOT).as_posix()
     if not AGENT_TOOLS_DIR.is_dir():
@@ -426,19 +437,37 @@ def check_agent_tools_are_read_only(r: Report) -> None:
                 continue
             name = _keyword_text(node, "name") or "<unnamed>"
             requires = _keyword_capability(node, "requires")
+            gated = _keyword_is_true(node, "requires_approval")
             if requires is None:
                 problems.append(f"{where}: tool {name} declares no requires=")
+            elif requires in forbidden and not gated:
+                problems.append(
+                    f"{where}: tool {name} demands {requires}, which changes something, "
+                    f"without requires_approval=True"
+                )
             elif requires in forbidden:
-                problems.append(f"{where}: tool {name} demands {requires}, which is a write")
+                declared.append(f"{name} -> {requires} (gated)")
             else:
                 declared.append(f"{name} -> {requires}")
 
     if problems:
-        r.fail("the agent holds a tool that could change something", "\n        ".join(problems))
+        r.fail("the agent holds a tool that could run itself", "\n        ".join(problems))
     elif declared:
-        r.ok(f"agent tools, all read-only: {', '.join(sorted(declared))}")
+        r.ok(f"agent tools, none self-executing: {', '.join(sorted(declared))}")
     else:
         r.fail("no agent tool found", "the scan matched nothing; has the registry shape changed?")
+
+
+def _keyword_is_true(node: ast.Call, name: str) -> bool:
+    """Whether `name=True` is written literally at the call site.
+
+    Literal only, on purpose. `requires_approval=some_flag` would be a gate whose
+    state this file cannot read, and a gate nobody can read is not a gate.
+    """
+    for kw in node.keywords:
+        if kw.arg == name:
+            return isinstance(kw.value, ast.Constant) and kw.value.value is True
+    return False
 
 
 def _is_tool_call(node: ast.Call) -> bool:
@@ -630,6 +659,7 @@ def check_pane_contract(r: Report) -> None:
     check_layouts_live_in_presets(r)
     check_ui_is_pure(r)
     check_binding_stays_on_the_engineer_surface(r)
+    check_features_no_raw_hex(r)
     check_i18n_keys(r)
 
 
@@ -738,6 +768,35 @@ def check_binding_stays_on_the_engineer_surface(r: Report) -> None:
         r.ok("no NodeId, raw Dbpos or logical-node name outside features/engineer/")
 
 
+def check_features_no_raw_hex(r: Report) -> None:
+    """Chrome colours come from theme tokens, not hex sprinkled in features.
+
+    Station palette (`st-*`) and diagram colours are exempt — they live under
+    `components/diagram/` or use Tailwind `text-st-*` utilities.
+    """
+    hex_pat = re.compile(r"#[0-9a-fA-F]{3,8}\b")
+    skip = {"components/diagram"}
+    offenders: list[str] = []
+    features_dir = FE_SRC / "features"
+    if not features_dir.exists():
+        r.skip("features hex", "no features/ yet")
+        return
+    for path in sorted(features_dir.rglob("*.vue")):
+        rel = path.relative_to(FE_SRC).as_posix()
+        if any(part in rel for part in skip):
+            continue
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if hex_pat.search(line):
+                offenders.append(f"{path.relative_to(ROOT).as_posix()}:{i}: {line.strip()}")
+    if offenders:
+        r.fail(
+            "raw hex colour in features/ (use theme tokens or st-*/sys-*)",
+            "\n".join(offenders),
+        )
+    else:
+        r.ok("features/ use no raw hex colours")
+
+
 def _i18n_keys(path: Path) -> set[str]:
     """Flatten one locale file into dotted keys.
 
@@ -802,38 +861,6 @@ def check_i18n_keys(r: Report) -> None:
     else:
         r.ok(f"{len(vi)} i18n keys, identical in vi and en; {len(used)} used and all defined")
 
-    check_agent_answer_keys_are_translated(r, vi)
-
-
-def check_agent_answer_keys_are_translated(r: Report, defined: set[str]) -> None:
-    """Every answer the backend can compute has words in both languages (ADR-0019).
-
-    When there is no model, the assistant answers with an i18n key and arguments
-    rather than a sentence — the backend cannot know whether the reader wants
-    Vietnamese or English, so it does not write prose at all (`agent/brief.py`,
-    same reasoning as the limit codes in `domain/evidence.py`).
-
-    That only works while the two halves agree. This is the same shape as the
-    scope grammar and the capability list: a contract that exists in two
-    languages, compared mechanically, because the failure is silent. A key the
-    frontend has never heard of renders as `agent.answer.denied` on screen —
-    machine text where an operator expected to be told why they were refused.
-    """
-    if not AGENT_BRIEF.exists():
-        r.fail(f"{AGENT_BRIEF.name} missing", "the computed answers are defined there")
-        return
-    emitted = set(re.findall(r'^KEY_\w+ = "([\w.]+)"', AGENT_BRIEF.read_text("utf-8"), re.M))
-    if not emitted:
-        r.fail("no computed answer keys found", "has agent/brief.py changed shape?")
-        return
-    absent = sorted(emitted - defined)
-    if absent:
-        r.fail(
-            "the backend can emit an answer the interface cannot render",
-            "\n        ".join(absent) + "\n        add them to i18n/vi.ts and i18n/en.ts",
-        )
-    else:
-        r.ok(f"{len(emitted)} computed answers translated in both languages")
 
 
 def check_docs_dated(r: Report) -> None:
@@ -854,6 +881,18 @@ def _is_onedrive_lock(output: str) -> bool:
     return "Access is denied" in output or "os error 396" in output
 
 
+def _output(proc: subprocess.CompletedProcess[str]) -> str:
+    """stdout + stderr, tolerating either being None.
+
+    `capture_output=True` normally fills both, but not on every platform and
+    every failure path — and this ran into it: a failing `ruff format --check`
+    on Windows came back with `stdout=None`, so the retry check raised a
+    TypeError and took down the whole run *instead of reporting the lint error*.
+    A checker that crashes while explaining a failure is worse than the failure.
+    """
+    return (proc.stdout or "") + (proc.stderr or "")
+
+
 def check_backend_toolchain(r: Report) -> None:
     section("7. Backend toolchain")
     if not shutil.which("uv"):
@@ -870,7 +909,7 @@ def check_backend_toolchain(r: Report) -> None:
         ("pytest", ["uv", "run", "pytest"]),
     ):
         proc = subprocess.run(cmd, cwd=BACKEND, capture_output=True, text=True)
-        if proc.returncode != 0 and _is_onedrive_lock(proc.stdout + proc.stderr):
+        if proc.returncode != 0 and _is_onedrive_lock(_output(proc)):
             # OneDrive occasionally holds .venv while uv reinstalls the editable
             # package. Transient; one retry clears it. See AGENTS.md section 7.
             proc = subprocess.run(cmd, cwd=BACKEND, capture_output=True, text=True)
@@ -880,7 +919,7 @@ def check_backend_toolchain(r: Report) -> None:
             # exit 5 = no tests collected; a bare scaffold is not a failure
             r.skip(label, "no tests collected yet")
         else:
-            out = (proc.stdout + proc.stderr).strip()
+            out = _output(proc).strip()
             r.fail(label, out[:1500])
 
 
