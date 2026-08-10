@@ -38,6 +38,11 @@ class Capability(StrEnum):
     KNOWLEDGE_WRITE = "knowledge.write"  # F - edit the knowledge base
     PROTECTION_READ = "protection.read"  # protection settings, interlock, relay logic
     AGENT_ASK = "agent.ask"  # ask the AI
+    #: Choose the language model and hold its key. Deliberately NOT one of the
+    #: `model.*` capabilities: those mean the *station* model, and one word doing
+    #: two jobs in a permission name is a mistake somebody makes exactly once,
+    #: at the worst moment.
+    ASSISTANT_CONFIG = "assistant.config"
     CONTROL_DRAFT = "control.draft"  # C - DRAFT an operation ticket
     CONTROL_SIGN = "control.sign"  # C - SIGN an operation ticket
     MODEL_CONNECT = "model.connect"  # connect a DataServer, reload
@@ -113,6 +118,9 @@ ROLES: dict[Role, frozenset[Capability]] = {
             Capability.AGENT_ASK,
             Capability.AUDIT_READ,
             Capability.ACCOUNT_MANAGE,
+            # Whoever holds the accounts holds the outbound API key too: both are
+            # "what this installation trusts", and neither is an operating right.
+            Capability.ASSISTANT_CONFIG,
         }
     ),
     Role.ENGINEER: frozenset(
@@ -125,6 +133,10 @@ ROLES: dict[Role, frozenset[Capability]] = {
             Capability.MODEL_EDIT,
             Capability.MODEL_PUBLISH,
             Capability.BINDING_READ,
+            # The engineer is who commissions the installation, and choosing the
+            # model is part of commissioning it. At a station with no admin on
+            # site, requiring one would leave the assistant switched off.
+            Capability.ASSISTANT_CONFIG,
         }
     ),
 }

@@ -26,7 +26,9 @@ from blackinterface.api import accounts, deps
 from blackinterface.api import errors as error_handlers
 from blackinterface.api.routers import (
     agent,
+    assistant,
     auth,
+    conversations,
     diagram,
     health,
     issues,
@@ -46,7 +48,12 @@ settings = deps.settings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    configure_logging(settings.log_level, settings.log_json)
+    configure_logging(
+        settings.log_level,
+        settings.log_json,
+        opcua_level=settings.log_opcua_level,
+        opcua_file=settings.log_opcua_file,
+    )
     log.info(
         "starting",
         source=settings.source,
@@ -95,6 +102,8 @@ app.include_router(live.router)
 app.include_router(summary.router)
 app.include_router(diagram.router)
 app.include_router(agent.router)
+app.include_router(conversations.router)
+app.include_router(assistant.router)
 
 
 # ------------------------------------------------------------------- frontend

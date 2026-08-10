@@ -20,6 +20,17 @@ dependencies = [
     # The agent's only outbound call: a streaming POST to an OpenAI-compatible
     # chat endpoint (ADR-0019). No model SDK — see `agent/provider.py`.
     "httpx>=0.27",
+    # Encrypts the model's API key at rest (`store/secrets.py`). Already in the
+    # tree under asyncua, but named here on purpose: depending on a transitive
+    # dependency for a security control is how the control disappears in an
+    # unrelated upgrade.
+    "cryptography>=43.0",
+    # Harness của agent (ADR-0021). **Pin cứng `==`, không `>=`** — trạm
+    # air-gapped, bản cài ở đó có thể không bao giờ nâng, nên phiên bản phải là
+    # một quyết định chứ không phải kết quả của lần `uv lock` gần nhất.
+    # Nâng bản = đọc changelog + chạy eval suite, không phải sửa một con số.
+    # Kéo theo `tiktoken`, dùng luôn cho `count_tokens_before_request`.
+    "pydantic-ai-slim[openai]==2.26.0",
 ]
 
 [dependency-groups]

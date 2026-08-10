@@ -1,6 +1,12 @@
 # ADR-0011 — Một đường ghi duy nhất qua `control/`; agent không bao giờ có tool ghi
 
-- **Status**: Accepted
+- **Status**: Accepted; **§3 superseded by [ADR-0021](0021-agent-harness.md) §2**
+  (2026-08-07). «Agent không có tool ghi. Vĩnh viễn.» đổi thành «Agent không có
+  tool **tự thực thi**»: tool ghi được phép nằm trong danh mục nhưng bắt buộc
+  dừng ở khung duyệt, và `control.sign` không bao giờ thuộc tập quyền agent mượn
+  được. Bảng «agent được / không được» ở §3 và câu **«Agent soạn phiếu, người ký»**
+  **giữ nguyên** — đổi cách cưỡng chế, không đổi điều được cưỡng chế.
+  §1, §2, §4 giữ nguyên; `control/registry.py` vẫn RỖNG.
 - **Date**: 2026-08-05
 - **Sửa đổi**: invariant **I1** trong `AGENTS.md` và §Phạm vi MVP trong
   `docs/00-product/vision.md`. Không supersede ADR nào — ADR-0005 (*AI không được

@@ -1,6 +1,15 @@
 # ADR-0019 — Hình dạng của agent: quyết định trước, hỏi mô hình sau
 
-- **Status**: Accepted
+- **Status**: Accepted; **§2 và §3 superseded by
+  [ADR-0020](0020-model-chooses-the-tools.md)** (2026-08-07). §2 nói mô hình chưa
+  chọn tool và ghi sẵn điều kiện xét lại; điều kiện đó được gọi ra sớm. §3 nói
+  `LLMProvider` một phương thức; nay là hai.
+  **§1, §4 lớp 2 và phương án A superseded by
+  [ADR-0021](0021-agent-harness.md)** (2026-08-07): ba bước `plan → read → phrase`
+  bỏ cùng cái sàn; `READ_ONLY` thành `REQUIRES_APPROVAL`; và **phương án A đảo
+  chiều — Pydantic AI được nhận**, vì tiền đề của nó (§2 nói chưa nên có vòng lặp)
+  đã mất hiệu lực từ ADR-0020, còn lập luận «framework không cho ta thứ đặc thù»
+  thì tra tài liệu ra là sai. §5, §6, §7, §8 giữ nguyên.
 - **Date**: 2026-08-07
 - **Supersedes**: không ADR nào. Nhưng **thay dòng «Agent = Pydantic AI»** trong
   `AGENTS.md` §3 — dòng đó viết 2026-08-04, trước khi có một dòng agent nào chạy,

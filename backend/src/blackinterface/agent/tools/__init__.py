@@ -1,33 +1,31 @@
-"""The agent's tool registry. Read-only, and structurally so — see `registry`.
+"""Danh mục tool của agent. Chỉ đọc, và chỉ đọc bằng cấu trúc — xem `registry`.
 
-Importing this package is what registers the tools. Nothing registers itself
-from a plugin path or a configuration file: the set of things the agent can do
-is a list in source control, reviewable in a diff.
+Import package này **chính là** thứ đăng ký các tool. Không cái nào tự đăng ký
+từ một đường plugin hay một file cấu hình: tập việc agent làm được là một danh
+sách nằm trong source control, soát được bằng một cái diff.
 """
 
-from blackinterface.agent.tools import station  # noqa: F401  (import registers the tools)
+from blackinterface.agent.tools import station  # noqa: F401  (import là để đăng ký tool)
 from blackinterface.agent.tools.registry import (
     READ_ONLY,
     TOOLS,
     Tool,
-    ToolArgs,
     ToolContext,
-    ToolResult,
     WriteToolError,
-    call,
+    authorize,
     catalogue,
     register,
+    result,
 )
 
 __all__ = [
     "READ_ONLY",
     "TOOLS",
     "Tool",
-    "ToolArgs",
     "ToolContext",
-    "ToolResult",
     "WriteToolError",
-    "call",
+    "authorize",
     "catalogue",
     "register",
+    "result",
 ]

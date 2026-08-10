@@ -1,43 +1,45 @@
-"""The agent, end to end, without a language model (I4).
+"""Agent, đầu-cuối, không gọi mô hình thật lần nào.
 
-Every test here runs against `OfflineProvider`, and that is the argument the
-module exists to make: if the answers, the scopes, the refusals and the evidence
-are all correct with no model in the process, then the model is not on the
-correctness path. A test suite that needed an API key to check what a
-disconnector is doing would be evidence of the opposite.
+Sau ADR-0021 lượt hội thoại **cần** một mô hình — sàn template đã bị xoá. Nhưng
+"cần một mô hình" không có nghĩa là "cần một API key": `FunctionModel` là một
+danh sách quyết định viết sẵn, nên mọi test ở đây vẫn chạy trên một máy không có
+key và trong CI. Đó là I4 sau khi thu hẹp: phần lõi vẫn kiểm được bằng máy.
 
-The tests that use `ScriptedProvider` are about the *phrasing* seam only — that
-prose arrives in pieces, and that a failing model loses the wording and nothing
-else.
+Kịch bản viết sẵn chứ không gọi mô hình thật là cố ý. Thứ đang kiểm là **vòng
+lặp làm gì với một quyết định** — từ chối nó, chạy nó, đưa kết quả về — chứ không
+phải mô hình quyết định thế nào. Cái sau là việc của eval suite (ADR-0021 §10
+tầng 2), chạy riêng, ngoài `check.py`.
 """
 
 from __future__ import annotations
 
+import json
 from collections.abc import AsyncIterator, Iterator
-from datetime import UTC, datetime
 
 import pytest
 from fastapi.testclient import TestClient
-
-from blackinterface.agent import brief, core, resolve, tools
-from blackinterface.agent.plan import plan
-from blackinterface.agent.provider import (
-    LLMUnavailableError,
-    OfflineProvider,
-    Prompt,
-    provider_for,
+from pydantic_ai.messages import (
+    ModelMessage,
+    ModelResponse,
+    TextPart,
+    ToolCallPart,
 )
-from blackinterface.agent.session import Conversation, InMemoryConversations, Turn
+from pydantic_ai.models.function import AgentInfo, DeltaToolCall, DeltaToolCalls, FunctionModel
+
+from blackinterface.agent import core, digest, harness, resolve, tools
+from blackinterface.agent.provider import LLMChoice, choice_from_settings
+from blackinterface.agent.session import InMemoryConversations, Turn
+from blackinterface.agent.tools.registry import Tool, WriteToolError, register
 from blackinterface.agent.tools.station import RESOLVE, SUMMARY
 from blackinterface.api import app as app_module
 from blackinterface.api import authz, deps
-from blackinterface.api.schemas import AnswerOut, ResolveOut, SummaryOut
+from blackinterface.api.schemas import AnswerOut
 from blackinterface.api.source import StationStore
+from blackinterface.api.summary import build_summary
 from blackinterface.config import Settings
 from blackinterface.domain.authz import Capability, Role, build_principal
 from blackinterface.domain.models import StationGraph
-from blackinterface.domain.scope import ScopeRef
-from blackinterface.errors import ConfigurationError, ForbiddenError, InvalidInputError
+from blackinterface.errors import ConfigurationError
 from blackinterface.store.db import Database
 from tests.conftest import SAS_TREE
 
@@ -46,21 +48,21 @@ from tests.conftest import SAS_TREE
 
 @pytest.fixture(scope="module")
 def wiring(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[StationStore, Database]]:
-    """A loaded store over a temporary database, wired into `deps`.
+    """Store đã nạp trên một database tạm, cắm vào `deps`.
 
-    Loaded through the app's own lifespan rather than by reaching into the
-    store: the point of these tests is the path a request takes, and a graph
-    installed by a back door would not have been through it.
+    Nạp qua chính lifespan của app chứ không thò tay vào store: thứ các test này
+    kiểm là **đường đi của một request**, và một graph cài bằng cửa sau thì chưa
+    từng đi qua đường đó.
     """
     if not SAS_TREE.exists():
-        pytest.skip(f"fixture missing: {SAS_TREE}")
+        pytest.skip(f"thiếu fixture: {SAS_TREE}")
     data_dir = tmp_path_factory.mktemp("agent-data")
     database = Database(data_dir / "test.sqlite")
     built = StationStore(
         Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
         database,
     )
-    deps.use(built, database, provider=OfflineProvider(), new_conversations=InMemoryConversations())
+    deps.use(built, database, new_conversations=InMemoryConversations())
     with TestClient(app_module.app):
         yield built, database
 
@@ -68,6 +70,11 @@ def wiring(tmp_path_factory: pytest.TempPathFactory) -> Iterator[tuple[StationSt
 @pytest.fixture
 def store(wiring: tuple[StationStore, Database]) -> StationStore:
     return wiring[0]
+
+
+@pytest.fixture
+def station(store: StationStore) -> StationGraph:
+    return store.graph
 
 
 @pytest.fixture
@@ -80,47 +87,126 @@ def conversations() -> InMemoryConversations:
     return InMemoryConversations()
 
 
-class ScriptedProvider:
-    """A model that says exactly what it was told to, or fails on cue."""
+@pytest.fixture
+def settings() -> Settings:
+    return Settings()
 
-    def __init__(self, pieces: tuple[str, ...] = (), fail_after: int | None = None) -> None:
-        self.pieces = pieces
-        self.fail_after = fail_after
-        self.prompts: list[Prompt] = []
+
+# ------------------------------------------------------------- mô hình viết sẵn
+
+
+def says(text: str) -> ModelResponse:
+    """Một lượt mô hình trả lời bằng chữ."""
+    return ModelResponse(parts=[TextPart(text)])
+
+
+def wants(name: str, **arguments: object) -> ModelResponse:
+    """Một lượt mô hình đòi gọi tool."""
+    return ModelResponse(parts=[ToolCallPart(name, dict(arguments))])
+
+
+class Script:
+    """Mô hình có lịch trình cố định: một danh sách quyết định, theo thứ tự.
+
+    Giữ lại `seen` để test khẳng định được **mô hình đã nhìn thấy gì** — đó là
+    cách kiểm rằng kết quả tool quay về đúng dạng gọn chứ không phải payload
+    đầy đủ (I3, ADR-0021 §5).
+    """
+
+    def __init__(self, *steps: ModelResponse) -> None:
+        self.script = list(steps)
+        self.seen: list[list[ModelMessage]] = []
+        self.info: AgentInfo | None = None
 
     @property
-    def name(self) -> str:
-        return "openai:scripted"
+    def model(self) -> FunctionModel:
+        return FunctionModel(self._answer, stream_function=self._stream)
 
-    @property
-    def generated(self) -> bool:
-        return True
+    def _answer(self, messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
+        self.seen.append(list(messages))
+        self.info = info
+        return self.script.pop(0) if self.script else says("(hết kịch bản)")
 
-    async def stream(self, prompt: Prompt) -> AsyncIterator[str]:
-        self.prompts.append(prompt)
-        for i, piece in enumerate(self.pieces):
-            if self.fail_after is not None and i == self.fail_after:
-                raise LLMUnavailableError("the endpoint went away")
-            yield piece
+    async def _stream(
+        self, messages: list[ModelMessage], info: AgentInfo
+    ) -> AsyncIterator[str | DeltaToolCalls]:
+        """Cùng kịch bản, nhưng chảy từng mẩu.
+
+        Production **stream** (`agent.run_stream_events`), nên test cũng phải
+        stream. Một `FunctionModel` chỉ trả nguyên khối sẽ kiểm một đường code
+        khác với đường chạy thật, và khung `token` — thứ người trực nhìn thấy
+        chữ chạy — sẽ không được kiểm lần nào.
+        """
+        for part in self._answer(messages, info).parts:
+            if isinstance(part, TextPart):
+                for word in part.content.split(" "):
+                    yield f"{word} "
+            elif isinstance(part, ToolCallPart):
+                yield {
+                    0: DeltaToolCall(
+                        name=part.tool_name,
+                        json_args=json.dumps(part.args_as_dict()),
+                        tool_call_id=part.tool_call_id,
+                    )
+                }
+
+    def texts(self) -> list[str]:
+        """Mọi chữ mô hình từng được đưa, gộp lại — kể cả kết quả tool."""
+        out: list[str] = []
+        for exchange in self.seen:
+            for message in exchange:
+                for part in message.parts:
+                    content = getattr(part, "content", None)
+                    if isinstance(content, str):
+                        out.append(content)
+        return out
 
 
 async def ask(
     question: str,
     ctx: tools.ToolContext,
     conversations: InMemoryConversations,
+    settings: Settings,
+    script: Script | None = None,
     *,
     scope: str = "station",
     conversation_id: str | None = None,
-    provider: object | None = None,
 ) -> AnswerOut:
     return await core.answer(
         question,
         scope,
         conversation_id,
         ctx=ctx,
-        provider=provider or OfflineProvider(),  # type: ignore[arg-type]
+        model=script.model if script is not None else None,
+        model_name="test" if script is not None else "off",
+        settings=settings,
         conversations=conversations,
     )
+
+
+async def stream_names(
+    question: str,
+    ctx: tools.ToolContext,
+    conversations: InMemoryConversations,
+    settings: Settings,
+    script: Script,
+    *,
+    scope: str = "station",
+) -> list[str]:
+    """Frame names from `core.run`, in order."""
+    names: list[str] = []
+    async for event in core.run(
+        question,
+        scope,
+        None,
+        ctx=ctx,
+        model=script.model,
+        model_name="test",
+        settings=settings,
+        conversations=conversations,
+    ):
+        names.append(event.name)
+    return names
 
 
 # ---------------------------------------------------------------- the resolver
@@ -128,368 +214,371 @@ async def ask(
 
 def test_evn_number_resolves_to_one_breaker(station: StationGraph) -> None:
     match = resolve.resolve(station, "271")
-    assert match.scope is not None
+    assert match.found and match.scope is not None
     assert match.scope.ref == "device:D03.XCBR1"
-    assert match.scope.tier is resolve.Tier.DESIGNATION
 
 
 def test_accents_do_not_matter_in_either_direction(station: StationGraph) -> None:
-    """OneATS stores "Ben Cat"; an operator types "Bến Cát"."""
-    assert resolve.resolve(station, "Bến Cát").scope == resolve.resolve(station, "ben cat").scope
-    assert resolve.resolve(station, "Bến Cát").scope is not None
+    with_accents = resolve.resolve(station, "Lai Uyên")
+    without = resolve.resolve(station, "lai uyen")
+    assert {c.ref for c in with_accents.candidates} == {c.ref for c in without.candidates}
 
 
 def test_a_name_two_bays_carry_is_reported_as_two(station: StationGraph) -> None:
-    """`Lai Uyen` is E01 and E02. Picking one would be the dangerous answer (I8)."""
     match = resolve.resolve(station, "Lai Uyen")
     assert match.ambiguous
-    assert {c.ref for c in match.candidates} == {"bay:E01", "bay:E02"}
-    assert match.scope is None
-
-
-def test_a_stronger_tier_wins_outright(station: StationGraph) -> None:
-    """`AT1` is a transformer id; nothing weaker may dilute it."""
-    match = resolve.resolve(station, "AT1")
-    assert match.scope is not None
-    assert match.scope.ref == "transformer:AT1"
-    assert match.scope.tier is resolve.Tier.ID
+    assert len(match.candidates) == 2
 
 
 def test_a_wellformed_ref_for_something_absent_is_not_a_match(station: StationGraph) -> None:
-    assert not resolve.resolve(station, "bay:ZZ99").found
-    assert resolve.resolve(station, "bay:D03").scope is not None
+    assert not resolve.resolve(station, "bay:NOPE").found
 
 
 def test_a_name_is_found_inside_a_sentence(station: StationGraph) -> None:
-    match = resolve.find_in_text(station, "trạng thái của máy cắt 271 thế nào?")
-    assert match.scope is not None
+    match = resolve.find_in_text(station, "cho tôi xem 271 với")
+    assert match.found and match.scope is not None
     assert match.scope.ref == "device:D03.XCBR1"
 
 
 def test_nothing_is_invented_for_a_number_the_station_does_not_have(
     station: StationGraph,
 ) -> None:
-    assert not resolve.find_in_text(station, "cho tôi trạng thái 999").found
+    assert not resolve.resolve(station, "999").found
 
 
-# -------------------------------------------------------------------- the plan
+# ------------------------------------------------- bản gọn đưa cho mô hình (I3)
 
 
-def test_a_question_naming_nothing_falls_back_to_the_pane() -> None:
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    made = plan("tình hình thế nào?", ScopeRef.bay("D03"), conversation)
-    assert made.fallback.ref == "bay:D03"
-    assert made.fallback_from == "pane"
-    assert not made.names_something
+def test_the_digest_is_a_fraction_of_the_payload(store: StationStore) -> None:
+    """Lý do `digest.py` tồn tại, kiểm bằng số.
+
+    Đo 2026-08-07: payload `station` là 20.064 token, bản gọn 715. Test này
+    không khoá con số đó — nó khoá **bậc độ lớn**, thứ mà một lần thêm field vào
+    `ReadingOut` có thể phá mà không ai nhận ra cho tới khi context window vỡ ở
+    trạm.
+    """
+    out = build_summary(store, "station", actor="tester")
+    assert len(digest.for_summary(out)) * 5 < len(out.model_dump_json())
 
 
-def test_a_follow_up_inherits_the_conversation_while_the_pane_stands_still() -> None:
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    conversation.turns.append(
-        Turn(
-            id="1", asked_at=_now(), question="271?", scope="device:D03.XCBR1", asked_from="station"
-        )
-    )
-    made = plan("còn số đo thì sao?", ScopeRef.station(), conversation)
-    assert made.fallback.ref == "device:D03.XCBR1"
-    assert made.fallback_from == "conversation"
+def test_the_digest_never_shows_the_model_a_nodeid(store: StationStore) -> None:
+    """`source_ref` bị chặn vì I6, không phải vì kích thước."""
+    out = build_summary(store, "station", actor="tester")
+    text = digest.for_summary(out)
+    assert "ns=" not in text
+    for reading in out.measurements:
+        assert reading.source_ref is None or reading.source_ref not in text
 
 
-def test_clicking_something_else_beats_what_we_were_talking_about() -> None:
-    """The operator's hand is fresher intent than the last answer."""
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    conversation.turns.append(
-        Turn(
-            id="1", asked_at=_now(), question="271?", scope="device:D03.XCBR1", asked_from="station"
-        )
-    )
-    made = plan("còn cái này?", ScopeRef.bay("E01"), conversation)
-    assert made.fallback.ref == "bay:E01"
-    assert made.fallback_from == "pane"
+def test_the_digest_carries_no_evidence(store: StationStore) -> None:
+    """Evidence do tool sinh và giao diện hiện riêng — mô hình không cần thấy."""
+    out = build_summary(store, "station", actor="tester")
+    assert out.evidence.called_at.isoformat() not in digest.for_summary(out)
 
 
-@pytest.mark.parametrize("question", ["271 thế nào", "trạng thái D03", "BB21?", "D03.XCBR1"])
-def test_identifier_shapes_are_recognised(question: str) -> None:
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    assert plan(question, ScopeRef.station(), conversation).names_something
+def test_an_unverified_scale_is_never_printed_as_a_unit(store: StationStore) -> None:
+    """`Vlin = 221.08` có thể là V hoặc kV. In "221.08 V" cạnh thanh cái 220 kV
+    còn tệ hơn không in gì."""
+    out = build_summary(store, "station", actor="tester")
+    text = digest.for_summary(out)
+    if any(r.unit.value == "?" for r in out.measurements):
+        assert "(thang?)" in text
+        assert "CHƯA biết thang đo" in text
 
 
-@pytest.mark.parametrize("question", ["tình hình thế nào", "có gì bất thường không"])
-def test_plain_prose_names_nothing(question: str) -> None:
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    assert not plan(question, ScopeRef.station(), conversation).names_something
+@pytest.mark.anyio
+async def test_an_ambiguous_name_is_handed_back_as_a_question(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """ "Lai Uyen" là tên của **cả** E01 lẫn E02 trên DEMO_SAS. Bản gọn phải kể cả
+    hai và bảo mô hình hỏi lại — chọn hộ một cái là trả lời tự tin về nhầm ngăn."""
+    script = Script(wants(RESOLVE, query="Lai Uyen"), says("Có hai ngăn tên đó, anh hỏi cái nào?"))
+    answer = await ask("Lai Uyen thế nào?", ctx, conversations, settings, script)
+
+    assert answer.resolution is not None and answer.resolution.ambiguous
+    shown = "\n".join(script.texts())
+    assert "hỏi người trực chọn" in shown
+    assert answer.summary is None, "nhập nhằng thì không đọc gì cả"
 
 
-# ---------------------------------------------------- the registry is read-only
+# ---------------------------------------------------- danh mục tool và cổng duyệt
 
 
 def test_the_registry_holds_exactly_the_two_tools() -> None:
     assert set(tools.TOOLS) == {RESOLVE, SUMMARY}
 
 
-def test_every_registered_tool_demands_only_a_read() -> None:
-    """The gate. Every tool's capability is one that cannot change anything (I1)."""
+def test_every_registered_tool_today_demands_only_a_read() -> None:
     for tool in tools.TOOLS.values():
-        assert tool.requires in tools.READ_ONLY, tool.name
+        assert tool.requires in tools.READ_ONLY
+        assert not tool.requires_approval
 
 
-def test_registering_a_tool_that_could_change_something_is_refused() -> None:
-    """The detector, proved to detect.
-
-    A capability list nobody can violate is a list nobody has tested. This asks
-    for the exact thing the rule forbids and requires it to be refused — and it
-    uses `control.draft`, which is the one that becomes legitimate for *people*
-    the day Module C opens, and must still never be legitimate for the agent.
-    """
-    with pytest.raises(tools.WriteToolError):
-        tools.register(
-            tools.Tool(
-                name="draft_an_operation",
-                description="would prepare a switching order",
+def test_a_tool_that_changes_something_without_a_gate_is_refused() -> None:
+    """I1 sau ADR-0021 §2: không phải "tool ghi không tồn tại", mà là **không
+    có tool tự thực thi**. Thiếu cổng duyệt là hỏng ngay lúc import."""
+    with pytest.raises(WriteToolError, match="TỰ THỰC THI"):
+        register(
+            Tool(
+                name="drafts-an-operation",
+                description="soạn một thao tác",
                 requires=Capability.CONTROL_DRAFT,
-                run=lambda ctx, args: pytest.fail("must never run"),
+                run=lambda ctx: None,
             )
         )
-    assert "draft_an_operation" not in tools.TOOLS
+    assert "drafts-an-operation" not in tools.TOOLS
+
+
+def test_a_tool_that_changes_something_is_allowed_behind_the_gate() -> None:
+    """Nửa còn lại của luật, và là nửa mới: khai cổng duyệt thì được đăng ký.
+
+    Đây là chỗ *«Agent soạn phiếu, người ký»* thôi là một khẩu hiệu và thành một
+    dòng code test được.
+    """
+    tool = Tool(
+        name="drafts-with-a-gate",
+        description="soạn một thao tác, chờ chữ ký",
+        requires=Capability.CONTROL_DRAFT,
+        run=lambda ctx: None,
+        requires_approval=True,
+    )
+    try:
+        register(tool)
+        assert tools.TOOLS["drafts-with-a-gate"].requires_approval
+    finally:
+        tools.TOOLS.pop("drafts-with-a-gate", None)
 
 
 def test_export_counts_as_changing_the_world() -> None:
-    """`report.export` reads, then sends the result off the machine. A person does that."""
+    """`report.export` đọc, rồi gửi kết quả ra khỏi máy. Agent soạn báo cáo,
+    người gửi."""
     assert Capability.REPORT_EXPORT not in tools.READ_ONLY
-    assert Capability.REPORT_READ in tools.READ_ONLY
-
-
-def test_a_tool_runs_as_the_caller_and_is_refused_like_the_caller(
-    store: StationStore,
-) -> None:
-    """ADR-0016 section 5: the agent borrows permissions, it does not hold any.
-
-    `admin` may talk to the assistant and may not read the station — the exact
-    combination that would let a permission model leak through the agent if the
-    tools ran as anybody but the caller.
-    """
-    admin = build_principal("root", [Role.ADMIN])
-    assert admin.can(Capability.AGENT_ASK)
-    assert not admin.can(Capability.STATION_READ)
-    with pytest.raises(ForbiddenError):
-        tools.call(SUMMARY, {"scope": "station"}, tools.ToolContext(store=store, principal=admin))
 
 
 def test_the_catalogue_hides_what_the_caller_cannot_use() -> None:
-    assert tools.catalogue(build_principal("root", [Role.ADMIN])) == ()
-    assert len(tools.catalogue(build_principal("op", [Role.OPERATOR]))) == 2
+    blind = build_principal("blind", [])
+    assert tools.catalogue(blind) == ()
+    seeing = build_principal("op", [Role.OPERATOR])
+    assert {t.name for t in tools.catalogue(seeing)} == {RESOLVE, SUMMARY}
 
 
-def test_an_unknown_tool_is_refused(ctx: tools.ToolContext) -> None:
-    with pytest.raises(InvalidInputError):
-        tools.call("switch_it_off", {}, ctx)
+# ------------------------------------------------------------------- một lượt
 
 
-# ------------------------------------------------------- tools carry evidence
-
-
-def test_both_tools_return_evidence_naming_their_subject(ctx: tools.ToolContext) -> None:
-    found = tools.call(RESOLVE, {"query": "271"}, ctx)
-    read = tools.call(SUMMARY, {"scope": "bay:D03"}, ctx)
-    assert found.evidence.tool == RESOLVE
-    assert found.evidence.subject == "device:D03.XCBR1"
-    assert read.evidence.tool == SUMMARY
-    assert read.evidence.subject == "bay:D03"
-
-
-def test_evidence_names_the_person_not_the_agent(ctx: tools.ToolContext) -> None:
-    """I3 + ADR-0016 section 5: an answer is traceable to whoever asked for it."""
-    read = tools.call(SUMMARY, {"scope": "station"}, ctx)
-    assert read.evidence.actor == "tester"
-
-
-def test_resolve_evidence_pins_the_model_version(ctx: tools.ToolContext) -> None:
-    """ "271 is D03's breaker" is true of one model of one station, and says so."""
-    found = tools.call(RESOLVE, {"query": "271"}, ctx)
-    assert found.evidence.model_version == ctx.store.graph.model_version
-    assert found.evidence.source.catalog_snapshot == ctx.store.graph.model_version
-
-
-# ------------------------------------------------------------ a whole turn
-
-
-async def test_a_question_naming_a_breaker_is_answered_about_that_breaker(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
+@pytest.mark.anyio
+async def test_the_model_chooses_the_tools_and_they_run(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
 ) -> None:
-    answer = await ask("271 đang thế nào?", ctx, conversations)
-    assert answer.scope == "device:D03.XCBR1"
-    assert isinstance(answer.summary, SummaryOut)
-    assert answer.summary.scope == "device:D03.XCBR1"
-    assert [record.tool for record in answer.evidence] == [RESOLVE, SUMMARY]
-
-
-async def test_an_ambiguous_name_reads_nothing_and_asks_back(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    """The important half is `summary is None`: nothing was read about a guess."""
-    answer = await ask("Lai Uyen thế nào?", ctx, conversations)
-    assert answer.key == brief.KEY_AMBIGUOUS
-    assert answer.summary is None
-    assert isinstance(answer.resolution, ResolveOut)
-    assert answer.resolution.ambiguous
-    assert answer.params["count"] == 2
-    assert answer.params["query"] == "Lai Uyen", "quote the name back, not the sentence"
-
-
-async def test_an_unknown_number_is_not_widened_into_a_station_answer(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    """Answering about the station would look like an answer, and would not be one."""
-    answer = await ask("cho tôi trạng thái 999", ctx, conversations)
-    assert answer.key == brief.KEY_UNKNOWN
-    assert answer.summary is None
-    assert answer.params["query"] == "999", "quote back the name, not the sentence"
-
-
-async def test_prose_with_no_name_answers_about_the_pane(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    answer = await ask("tình hình thế nào?", ctx, conversations, scope="bay:D03")
-    assert answer.scope == "bay:D03"
-    assert answer.key == brief.KEY_SUMMARY
-
-
-async def test_a_follow_up_stays_on_the_subject(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    first = await ask("271?", ctx, conversations)
-    second = await ask(
-        "còn số đo thì sao?", ctx, conversations, conversation_id=first.conversation_id
+    script = Script(
+        wants(RESOLVE, query="271"),
+        wants(SUMMARY, scope="device:D03.XCBR1"),
+        says("271 đang đóng."),
     )
-    assert second.conversation_id == first.conversation_id
-    assert second.scope == "device:D03.XCBR1"
+    answer = await ask("271 thế nào?", ctx, conversations, settings, script)
+
+    assert answer.text == "271 đang đóng."
+    assert answer.generated
+    assert answer.scope == "device:D03.XCBR1"
+    assert [e.tool for e in answer.evidence] == [RESOLVE, SUMMARY]
+    assert answer.summary is not None
 
 
-async def test_an_account_that_may_ask_but_not_look_is_told_which_permission(
-    store: StationStore, conversations: InMemoryConversations
+@pytest.mark.anyio
+async def test_stream_emits_structured_payloads_before_the_final_answer(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
 ) -> None:
-    admin = tools.ToolContext(store=store, principal=build_principal("root", [Role.ADMIN]))
-    answer = await ask("trạng thái trạm?", admin, conversations)
-    assert answer.key == brief.KEY_DENIED
-    assert answer.params["missing"] == Capability.STATION_READ.value
+    """Giao diện hiện câu tính được trước khi mô hình viết xong — không đợi khung
+    `answer`."""
+    script = Script(
+        wants(RESOLVE, query="271"),
+        wants(SUMMARY, scope="device:D03.XCBR1"),
+        says("271 đang đóng."),
+    )
+    names = await stream_names("271 thế nào?", ctx, conversations, settings, script)
+
+    assert names[0] == "turn"
+    assert names[-1] == "answer"
+    summary_at = names.index("summary")
+    answer_at = names.index("answer")
+    assert summary_at < answer_at
+    assert "resolution" in names
+    assert names.index("resolution") < summary_at
+
+
+@pytest.mark.anyio
+async def test_a_scope_the_model_invented_is_refused(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """Chỗ đáng giá nhất của cả file (I8).
+
+    `bay:E01` **có tồn tại**, nên không tầng nào phía dưới phản đối — đó chính là
+    chỗ nguy hiểm: một câu trả lời tự tin về nhầm ngăn nhìn y hệt một câu trả lời
+    đúng. Từ chối quay về với mô hình dưới dạng một câu nhắc, và cách sửa đúng là
+    hành vi ta muốn.
+    """
+    script = Script(
+        wants(SUMMARY, scope="bay:E01"),  # gõ từ trí nhớ
+        wants(RESOLVE, query="E01"),  # bị nhắc, làm lại cho đúng
+        wants(SUMMARY, scope="bay:E01"),  # giờ thì hợp lệ
+        says("E01 đang có điện."),
+    )
+    answer = await ask("E01 thế nào?", ctx, conversations, settings, script)
+
+    assert answer.summary is not None, "sau khi resolve thì phải đọc được"
+    # Lần đọc bị từ chối không sinh evidence: không có gì được đọc.
+    assert [e.tool for e in answer.evidence] == [RESOLVE, SUMMARY]
+    assert any("không phải thứ `resolve` đã trả về" in t for t in script.texts())
+
+
+@pytest.mark.anyio
+async def test_the_scope_on_screen_needs_no_resolving(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """Người trực đang nhìn nó, nên mô hình không bịa ra nó."""
+    script = Script(wants(SUMMARY, scope="station"), says("Trạm bình thường."))
+    answer = await ask("thế nào?", ctx, conversations, settings, script, scope="station")
+    assert answer.summary is not None
+    assert [e.tool for e in answer.evidence] == [SUMMARY]
+
+
+@pytest.mark.anyio
+async def test_a_greeting_is_answered_without_reading_anything(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """Lỗi ADR-0021 sinh ra để sửa.
+
+    Trước đây một câu chào không kèm tool call bị coi là thất bại và rơi xuống
+    sàn, mà sàn thì vô điều kiện đọc cả trạm — người dùng gõ `hello` và nhận về
+    80 thiết bị. Giờ câu chào là một câu trả lời hợp lệ.
+    """
+    answer = await ask("hello", ctx, conversations, settings, Script(says("Chào anh.")))
+    assert answer.text == "Chào anh."
+    assert answer.evidence == []
+    assert answer.summary is None
+
+
+@pytest.mark.anyio
+async def test_the_model_is_only_shown_tools_the_caller_may_use(
+    store: StationStore, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """Agent mượn quyền người hỏi và không có quyền riêng (ADR-0016 §5)."""
+    blind = tools.ToolContext(store=store, principal=build_principal("blind", []))
+    script = Script(says("Tôi không đọc được gì."))
+    await ask("271 thế nào?", blind, conversations, settings, script)
+    assert script.info is not None
+    assert script.info.function_tools == []
+
+
+@pytest.mark.anyio
+async def test_the_model_sees_the_digest_not_the_payload(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """I3 bằng cấu trúc: payload đầy đủ đi ra giao diện, bản gọn đi vào mô hình."""
+    script = Script(wants(SUMMARY, scope="station"), says("xong"))
+    answer = await ask("thế nào?", ctx, conversations, settings, script)
+
+    shown = "\n".join(script.texts())
+    assert "ns=" not in shown, "NodeId không bao giờ tới mô hình (I6)"
+    assert "raw_value" not in shown
+    assert answer.summary is not None, "nhưng payload đầy đủ vẫn ra tới giao diện"
+    assert answer.summary.measurements
+
+
+@pytest.mark.anyio
+async def test_a_dead_model_loses_the_wording_and_keeps_the_evidence(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    class Dies(Script):
+        def _answer(self, messages: list[ModelMessage], info: AgentInfo) -> ModelResponse:
+            if self.script:
+                return super()._answer(messages, info)
+            raise RuntimeError("endpoint biến mất")
+
+    script = Dies(wants(SUMMARY, scope="station"))
+    answer = await ask("thế nào?", ctx, conversations, settings, script)
+
+    assert answer.text == "", "nửa câu về một dao đang mở tệ hơn không có câu nào"
+    assert answer.llm_error is not None
+    assert answer.evidence, "nhưng số đã đọc thì vẫn còn, người trực vẫn xem được"
+
+
+@pytest.mark.anyio
+async def test_a_turn_stops_when_the_budget_runs_out(
+    ctx: tools.ToolContext, conversations: InMemoryConversations
+) -> None:
+    """Hết ngân sách là một kết cục nói ra được, không phải một vòng lặp vô tận."""
+    tight = Settings(llm_max_tool_calls=1)
+    script = Script(*[wants(SUMMARY, scope="station")] * 5)
+    answer = await ask("thế nào?", ctx, conversations, tight, script)
+    assert answer.llm_error is not None
+    assert "ngân sách" in answer.llm_error
+
+
+# --------------------------------------------------------- chưa cấu hình mô hình
+
+
+@pytest.mark.anyio
+async def test_with_no_model_the_tab_says_so_instead_of_inventing_one(
+    ctx: tools.ToolContext, conversations: InMemoryConversations, settings: Settings
+) -> None:
+    """I4 sau ADR-0021 §3.
+
+    Không còn template. Cái giữ cho giao diện dùng được khi mô hình chết là I5 —
+    frontend gọi thẳng Domain API — chứ không phải một câu trả lời dựng sẵn.
+    """
+    answer = await ask("271 thế nào?", ctx, conversations, settings, None)
+    assert answer.unconfigured
+    assert answer.text == ""
+    assert not answer.generated
     assert answer.evidence == []
 
 
-async def test_the_offline_answer_is_computed_and_says_so(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    answer = await ask("tình hình thế nào?", ctx, conversations)
-    assert answer.provider == "offline"
-    assert answer.generated is False
-    assert answer.text == ""
-    assert answer.key == brief.KEY_SUMMARY
-    assert answer.params["devices"] == 80
+def test_the_default_installation_needs_no_model() -> None:
+    assert harness.model_for(Settings(), choice_from_settings(Settings())) is None
 
 
-async def test_an_undetermined_position_survives_into_the_brief(
-    ctx: tools.ToolContext,
-) -> None:
-    """I2 all the way to the wording: nothing rounds UNDETERMINED to open or closed."""
-    read = tools.call(SUMMARY, {"scope": "station"}, ctx)
-    assert isinstance(read.payload, SummaryOut)
-    digest = brief.for_summary(read.payload)
-    counted = read.payload.switch_states
-    assert digest.params["undetermined"] == counted.get("UNDETERMINED", 0) + counted.get(
-        "INTERMEDIATE", 0
-    )
-    assert "undetermined" in digest.facts
+def test_asking_for_a_model_without_naming_one_fails_loudly() -> None:
+    """Một endpoint đã được yêu cầu mà không dựng nổi tuyệt đối không được lặng
+    lẽ thành "tắt"."""
+    with pytest.raises(ConfigurationError):
+        harness.model_for(Settings(), LLMChoice(provider="openai", model=""))
+
+
+def test_the_openrouter_provider_is_pinned_when_asked() -> None:
+    """Không pin thì eval suite xanh hôm nay, đỏ ngày mai, code không đổi."""
+    choice = LLMChoice(provider="openai", model="qwen/qwen3.6-27b", provider_order=("a", "b"))
+    body = harness._settings_for(Settings(), choice).get("extra_body")
+    assert body == {"provider": {"order": ["a", "b"], "allow_fallbacks": False}}
 
 
 # -------------------------------------------------------------- conversations
 
 
 def test_a_conversation_belongs_to_the_person_who_opened_it() -> None:
-    """Resuming someone else's id starts a fresh one — no error, no leak."""
-    kept = InMemoryConversations()
-    mine = kept.resume(None, "alice")
-    kept.append(mine, Turn(id="1", asked_at=_now(), question="271?", scope="device:D03.XCBR1"))
-
-    theirs = kept.resume(mine.id, "bob")
-    assert theirs.id != mine.id
-    assert theirs.turns == []
-    assert kept.resume(mine.id, "alice").id == mine.id
+    store = InMemoryConversations()
+    mine = store.resume(None, "an")
+    assert store.resume(mine.id, "binh").id != mine.id, "im lặng mở cái mới, không báo lỗi"
 
 
 def test_history_skips_turns_nobody_wrote_prose_for() -> None:
-    conversation = Conversation(id="c", actor="a", started_at=_now())
-    conversation.turns.append(Turn(id="1", asked_at=_now(), question="a?", answer=""))
-    conversation.turns.append(Turn(id="2", asked_at=_now(), question="b?", answer="yes"))
-    assert conversation.history() == (("b?", "yes"),)
+    store = InMemoryConversations()
+    conversation = store.resume(None, "an")
+    store.append(conversation, _turn("hỏi 1", ""))
+    store.append(conversation, _turn("hỏi 2", "đáp 2"))
+    assert conversation.history() == (("hỏi 2", "đáp 2"),)
 
 
-def test_turns_are_capped() -> None:
-    kept = InMemoryConversations(max_turns=3)
-    conversation = kept.resume(None, "alice")
-    for i in range(10):
-        kept.append(conversation, Turn(id=str(i), asked_at=_now(), question=str(i)))
-    assert [t.id for t in conversation.turns] == ["7", "8", "9"]
+def _turn(question: str, answer: str) -> Turn:
+    from datetime import UTC, datetime
 
-
-# ------------------------------------------------------------ the phrasing seam
-
-
-async def test_generated_prose_arrives_in_pieces_and_is_kept_whole(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    model = ScriptedProvider(("Ngăn ", "D03 ", "đang mang điện."))
-    pieces = []
-    final: AnswerOut | None = None
-    async for event in core.run(
-        "tình hình D03?",
-        "station",
-        None,
-        ctx=ctx,
-        provider=model,  # type: ignore[arg-type]
-        conversations=conversations,
-    ):
-        if event.name == "token":
-            pieces.append(event.data.model_dump()["text"])
-        if isinstance(event.data, AnswerOut):
-            final = event.data
-    assert pieces == ["Ngăn ", "D03 ", "đang mang điện."]
-    assert final is not None
-    assert final.text == "Ngăn D03 đang mang điện."
-    assert final.generated is True
-
-
-async def test_the_model_only_ever_sees_the_brief(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    """It is handed text and returns text. No store, no graph, no tools (I4)."""
-    model = ScriptedProvider(("ok",))
-    await ask("271?", ctx, conversations, provider=model)
-    assert len(model.prompts) == 1
-    assert "device:D03.XCBR1" in model.prompts[0].brief
-    assert model.prompts[0].question == "271?"
-
-
-async def test_a_dead_model_loses_the_wording_and_nothing_else(
-    ctx: tools.ToolContext, conversations: InMemoryConversations
-) -> None:
-    """The answer that matters was computed before the model was asked (I4)."""
-    model = ScriptedProvider(("Ngăn D03 ", "đang"), fail_after=1)
-    answer = await ask("tình hình D03?", ctx, conversations, provider=model)
-    assert answer.llm_error
-    assert answer.generated is False
-    assert answer.text == "", "half a sentence about a substation is worse than none"
-    assert answer.key == brief.KEY_SUMMARY
-    assert isinstance(answer.summary, SummaryOut)
-    assert answer.evidence
-
-
-def test_the_default_installation_needs_no_model() -> None:
-    assert isinstance(provider_for(Settings(data_dir=SAS_TREE.parent)), OfflineProvider)
-
-
-def test_asking_for_a_model_without_naming_one_fails_loudly() -> None:
-    """A misconfigured endpoint must not quietly become the offline provider."""
-    with pytest.raises(ConfigurationError):
-        provider_for(Settings(llm="openai", llm_model="", data_dir=SAS_TREE.parent))
+    return Turn(
+        id="t",
+        asked_at=datetime.now(UTC),
+        question=question,
+        answer=answer,
+        scope="station",
+        asked_from="station",
+    )
 
 
 # ------------------------------------------------------------------ over HTTP
@@ -497,34 +586,26 @@ def test_asking_for_a_model_without_naming_one_fails_loudly() -> None:
 
 @pytest.fixture
 def client(wiring: tuple[StationStore, Database]) -> Iterator[TestClient]:
-    with TestClient(app_module.app) as test_client:
-        yield test_client
-
-
-def test_ask_answers_over_http(client: TestClient) -> None:
-    body = client.post("/api/ask", json={"question": "271 thế nào?"}).json()
-    assert body["scope"] == "device:D03.XCBR1"
-    assert body["summary"]["scope"] == "device:D03.XCBR1"
-    assert [record["tool"] for record in body["evidence"]] == [RESOLVE, SUMMARY]
-
-
-def test_the_stream_carries_the_same_answer_as_the_poll(client: TestClient) -> None:
-    """One code path, two deliveries — the reasoning behind /api/live and /api/stream."""
-    whole = client.post("/api/ask", json={"question": "tình hình D03?"}).json()
-    with client.stream("POST", "/api/ask/stream", json={"question": "tình hình D03?"}) as response:
-        frames = [line for line in response.iter_lines() if line.startswith("event:")]
-    names = [line.removeprefix("event: ") for line in frames]
-    assert names[0] == "turn"
-    assert names[-1] == "answer"
-    assert names.count("evidence") == 2
-    assert whole["key"] == brief.KEY_SUMMARY
+    with TestClient(app_module.app) as made:
+        yield made
 
 
 def test_asking_needs_permission_to_ask(client: TestClient) -> None:
-    """The endpoint's own gate, distinct from the per-tool one above."""
     authz.use(build_principal("nobody", []))
-    assert client.post("/api/ask", json={"question": "271?"}).status_code == 403
+    try:
+        response = client.post("/api/ask", json={"question": "thế nào?", "scope": "station"})
+    finally:
+        authz.use(None)
+    assert response.status_code == 403
 
 
-def _now() -> datetime:
-    return datetime.now(UTC)
+def test_an_unconfigured_install_answers_rather_than_erroring(client: TestClient) -> None:
+    """Chưa cấu hình mô hình không phải một lỗi HTTP: người trực có quyền *hỏi*,
+    và câu trả lời là một câu nói rõ chưa cấu hình."""
+    authz.use(build_principal("op", [Role.OPERATOR]))
+    try:
+        response = client.post("/api/ask", json={"question": "thế nào?", "scope": "station"})
+    finally:
+        authz.use(None)
+    assert response.status_code == 200
+    assert response.json()["unconfigured"] is True

@@ -93,15 +93,71 @@ class Settings(BaseSettings):
     #: `openai` — any endpoint speaking the OpenAI chat-completions API. That is
     #:            OpenRouter while developing and Ollama at the station, which is
     #:            the whole reason this is one setting rather than two backends.
+    #: These four are the *fallback*. Once somebody sets the assistant up through
+    #: the interface, the row in `assistant_config` wins — the station's own
+    #: answer should beat the machine's default, not the other way round. They
+    #: stay because CI and a developer's laptop have no interface to fill in.
     llm: Literal["off", "openai"] = "off"
     llm_base_url: str = "https://openrouter.ai/api/v1"
-    #: No default. A model name is installation-specific, and guessing one turns
-    #: "you did not configure this" into a 404 from someone else's server.
-    llm_model: str = ""
+    #: The model this product is developed *and* deployed on (ADR-0021 §7).
+    #: Deliberately the same in both places: developing on something larger and
+    #: swapping at commissioning is how a harness that works all through
+    #: development gets lost at step four on the day it matters.
+    llm_model: str = "qwen/qwen3.6-27b"
     llm_api_key: str | None = None
     #: Generous: a local model on station hardware is slow to first token, and
     #: the stream is already showing progress by then.
     llm_timeout: float = 120.0
+    #: OpenRouter providers allowed to serve `llm_model`, best first, comma
+    #: separated. Empty lets OpenRouter choose — fine on a laptop, **not** fine
+    #: for the eval suite: one model id routes to several providers, each with
+    #: its own sampling defaults and tool-call parser, so an unpinned run is
+    #: green today and red tomorrow with no code change (ADR-0021 §7).
+    llm_provider_order: str = ""
+
+    # ---- ngân sách một lượt hội thoại (ADR-0021 §5)
+    #:
+    #: Đặt theo **hồ sơ máy trạm**, không theo máy dev: RTX 5090 32GB, Qwen 27B
+    #: Q4 ≈ 17GB trọng số, còn ~12GB KV ≈ 40-60k token dùng được. Máy dev qua API
+    #: có thừa chỗ, và đó chính là lý do phải đặt trần ở đây — nếu không, cái
+    #: chạy được suốt kỳ phát triển sẽ không chạy được ở trạm.
+    #:
+    #: Chừa biên cho Q4: đo được là 40-60k, nhận 24k. Phần dư là chỗ cho lượng
+    #: tử hoá làm mô hình nhớ kém đi, thứ không test từ xa được.
+    llm_max_turn_tokens: int = 24_000
+    #: Thay `MAX_STEPS = 6` cứng của ADR-0020. Sáu là hai `resolve` + hai
+    #: `summary` cộng chỗ hồi lại sau một lần bị từ chối; mười cho câu nhiều
+    #: bước thật mà vẫn chặn được vòng lặp lạc đề.
+    llm_max_tool_calls: int = 10
+    llm_max_requests: int = 12
+    #: Câu trả lời tối đa năm câu (xem `agent/harness.py` SYSTEM). Trần này là
+    #: cái chặn một mô hình quyết định viết luận văn.
+    llm_max_output_tokens: int = 1_200
+    #: Đếm token **trước** khi gửi, để một lượt vượt trần hỏng ở đây chứ không
+    #: hỏng ở đầu kia sau khi đã trả tiền.
+    #:
+    #: **Mặc định TẮT, và đó là một quyết định chứ không phải quên bật.** Không
+    #: phải model nào cũng đếm trước được — `FunctionModel` ném thẳng
+    #: `Token counting ahead of the request is not supported`, và một endpoint
+    #: OpenAI-compatible bất kỳ có thể cũng vậy. Bật nó lên khi chưa biết endpoint
+    #: có đỡ được không là đánh đổi một tối ưu lấy nguy cơ *mọi* câu hỏi đều hỏng.
+    #: `llm_max_turn_tokens` vẫn chặn sau khi gửi, và đó mới là cái giữ ngân sách.
+    #: Bật ở trạm sau khi đã thử thật với vLLM.
+    llm_count_tokens_before_request: bool = False
+    #: Bao nhiêu lượt trước được kể lại cho mô hình (ADR-0022 §1).
+    #:
+    #: Chỉ **văn xuôi** — không tool call, không số đo, không evidence. Nhỏ có
+    #: chủ ý: câu trả lời đến từ tool chứ không từ transcript, và lịch sử càng
+    #: dài thì càng mời mô hình trả lời bằng trí nhớ thay vì bằng số của phút
+    #: này. `0` tắt hẳn trí nhớ, và tắt nó là một cách chẩn đoán hợp lệ khi nghi
+    #: mô hình đang bám vào câu cũ.
+    llm_history_turns: int = 4
+
+    #: Encrypts the API key stored in SQLite. Random, not a chosen password —
+    #: see `store/secrets.py`, which also spells out what this does not protect
+    #: against. Unset means the key cannot be stored through the interface;
+    #: `BI_LLM_API_KEY` still works, so a developer is never blocked by it.
+    secret_key: str = ""
 
     # ---- local storage
     data_dir: Path = REPO_ROOT / "data"
@@ -110,6 +166,17 @@ class Settings(BaseSettings):
     # ---- logging
     log_level: str = "INFO"
     log_json: bool = False  # True in production; human-readable while developing
+    #: Level for asyncua's own loggers, which are noisy in a way ours are not:
+    #: it reports every publish at INFO, and with `opcua_publish_ms=500` on a
+    #: station whose analog points never sit still that is two multi-kilobyte
+    #: lines a second. At the default WARNING the link's failures still show and
+    #: its routine breathing does not. Raise it to INFO or DEBUG to watch the
+    #: protocol; prefer sending it to `log_opcua_file` when you do.
+    log_opcua_level: str = "WARNING"
+    #: Send everything asyncua says to this file instead of the console. Useful
+    #: exactly when `log_opcua_level` is loud: the protocol trace is kept, in
+    #: full, somewhere it cannot bury the application's own log.
+    log_opcua_file: Path | None = None
 
     # ---- HTTP
     #: The Vite dev server runs on its own port and calls this API cross-origin.

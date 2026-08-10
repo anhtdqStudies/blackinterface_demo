@@ -28,11 +28,30 @@ from fastapi.responses import StreamingResponse
 from blackinterface.agent import core
 from blackinterface.agent.tools import ToolContext
 from blackinterface.api.authz import CALLER, requires
-from blackinterface.api.deps import get_conversations, get_provider, get_store
-from blackinterface.api.schemas import AnswerOut, AskIn
+from blackinterface.api.deps import (
+    get_conversations,
+    get_model,
+    get_model_name,
+    get_settings_for_request,
+    get_store,
+)
+from blackinterface.api.schemas import AnswerOut, AskFrameOut, AskIn
 from blackinterface.domain.authz import Capability, Principal
 
 router = APIRouter()
+
+
+class EventStream(StreamingResponse):
+    """A `StreamingResponse` that declares its media type to OpenAPI.
+
+    `StreamingResponse.media_type` is `None`, and FastAPI falls back to
+    `application/json` when it writes the response's content map — so a schema
+    attached to this endpoint would be documented under a media type this
+    endpoint never produces. One attribute makes the document say what actually
+    goes over the wire.
+    """
+
+    media_type = "text/event-stream"
 
 
 @router.post(
@@ -47,27 +66,37 @@ async def ask(body: AskIn, principal: Principal = CALLER) -> AnswerOut:
         body.scope,
         body.conversation_id,
         ctx=ToolContext(store=get_store(), principal=principal),
-        provider=get_provider(),
+        model=get_model(),
+        model_name=get_model_name(),
+        settings=get_settings_for_request(),
         conversations=get_conversations(),
     )
 
 
 @router.post(
     "/api/ask/stream",
-    responses={200: {"content": {"text/event-stream": {}}, "description": "Answer frames"}},
-    response_class=StreamingResponse,
+    # `model` is what puts the frame payloads — and only through them,
+    # `TurnStartOut` and `ToolCallOut` — into openapi.json, so the frontend
+    # generates its types for them instead of hand-writing two (ADR-0009).
+    responses={
+        200: {
+            "model": AskFrameOut,
+            "description": "One frame payload per SSE event; `event:` says which",
+        }
+    },
+    response_class=EventStream,
     dependencies=[requires(Capability.AGENT_ASK)],
 )
-async def ask_stream(body: AskIn, principal: Principal = CALLER) -> StreamingResponse:
+async def ask_stream(body: AskIn, principal: Principal = CALLER) -> EventStream:
     """The same answer, as it is produced (Server-Sent Events).
 
-    Frame types are `turn`, `tool`, `evidence`, `token` and `answer`; the last
-    carries the complete `AnswerOut` and supersedes anything accumulated from
-    `token`. See `agent/core.py` for why that replacement matters.
+    Frame types are `turn`, `tool`, `evidence`, `resolution`, `summary`, `token`
+    and `answer`; the last carries the complete `AnswerOut` and supersedes
+    anything accumulated from `token`. See `agent/core.py` for why that
+    replacement matters.
     """
-    return StreamingResponse(
+    return EventStream(
         _frames(body, principal),
-        media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-transform",
             "X-Accel-Buffering": "no",  # nginx would otherwise sit on each frame
@@ -83,7 +112,9 @@ async def _frames(body: AskIn, principal: Principal) -> AsyncIterator[str]:
         body.scope,
         body.conversation_id,
         ctx=ToolContext(store=get_store(), principal=principal),
-        provider=get_provider(),
+        model=get_model(),
+        model_name=get_model_name(),
+        settings=get_settings_for_request(),
         conversations=get_conversations(),
     ):
         yield f"event: {event.name}\ndata: {event.data.model_dump_json()}\n\n"

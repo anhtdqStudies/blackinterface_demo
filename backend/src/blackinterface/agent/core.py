@@ -1,25 +1,34 @@
-"""One turn of conversation: plan, read, phrase. In that order, always.
+"""Một lượt hội thoại. Một generator, hai cửa.
 
-    plan    deterministic, this process, no model      -> which scope
-    read    the same facets the interface calls (I5)   -> payload + evidence
-    phrase  a language model, or a template            -> words
+Sau ADR-0021 chỉ còn **một** đường: mô hình chọn đọc gì, trong ngân sách của
+`harness.limits()`. Đường thứ hai — `plan → read → template` — đã bị xoá cùng
+`plan.py` và `brief.py`, và lý do đáng ghi lại vì nó ngược với trực giác:
 
-The order is the architecture. By the time a model is asked for anything, every
-number in the answer is fixed and every caveat is recorded; the model is handed
-text and returns text and touches nothing else (I4, ADR-0005). If it is
-misconfigured, slow, hallucinating or dead, the answer is still computed, still
-carries its evidence, and still arrives — only the wording changes.
+  Cái giữ cho *"giao diện dùng được khi mô hình chết"* **không phải** câu trả lời
+  template. Là **I5** — frontend gọi thẳng Domain API, BlackCore không phải
+  proxy. Mô hình chết thì sơ đồ, panel, số đo, SSE không hề biết. Sàn template
+  chưa bao giờ giữ lời hứa mà người ta tưởng nó giữ; nó chỉ làm cho tab hội
+  thoại trả về *một cái gì đó*, và cái gì đó ấy có lần là nguyên bảng trạng thái
+  80 thiết bị đáp lại câu «hello» (ADR-0021 §Bối cảnh).
 
-A model does not choose which tool to call. With two tools and a deterministic
-resolver, letting it choose would add a failure mode and no capability. That is
-a decision with a trigger, recorded in ADR-0019: when the catalogue reaches a
-size where selection is a real judgement — around Module B's alarm and event
-tools — the choice moves here, *behind* the same validation, and the plan stays
-the thing that runs when the model's answer does not parse.
+Không cấu hình mô hình thì tab hội thoại nói *chưa cấu hình*. Đó là I4 sau khi
+ADR-0021 §3 thu hẹp nó về đúng phần lõi.
 
-One generator serves both endpoints. `POST /api/ask` drains it and returns the
-last frame; `POST /api/ask/stream` writes each frame to the wire. Two deliveries
-of one code path, so a bug cannot exist in only one of them.
+Khung, theo thứ tự:
+
+    turn        định danh và mô hình sắp dùng
+    tool        một khung mỗi tool, **trước** khi nó chạy
+    evidence    một khung mỗi tool, **sau** khi nó chạy
+    resolution  payload `resolve`, ngay sau evidence của nó
+    summary     payload `summary`, ngay sau evidence của nó — câu tính được
+                hiện trước khi mô hình viết xong
+    token       văn xuôi, từng mẩu
+    answer      toàn bộ, và là bản chính thức của mọi trường
+
+Client áp `answer` lên trên thứ nó đã gom từ `token`. Không phải thắt lưng kèm
+dây đeo quần: nếu mô hình hỏng giữa chừng thì đám token đã gửi là một câu **dở
+dang** về một trạm biến áp, và khung cuối là chỗ chúng bị thay bằng thứ hoàn
+chỉnh.
 """
 
 from __future__ import annotations
@@ -29,21 +38,28 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from pydantic import BaseModel
+from pydantic_ai import UsageLimitExceeded
+from pydantic_ai.messages import (
+    FunctionToolCallEvent,
+    FunctionToolResultEvent,
+    PartDeltaEvent,
+    PartStartEvent,
+    TextPart,
+    TextPartDelta,
+)
+from pydantic_ai.models import Model
 
-from blackinterface.agent import brief as briefing
-from blackinterface.agent import tools
-from blackinterface.agent.plan import plan
-from blackinterface.agent.provider import LLMProvider, LLMUnavailableError, Prompt
-from blackinterface.agent.session import Conversations, Turn, new_turn_id
-from blackinterface.agent.tools.station import RESOLVE, SUMMARY
+from blackinterface.agent import harness
+from blackinterface.agent.provider import LLMUnavailableError
+from blackinterface.agent.session import Conversation, Conversations, Turn, new_turn_id
+from blackinterface.agent.tools.registry import ToolContext
 from blackinterface.api.schemas import (
     AnswerOut,
-    ResolveOut,
-    SummaryOut,
     TokenOut,
     ToolCallOut,
     TurnStartOut,
 )
+from blackinterface.config import Settings
 from blackinterface.domain.evidence import EvidenceRecord
 from blackinterface.domain.scope import ScopeLike, ScopeRef, as_scope
 from blackinterface.errors import ForbiddenError
@@ -54,7 +70,7 @@ log = get_logger(__name__)
 
 @dataclass(frozen=True)
 class Event:
-    """One frame. `name` becomes the SSE event type."""
+    """Một khung. `name` thành kiểu event của SSE."""
 
     name: str
     data: BaseModel
@@ -65,109 +81,99 @@ async def run(
     asked_from: ScopeLike,
     conversation_id: str | None,
     *,
-    ctx: tools.ToolContext,
-    provider: LLMProvider,
+    ctx: ToolContext,
+    model: Model | None,
+    model_name: str,
+    settings: Settings,
     conversations: Conversations,
 ) -> AsyncIterator[Event]:
-    """Answer one question, reporting progress as it goes.
-
-    Frames, in order:
-
-        turn      identifiers and which model is about to be used
-        tool      one per tool, before it runs
-        evidence  one per tool, after it runs
-        token     prose, in pieces; absent when nothing generates prose
-        answer    the whole thing, and the authoritative copy of every field
-
-    A client applies `answer` over whatever it accumulated from `token`. That is
-    not belt-and-braces: if the model fails halfway, the tokens already sent are
-    a truncated sentence about a substation, and the final frame is where they
-    get replaced by something complete.
-    """
+    """Trả lời một câu hỏi, báo tiến trình dọc đường."""
     pane = as_scope(asked_from)
     conversation = conversations.resume(conversation_id, ctx.principal.user)
-    intent = plan(question, pane, conversation)
     turn_id = new_turn_id()
+
+    # Người trực đang nhìn scope này, nên mô hình không bịa ra nó (I8).
+    ctx.seen.add(pane.ref)
 
     yield Event(
         "turn",
         TurnStartOut(
             conversation_id=conversation.id,
             turn_id=turn_id,
-            provider=provider.name,
-            generated=provider.generated,
+            provider=model_name,
+            generated=model is not None,
         ),
     )
 
-    evidence: list[EvidenceRecord] = []
-    resolution: ResolveOut | None = None
-    summary: SummaryOut | None = None
-    scope: ScopeRef = pane
-    digest: briefing.Brief
+    if model is None:
+        answer = _assemble(
+            question=question,
+            conversation_id=conversation.id,
+            turn_id=turn_id,
+            scope=pane,
+            model_name=model_name,
+            ctx=ctx,
+            text="",
+            llm_error=None,
+            unconfigured=True,
+        )
+        yield Event("answer", answer)
+        return
+
+    agent = harness.build(ctx.principal, model)
+    text, llm_error = "", None
+    pending_tool: str | None = None
 
     try:
-        yield Event("tool", ToolCallOut(tool=RESOLVE, args={"query": question}))
-        found = tools.call(RESOLVE, {"query": intent.query}, ctx)
-        resolution = _as_resolution(found.payload)
-        evidence.append(found.evidence)
-        yield Event("evidence", found.evidence)
-
-        scope, notes = _target(resolution, intent.fallback, intent.names)
-        if notes is not None:
-            digest = notes
-        else:
-            yield Event("tool", ToolCallOut(tool=SUMMARY, args={"scope": scope.ref}))
-            read = tools.call(SUMMARY, {"scope": scope.ref}, ctx)
-            summary = _as_summary(read.payload)
-            evidence.append(read.evidence)
-            yield Event("evidence", read.evidence)
-            digest = briefing.for_summary(summary, resolution)
+        async with agent.run_stream_events(
+            _prompt(question, pane),
+            deps=ctx,
+            # Prose of earlier turns, and nothing they read (ADR-0022 §1).
+            # `harness.history()` is where that line is drawn and defended.
+            message_history=harness.history(conversation, settings),
+            usage_limits=harness.limits(settings),
+        ) as events:
+            async for event in events:
+                tool_for_result = (
+                    pending_tool if isinstance(event, FunctionToolResultEvent) else None
+                )
+                for frame in _frames(event, ctx, tool_for_result):
+                    yield frame
+                if isinstance(event, FunctionToolCallEvent):
+                    pending_tool = event.part.tool_name
+                elif isinstance(event, FunctionToolResultEvent):
+                    pending_tool = None
+                text += _prose(event)
+    except UsageLimitExceeded as exc:
+        # Hết ngân sách là một kết cục, không phải một sự cố. Giữ lại những gì đã
+        # đọc và nói thẳng là đã dừng ở đâu — im lặng rơi sang một đường khác là
+        # đúng thứ ADR-0021 §5 bỏ đi.
+        log.warning("agent hit its budget", error=str(exc), user=ctx.principal.user)
+        llm_error = f"đã dừng khi hết ngân sách một lượt: {exc}"
     except ForbiddenError as exc:
-        # In band, not as an HTTP error: the caller is entitled to *ask*, and a
-        # dead stream tells them less than a sentence saying which permission
-        # they are missing. Nothing was read, so there is no evidence to carry.
+        # Người hỏi không được đọc thứ này. Trả trong luồng, không phải bằng lỗi
+        # HTTP: họ có quyền *hỏi*, và một stream chết nói với họ ít hơn một câu
+        # cho biết đang thiếu quyền nào.
         missing = exc.detail.get("missing") or [""]
-        digest = briefing.for_denied(str(missing[0]))
+        llm_error = f"thiếu quyền: {missing[0]}"
+    except Exception as exc:
+        # Bỏ những gì đã tới. Nửa câu về việc dao nào đang mở tệ hơn không có câu
+        # nào — và evidence thì vẫn còn nguyên, nên người trực vẫn đọc được số.
+        log.warning("the model failed mid-answer", error=str(exc), provider=model_name)
+        text, llm_error = "", str(LLMUnavailableError(f"không gọi được mô hình: {exc}").message)
 
-    text, llm_error = "", None
-    if provider.generated:
-        prompt = Prompt(question=question, brief=digest.facts, history=conversation.history())
-        try:
-            async for piece in provider.stream(prompt):
-                text += piece
-                yield Event("token", TokenOut(text=piece))
-        except LLMUnavailableError as exc:
-            # Drop what arrived. Half a statement about which disconnectors are
-            # open is worse than none, and the computed answer below is complete.
-            log.warning("the model failed mid-answer", error=exc.message, provider=provider.name)
-            text, llm_error = "", exc.message
-
-    answer = AnswerOut(
+    answer = _assemble(
+        question=question,
         conversation_id=conversation.id,
         turn_id=turn_id,
-        question=question,
-        scope=scope.ref,
-        provider=provider.name,
-        generated=provider.generated and not llm_error,
-        text=text,
-        key=digest.key,
-        params=digest.params,
-        resolution=resolution,
-        summary=summary,
-        evidence=evidence,
+        scope=_answered_about(ctx, pane),
+        model_name=model_name,
+        ctx=ctx,
+        text=text.strip(),
         llm_error=llm_error,
+        unconfigured=False,
     )
-    conversations.append(
-        conversation,
-        Turn(
-            id=turn_id,
-            asked_at=datetime.now(UTC),
-            question=question,
-            answer=text,
-            scope=scope.ref if summary is not None else "",
-            asked_from=pane.ref,
-        ),
-    )
+    _remember(conversations, conversation, answer, pane, turn_id)
     yield Event("answer", answer)
 
 
@@ -176,49 +182,162 @@ async def answer(
     asked_from: ScopeLike,
     conversation_id: str | None,
     *,
-    ctx: tools.ToolContext,
-    provider: LLMProvider,
+    ctx: ToolContext,
+    model: Model | None,
+    model_name: str,
+    settings: Settings,
     conversations: Conversations,
 ) -> AnswerOut:
-    """The same turn, delivered whole. What `POST /api/ask` returns."""
+    """Cùng một lượt, giao nguyên khối. Thứ `POST /api/ask` trả về."""
     final: AnswerOut | None = None
     async for event in run(
         question,
         asked_from,
         conversation_id,
         ctx=ctx,
-        provider=provider,
+        model=model,
+        model_name=model_name,
+        settings=settings,
         conversations=conversations,
     ):
         if isinstance(event.data, AnswerOut):
             final = event.data
-    assert final is not None, "run() must always end with an answer frame"
+    assert final is not None, "run() luôn phải kết thúc bằng một khung answer"
     return final
 
 
-def _target(
-    resolution: ResolveOut, fallback: ScopeRef, names: tuple[str, ...]
-) -> tuple[ScopeRef, briefing.Brief | None]:
-    """Which scope to read, or the reason there is nothing to read.
+def _prompt(question: str, asked_from: ScopeRef) -> str:
+    """Câu hỏi, kèm thứ người trực đang nhìn.
 
-    Four outcomes, and the third is the one that matters: a question that names
-    something this station does not have is answered with "no such thing", never
-    by quietly answering about somewhere else (`plan.py`).
+    Nói ra chứ không để mô hình đoán: *"còn số đo thì sao?"* chỉ có nghĩa khi
+    biết màn hình đang ở đâu, và scope của pane là bằng chứng cứng về điều đó.
     """
-    if resolution.ambiguous:
-        return fallback, briefing.for_ambiguity(resolution)
-    if resolution.scope:
-        return as_scope(resolution.scope), None
-    if names:
-        return fallback, briefing.for_unknown(", ".join(names))
-    return fallback, None
+    return (
+        f"{question}\n\n"
+        f"(Người trực đang xem {asked_from.ref}. Nếu câu hỏi không gọi tên thứ gì "
+        f"thì nó nói về chỗ đó.)"
+    )
 
 
-def _as_resolution(payload: BaseModel) -> ResolveOut:
-    assert isinstance(payload, ResolveOut)
-    return payload
+def _frames(event: object, ctx: ToolContext, tool_for_result: str | None) -> list[Event]:
+    """Event của Pydantic AI -> khung của ta.
+
+    `agent/` mô tả chuyện gì xảy ra; `api/` quyết định đưa nó lên dây thế nào.
+    Dịch ở đây để một lần Pydantic AI đổi tên event không lan tới frontend.
+    """
+    if isinstance(event, FunctionToolCallEvent):
+        args = event.part.args_as_dict()
+        return [Event("tool", ToolCallOut(tool=event.part.tool_name, args=_flat(args)))]
+    if isinstance(event, FunctionToolResultEvent):
+        out: list[Event] = []
+        evidence = _evidence_of(event)
+        if evidence is not None:
+            out.append(Event("evidence", evidence))
+        if tool_for_result == "resolve" and ctx.resolution is not None:
+            out.append(Event("resolution", ctx.resolution))
+        elif tool_for_result == "summary" and ctx.summary is not None:
+            out.append(Event("summary", ctx.summary))
+        return out
+    piece = _prose(event)
+    return [Event("token", TokenOut(text=piece))] if piece else []
 
 
-def _as_summary(payload: BaseModel) -> SummaryOut:
-    assert isinstance(payload, SummaryOut)
-    return payload
+def _prose(event: object) -> str:
+    """Chữ mới trong một event, hoặc "" nếu event này không mang chữ.
+
+    **Mẩu đầu tiên đến trong `PartStartEvent`, không phải `PartDeltaEvent`.**
+    Bỏ sót nó thì câu trả lời mất chữ đầu — và trên màn hình nó hiện thành một
+    câu cụt đầu chạy ra, thứ trông y như mô hình bị cắt ngang. Một test bắt được
+    đúng lỗi này, nên hai nhánh nằm chung một hàm để không nhánh nào bị quên.
+    """
+    if isinstance(event, PartStartEvent) and isinstance(event.part, TextPart):
+        return event.part.content
+    if isinstance(event, PartDeltaEvent) and isinstance(event.delta, TextPartDelta):
+        return event.delta.content_delta
+    return ""
+
+
+def _evidence_of(event: FunctionToolResultEvent) -> EvidenceRecord | None:
+    """Evidence của một tool vừa xong.
+
+    Lấy từ `metadata` — thứ mô hình **không** nhìn thấy — chứ không parse ra từ
+    `content`. Đó là I3 nói bằng cấu trúc: bằng chứng do tool sinh, không phải
+    thứ đọc ngược lại từ chữ.
+
+    `None` khi tool bị `ModelRetry` từ chối hoặc ném lỗi: không có gì được đọc,
+    nên không có bằng chứng nào để kể.
+    """
+    metadata = getattr(event.part, "metadata", None)
+    if not isinstance(metadata, dict):
+        return None
+    evidence = metadata.get("evidence")
+    return evidence if isinstance(evidence, EvidenceRecord) else None
+
+
+def _flat(args: dict[str, object]) -> dict[str, str | int | float | bool | None]:
+    """Đối số phẳng để ghi log và đưa lên dây.
+
+    Thứ lồng nhau bị **bỏ** chứ không bị ép thành chuỗi: một đối số tool không
+    log được, không replay được, không đưa vào evidence được thì không phải thứ
+    hệ này nhận — và lặng lẽ ép `{'a': 1}` thành `"{'a': 1}"` là cách tuồn một
+    cái như thế vào.
+    """
+    return {k: v for k, v in args.items() if isinstance(v, str | int | float | bool) or v is None}
+
+
+def _answered_about(ctx: ToolContext, pane: ScopeRef) -> ScopeRef:
+    """Scope câu trả lời thật sự nói về: cái đọc cuối, nếu có đọc gì."""
+    if ctx.summary is not None:
+        return ScopeRef.parse(ctx.summary.scope)
+    return pane
+
+
+def _assemble(
+    *,
+    question: str,
+    conversation_id: str,
+    turn_id: str,
+    scope: ScopeRef,
+    model_name: str,
+    ctx: ToolContext,
+    text: str,
+    llm_error: str | None,
+    unconfigured: bool,
+) -> AnswerOut:
+    """Một chỗ duy nhất dựng câu trả lời, để hai cửa không thể trôi khỏi nhau."""
+    return AnswerOut(
+        conversation_id=conversation_id,
+        turn_id=turn_id,
+        question=question,
+        scope=scope.ref,
+        provider=model_name,
+        generated=bool(text) and not unconfigured,
+        text=text,
+        resolution=ctx.resolution,
+        summary=ctx.summary,
+        evidence=list(ctx.evidence),
+        llm_error=llm_error,
+        unconfigured=unconfigured,
+    )
+
+
+def _remember(
+    conversations: Conversations,
+    conversation: Conversation,
+    answer: AnswerOut,
+    pane: ScopeRef,
+    turn_id: str,
+) -> None:
+    """Ghi lại lượt. `scope` chỉ khi thật sự đã đọc gì đó — một câu hỏi không trả
+    lời được không được phép thành chủ đề mà câu sau thừa kế."""
+    conversations.append(
+        conversation,
+        Turn(
+            id=turn_id,
+            asked_at=datetime.now(UTC),
+            question=answer.question,
+            answer=answer.text,
+            scope=answer.scope if answer.summary is not None else "",
+            asked_from=pane.ref,
+        ),
+    )

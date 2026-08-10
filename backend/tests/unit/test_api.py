@@ -152,6 +152,18 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         # otherwise (tools/check.py section 2, test_agent.py).
         "POST /api/ask",
         "POST /api/ask/stream",
+        # Choosing the language model and storing its key. Writes one row of
+        # this installation's own SQLite; it reaches no OneATS surface, and the
+        # assistant it configures still holds only read-only tools (I1).
+        "PUT /api/assistant/config",
+        # A real call to the model endpoint. Outbound, and writes only the
+        # `verified_at` stamp recording that the call happened.
+        "POST /api/assistant/test",
+        # Forgetting one of one's own conversations (ADR-0022). Deletes rows in
+        # this installation's SQLite and nothing else: a transcript holds
+        # questions and prose, never a reading, so there is no station state to
+        # lose here and no path from it to OneATS.
+        "DELETE /api/conversations/{conversation_id}",
     }
 
 

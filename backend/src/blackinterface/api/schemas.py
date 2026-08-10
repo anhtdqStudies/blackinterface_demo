@@ -12,7 +12,9 @@ buries that.
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from typing import Literal
+
+from pydantic import BaseModel, RootModel
 
 from blackinterface.domain.energization import CrossCheck, Island, LiveState
 from blackinterface.domain.evidence import EvidenceRecord
@@ -394,23 +396,27 @@ class AnswerOut(BaseModel):
     Prose and facts are separate fields on purpose (I3). `text` is what a
     language model wrote and is labelled as interpretation; `summary`,
     `resolution` and `evidence` are computed and are what the interface may
-    show as fact. When `generated` is false there is no model in the loop at
-    all and `key`/`params` carry a computed statement for the frontend to
-    render in its own language.
+    show as fact.
+
+    Since ADR-0021 the backend no longer sends a computed *sentence*: it sends
+    the computed *payload*, and the interface writes the sentence in the reader's
+    language. Same principle as before (the backend does not know whether the
+    reader wants Vietnamese or English) with one fewer indirection, and the
+    safety property is unchanged — there is always something measured on screen
+    that does not depend on trusting the model's wording.
     """
 
     conversation_id: str
     turn_id: str
     question: str
     scope: str  # the scope actually answered about, after resolution
-    provider: str  # "offline" | "openai:<model>"
+    provider: str  # "off" | "<model id>"
     generated: bool  # a language model wrote `text`
     text: str = ""
-    #: i18n key + arguments for the computed statement. Present whenever the
-    #: answer could be computed, including alongside generated prose, so the UI
-    #: still has something correct to show if it chooses not to trust the model.
-    key: str | None = None
-    params: dict[str, str | int | float | bool | None] = {}
+    #: No model is configured. Distinct from `llm_error`, which means one was
+    #: configured, asked, and failed. The interface says "not configured yet" and
+    #: points at `#/eng`; it does not say the assistant is broken (I4).
+    unconfigured: bool = False
     resolution: ResolveOut | None = None
     summary: SummaryOut | None = None
     #: Every record produced by this turn, one per tool that ran. The canonical
@@ -421,3 +427,119 @@ class AnswerOut(BaseModel):
     #: still here and still correct; only the wording is the computed one. A
     #: silent downgrade would make an outage invisible (I4).
     llm_error: str | None = None
+
+
+class ConversationTurnOut(BaseModel):
+    """One turn as it is remembered — **words, not readings** (ADR-0022 §2).
+
+    There is no evidence and no summary here, and that is the schema saying so
+    rather than an omission. An `EvidenceRecord` is a statement about one
+    moment; showing it again three days later, next to a question, under a
+    conversation title, invites somebody to read a stale number as a live one.
+    A reopened transcript shows what was said and when. For current figures,
+    ask again — it is cheap and it is never wrong.
+    """
+
+    turn_id: str
+    asked_at: str
+    question: str
+    #: The model's prose, "" when no model wrote any.
+    answer: str = ""
+    #: The scope this turn settled on, "" when it settled on nothing.
+    scope: str = ""
+    asked_from: str = ""
+
+
+class ConversationOut(BaseModel):
+    """A conversation in the picker: enough to choose one, no transcript."""
+
+    id: str
+    #: The first question, truncated. Derived, never typed by anyone.
+    title: str
+    started_at: str
+    #: When the last turn landed. What the list is ordered by.
+    last_at: str
+    turns: int
+
+
+class ConversationDetailOut(ConversationOut):
+    """One conversation with everything stored about it."""
+
+    transcript: list[ConversationTurnOut] = []
+
+
+class AssistantConfigOut(BaseModel):
+    """How the assistant is set up. **Never carries the API key.**
+
+    `has_key` is the whole of what the interface is told about the secret. A
+    field that returned even a masked prefix would still be the key travelling
+    through a browser, a proxy log and a screenshot.
+
+    `source` says where the settings in force came from — `store` when somebody
+    configured it here, `env` when it is falling back to `BI_LLM*`. Without it,
+    an engineer who saves settings on a machine whose environment overrides them
+    has no way to see why nothing changed.
+    """
+
+    provider: str = "off"
+    base_url: str = ""
+    model: str = ""
+    timeout: float = 120.0
+    has_key: bool = False
+    #: Whether this installation can store a key at all — false when
+    #: `BI_SECRET_KEY` is unset. The screen says so instead of failing on save.
+    can_store_key: bool = False
+    source: str = "env"
+    #: ISO time these exact settings last reached a model and it answered.
+    verified_at: str | None = None
+    updated_at: str = ""
+    updated_by: str = ""
+
+
+class AssistantConfigIn(BaseModel):
+    """New settings.
+
+    `api_key` absent means *leave the stored key alone*; empty string means
+    *remove it*. The two have to be distinguishable, because the screen never
+    receives the key and so cannot send it back unchanged.
+    """
+
+    provider: Literal["off", "openai"] = "off"
+    base_url: str = ""
+    model: str = ""
+    timeout: float = 120.0
+    api_key: str | None = None
+
+
+class AssistantProbeOut(BaseModel):
+    """The result of actually calling the model. Not a validation of the form."""
+
+    ok: bool
+    provider: str
+    #: What the model replied, trimmed. Present so the answer is visibly from a
+    #: model rather than from our own success message.
+    reply: str = ""
+    error: str | None = None
+
+
+class AskFrameOut(
+    RootModel[
+        TurnStartOut | ToolCallOut | EvidenceRecord | ResolveOut | SummaryOut | TokenOut | AnswerOut
+    ]
+):
+    """The `data:` payload of one frame from `POST /api/ask/stream`.
+
+    OpenAPI has no vocabulary for Server-Sent Events, so the *sequence* of frames
+    cannot be described here. The payloads can, and they are the part a client
+    has to parse: the `event:` line says which member arrived — `turn`, `tool`,
+    `evidence`, `resolution`, `summary`, `token`, `answer`.
+
+    Its real job is to make `TurnStartOut` and `ToolCallOut` reach
+    `openapi.json` at all. Neither appears in a request or a response body, so
+    without this they would be the only two API types the frontend had to
+    hand-write, which is the thing ADR-0009 exists to prevent.
+    """
+
+    root: (
+        TurnStartOut | ToolCallOut | EvidenceRecord | ResolveOut | SummaryOut | TokenOut | AnswerOut
+    )
