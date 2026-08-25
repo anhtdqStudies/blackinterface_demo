@@ -63,12 +63,12 @@ function isChatColumn(colIndex: number, pane: Pane): boolean {
   <SplitterGroup
     direction="horizontal"
     :auto-save-id="saveId()"
-    class="flex min-h-0 flex-1 gap-2 bg-background p-2"
+    class="flex min-h-0 flex-1 gap-px bg-background"
   >
     <template v-for="(col, ci) in layout.cols" :key="ci">
       <SplitterResizeHandle
         v-if="ci > 0"
-        class="w-px shrink-0 bg-border transition-colors data-[state=drag]:bg-primary hover:bg-primary/60"
+        class="w-px shrink-0 bg-border transition-colors data-[state=drag]:bg-primary/60 hover:bg-primary/40"
       />
       <SplitterPanel
         :default-size="col.size"
@@ -78,12 +78,12 @@ function isChatColumn(colIndex: number, pane: Pane): boolean {
         <SplitterGroup
           direction="vertical"
           :auto-save-id="saveId(`.c${ci}`)"
-          class="min-h-0 flex-1 gap-2"
+          class="min-h-0 flex-1 gap-px"
         >
           <template v-for="(row, ri) in col.rows" :key="ri">
             <SplitterResizeHandle
               v-if="ri > 0"
-              class="h-px shrink-0 bg-border transition-colors data-[state=drag]:bg-primary hover:bg-primary/60"
+              class="h-px shrink-0 bg-border transition-colors data-[state=drag]:bg-primary/60 hover:bg-primary/40"
             />
 
             <SplitterPanel

@@ -277,6 +277,24 @@ class MeasurementOut(BaseModel):
     readings: dict[str, list[ReadingOut]] = {}
 
 
+class AlarmLiveOut(BaseModel):
+    """The `alarm` cadence: what is annunciated station-wide, right now.
+
+    Carries the classified list with switch positions and configuration rows
+    already filtered out — station-wide that is 243 rows down to a handful. A
+    pane that wants a narrower scope, or wants the noise back, calls
+    `/api/alarms`; this is the push that tells it something moved.
+    """
+
+    revision: int = 0
+    #: False until the first snapshot has been read. An empty list means
+    #: something different before and after that, and "no alarms" is a claim we
+    #: are not entitled to make before looking (I2).
+    has_snapshot: bool = False
+    counts: dict[str, int] = {}
+    alarms: list[AlarmOut] = []
+
+
 class LiveOut(BaseModel):
     """Everything that moves, in one document — the shape `/api/live` returns.
 
@@ -290,6 +308,9 @@ class LiveOut(BaseModel):
     state: StateOut
     measurement: MeasurementOut
     link: LinkOut
+    #: Added with Module B. Fourth cadence, and the only one that is never
+    #: throttled: a dropped reading is resent, a dropped alarm is gone.
+    alarm: AlarmLiveOut
 
 
 class SummaryOut(BaseModel):
@@ -543,3 +564,99 @@ class AskFrameOut(
     root: (
         TurnStartOut | ToolCallOut | EvidenceRecord | ResolveOut | SummaryOut | TokenOut | AnswerOut
     )
+
+
+# --------------------------------------------------------------------------
+# Module B — alarms and incidents (ADR-0026 channels, ADR-0027 model)
+# --------------------------------------------------------------------------
+
+
+class AlarmOut(BaseModel):
+    """One alarm, already classified. Raw alarms do not cross this boundary.
+
+    `klass` is what the UI filters on. A healthy station reports 243 active
+    alarms of which 90 say a breaker is closed; shipping that list unclassified
+    would rebuild the wall of noise this product replaces (ADR-0027).
+    """
+
+    event_id: str
+    subject: str
+    point: str
+    klass: str
+    state: str
+    message: str = ""
+    severity: int = 0
+    category: str = ""
+    value: bool | int | float | str | None = None
+    #: Set when a person caused this. Only the snapshot channel carries it —
+    #: OneATS leaves the A&C `ClientUserId` empty (measured 2026-08-13).
+    actor: str | None = None
+    t_active: str | None = None
+    t_change: str | None = None
+    acknowledged: bool = False
+
+
+class PlaybookStepOut(BaseModel):
+    text: str
+    caution: str = ""
+
+
+class PlaybookOut(BaseModel):
+    """Handling guidance for one kind of alarm.
+
+    `status` is not decoration. Everything shipped today is `draft` — composed
+    by an agent, reviewed by nobody with authority over this substation — and
+    the UI is required to show that next to the text (ADR-0027 §3).
+    """
+
+    id: str
+    title: str
+    status: Literal["draft", "approved"]
+    summary: str = ""
+    steps: list[PlaybookStepOut] = []
+    references: list[str] = []
+
+
+class IncidentOut(BaseModel):
+    """A cluster of alarms that belong together in time and in the network.
+
+    `seed` is the highest-severity fault in the cluster. It is deliberately not
+    called a cause: grouping says these belong together, it does not say the
+    first one produced the rest. Causality is `trace` (ADR-0024).
+    """
+
+    id: str
+    subject: str
+    started_at: str | None = None
+    ended_at: str | None = None
+    severity: int = 0
+    seed: AlarmOut
+    faults: list[AlarmOut] = []
+    evidence: list[AlarmOut] = []
+    #: Points seen going in and out repeatedly — one misbehaving measurement,
+    #: collapsed, rather than one incident per oscillation.
+    flapping_points: list[str] = []
+    scopes: list[str] = []
+    playbook: PlaybookOut | None = None
+    #: Set when returned from the dismissed history list — local operator workflow,
+    #: not OneATS acknowledgement (I1).
+    dismissed_at: str | None = None
+
+
+class AlarmsOut(BaseModel):
+    """Active alarms for one scope, with the evidence behind the answer."""
+
+    scope: str
+    kind: str
+    counts: dict[str, int] = {}
+    alarms: list[AlarmOut] = []
+    evidence: EvidenceRecord
+
+
+class IncidentsOut(BaseModel):
+    """What is actually wrong in one scope, and what to do about it."""
+
+    scope: str
+    kind: str
+    incidents: list[IncidentOut] = []
+    evidence: EvidenceRecord

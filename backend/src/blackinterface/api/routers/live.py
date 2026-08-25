@@ -1,11 +1,12 @@
-"""What moves: one poll endpoint and one stream, three cadences.
+"""What moves: one poll endpoint and one stream, four cadences.
 
-`/api/live` hands over all three at once — a client that has just connected
+`/api/live` hands over all four at once — a client that has just connected
 needs the whole present tense before it can render anything. `/api/stream`
 then sends each cadence separately, as its own SSE event type, whenever that
 one changes (ADR-0012):
 
     event: state        positions, IsLive, energisation   rare, rebuilds
+    event: alarm        what is annunciated                bursty, never throttled
     event: measurement  analog readings                   dense, deadbanded
     event: link         the subscription's own health     rare
 
@@ -28,8 +29,14 @@ from pydantic import BaseModel
 
 from blackinterface.api.authz import requires
 from blackinterface.api.broadcast import CADENCE_ORDER, Cadence
-from blackinterface.api.deps import get_store
-from blackinterface.api.mappers import link_out, live_out, measurement_out, state_out
+from blackinterface.api.deps import get_alarms, get_store
+from blackinterface.api.mappers import (
+    alarm_live_out,
+    link_out,
+    live_out,
+    measurement_out,
+    state_out,
+)
 from blackinterface.api.schemas import LiveOut
 from blackinterface.api.source import StationStore
 from blackinterface.domain.authz import Capability
@@ -43,6 +50,9 @@ _HEARTBEAT_SECONDS = 20.0
 #: and one line in `Cadence` — not a new branch in the middle of the generator.
 _RENDER = {
     Cadence.STATE: state_out,
+    # Reads the alarm store rather than the station one: alarms are their own
+    # source (ADR-0026) and deliberately not folded into the graph.
+    Cadence.ALARM: lambda _store: alarm_live_out(get_alarms()),
     Cadence.MEASUREMENT: measurement_out,
     Cadence.LINK: link_out,
 }

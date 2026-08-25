@@ -19,6 +19,15 @@ export default {
     engineering: 'Kỹ thuật',
     language: 'Ngôn ngữ',
   },
+  workspace: {
+    nav: 'Điều hướng workspace',
+    navCollapse: 'Thu gọn thanh điều hướng',
+    navExpand: 'Mở rộng thanh điều hướng',
+    details: 'Chi tiết phạm vi',
+    detailsTitle: 'Trạng thái nhanh',
+    detailsClose: 'Ẩn chi tiết',
+    detailsReopen: 'Hiện trạng thái nhanh bên cạnh sơ đồ',
+  },
   session: {
     // Hiện ở góc phải: ai đang đăng nhập, giữ vai nào (ADR-0016, ADR-0017).
     capabilities: 'quyền',
@@ -38,6 +47,8 @@ export default {
     measurements: 'Số đo',
     energization: 'Mang điện',
     anomalies: 'Bất thường',
+    alarms: 'Sự cố',
+    alarmList: 'Alarm',
     evidence: 'Bằng chứng',
     chat: 'Hỏi đáp',
     connections: 'Kết nối',
@@ -81,9 +92,63 @@ export default {
     backToStation: '← Về toàn trạm',
     backToBay: '← Về ngăn {bay}',
   },
+  alarms: {
+    scopeLine: 'Đang xét phạm vi: {scope}',
+    notAsked: 'Chưa hỏi máy chủ về phạm vi này.',
+    noneInScope: 'Không có sự cố nào trong {scope}.',
+    none: 'Không có sự cố nào đang mở.',
+    unknownYet: 'Chưa đọc được danh sách alarm — không phải "không có sự cố".',
+    stationCounts: 'Toàn trạm: {fault} sự cố · {status} trạng thái · {unknown} chưa phân loại',
+    seed: 'Alarm nặng nhất',
+    faults: 'Alarm trong cụm',
+    evidence: 'Bằng chứng đi kèm',
+    flapping: 'Đang dao động',
+    flappingHint: 'Điểm này vào ra liên tục — gộp thành một mục, không phải nhiều sự cố.',
+    scopes: 'Phạm vi ảnh hưởng',
+    span: 'Kéo dài {ms} ms',
+    byOperator: 'Do {actor} thao tác',
+    notCause: 'Đây là nhóm alarm cùng thời điểm và cùng vùng điện — chưa phải chuỗi nhân quả.',
+    guidance: 'Hướng dẫn xử lý',
+    noGuidance: 'Chưa có hướng dẫn cho loại alarm này.',
+    draft: 'BẢN NHÁP — chưa được duyệt',
+    draftHint:
+      'Nội dung do hệ thống soạn, chưa có người có thẩm quyền vận hành duyệt. Dùng để tham khảo, không thay quy trình của trạm.',
+    caution: 'Lưu ý',
+    references: 'Nguồn',
+    klass: {
+      fault: 'Sự cố',
+      status: 'Trạng thái',
+      config: 'Cấu hình',
+      action: 'Thao tác',
+      unknown: 'Chưa phân loại',
+    },
+  },
+  alarmList: {
+    tabActive: 'Đang active',
+    tabHistory: 'Đã xử lý',
+    filters: 'Bộ lọc',
+    rowCount: '{count} dòng',
+    time: 'Thời gian',
+    severity: 'Mức',
+    klass: 'Loại',
+    message: 'Nội dung',
+    point: 'Điểm',
+    search: 'Tìm',
+    searchPlaceholder: 'message, point, severity…',
+    all: 'Tất cả',
+    includeStatus: 'Hiện trạng thái đóng cắt',
+    noneInScope: 'Không có alarm nào trong {scope}.',
+    noHistory: 'Chưa có sự cố đã xử lý trong {scope}.',
+    historyHint:
+      'Sự cố chuyển vào đây sau khi ấn Done trên tab Sự cố. Đây là ghi nhận nội bộ — không phải ack trên OneATS.',
+    done: 'Done — đã xử lý',
+    dismissing: 'Đang lưu…',
+    dismissedAt: 'Done lúc {time}',
+  },
   anomalies: {
     none: 'Không có bất thường vận hành.',
     stationWide: 'Toàn trạm — cố ý không lọc theo {scope}.',
+    scopeLine: 'Bất thường vận hành — luôn toàn trạm',
   },
   eng: {
     title: 'Kỹ thuật',
@@ -119,6 +184,7 @@ export default {
   },
   energization: {
     title: 'Mang điện',
+    scopeLine: 'Mang điện — luôn toàn trạm',
     noComparison: 'Không có ngăn nào đối chiếu được với IsLive của OneATS.',
     agrees: 'Khớp OneATS {n}/{total} ngăn — hai cách tính độc lập ra cùng kết quả.',
     mismatch:
@@ -188,6 +254,15 @@ export default {
     baysAtLevel: '{level} — {count} ngăn',
     bayOverview: 'Ngăn {bay}',
     scopeUnsupported: 'Chọn toàn trạm, một ngăn hoặc một thiết bị để xem trạng thái.',
+    scopeLine: 'Vị trí đóng cắt — phạm vi: {scope}',
+  },
+  sld: {
+    fit: 'Vừa màn hình',
+    zoomIn: 'Phóng to',
+    zoomOut: 'Thu nhỏ',
+    fullscreen: 'Toàn màn hình',
+    exitFullscreen: 'Thoát toàn màn hình',
+    hint: 'Lăn chuột · kéo để di chuyển · phím f',
   },
   liveState: {
     LIVE: 'CÓ ĐIỆN',
@@ -218,6 +293,7 @@ export default {
   },
   measurement: {
     title: 'Số đo',
+    scopeLine: 'Số đo — phạm vi: {scope}',
     columnQuantity: 'Đại lượng',
     columnValue: 'Giá trị',
     unreadable: 'không đọc được (quality {quality})',
@@ -230,6 +306,7 @@ export default {
   /** Bằng chứng — vì sao một câu trả lời đáng tin tới đâu (ADR-0013). */
   evidence: {
     title: 'Bằng chứng',
+    scopeLine: 'Độ phủ bằng chứng — phạm vi: {scope}',
     clean: 'đầy đủ',
     /** Khác «đầy đủ»: tool này không đọc điểm nào, nên nó không bảo chứng cho
      * một con số nào — chỉ cho xuất xứ (trạm nào, ModelVersion nào). */
@@ -296,9 +373,7 @@ export default {
     chipHint: 'Câu không nêu tên được hiểu là hỏi về phạm vi này. Bấm để mở rộng.',
   },
   chat: {
-    empty:
-      'Hỏi bằng tiếng Việt về trạm này. Nêu tên hoặc số hiệu thiết bị — ví dụ «271 thế nào?». ' +
-      'Câu không nêu tên được hiểu là hỏi về phạm vi đang xem.',
+    empty: 'Hỏi về trạm…',
     placeholder: 'Hỏi về trạm…',
     send: 'Hỏi',
     sending: 'Đang hỏi…',

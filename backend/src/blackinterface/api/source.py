@@ -34,6 +34,8 @@ from collections.abc import Mapping
 from contextlib import AbstractAsyncContextManager
 from typing import TYPE_CHECKING
 
+from blackinterface.api.alarmsource import AlarmStore
+from blackinterface.api.alarmwatch import AlarmSupervisor
 from blackinterface.api.broadcast import Cadence, Listener, RevisionBroadcaster
 from blackinterface.api.reader import SourceReader
 from blackinterface.api.throttle import Throttle
@@ -82,6 +84,11 @@ class StationStore:
         self._watch = MonitorSupervisor(
             self.settings, on_batch=self.apply_live, on_status=self._on_monitor_status
         )
+        # Alarms ride their own channel (ADR-0026) and their own supervisor: an
+        # alarm subscription that has dropped must not stop the diagram being
+        # drawn, and a lost point subscription must not silence alarms.
+        self.alarms = AlarmStore()
+        self._alarm_watch = AlarmSupervisor(self.settings, self.alarms, self._broadcast)
         self._measurement_pulse = Throttle(
             self.settings.measurement_throttle_ms / 1000.0, self._announce_measurement
         )
@@ -272,6 +279,8 @@ class StationStore:
     async def unload(self) -> None:
         """Forget the current graph and project (used when the project is deleted)."""
         await self._watch.stop()
+        await self._alarm_watch.stop()
+        self.alarms.clear()
         self._measurement_pulse.cancel()
         self._obs = None
         self._graph = None
@@ -286,8 +295,9 @@ class StationStore:
             self._meta.set(ACTIVE_PROJECT_ID, "")
 
     async def shutdown(self) -> None:
-        """Release the subscription. Called from the app's lifespan."""
+        """Release the subscriptions. Called from the app's lifespan."""
         await self._watch.stop()
+        await self._alarm_watch.stop()
         self._measurement_pulse.cancel()
 
     # ----------------------------------------------------------------- humble
@@ -330,6 +340,7 @@ class StationStore:
             seconds=round(self._load_seconds, 3),
         )
         await self._watch.sync(self._monitor_url(), watch_points(obs))
+        await self._alarm_watch.sync(self._monitor_url())
         self._broadcast.bump(Cadence.STATE)
         return graph
 

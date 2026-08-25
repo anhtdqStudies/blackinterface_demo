@@ -501,15 +501,25 @@ def test_the_stream_route_is_a_readable_event_stream(client: TestClient) -> None
 
 async def test_the_stream_opens_with_every_cadence(served: StationStore) -> None:
     """No separate initial fetch: connecting is enough to know where you are —
-    and that means all three cadences, not just the one that moves most."""
+    and that means every cadence, not just the one that moves most.
+
+    Order is asserted, not just membership: `alarm` sits behind `state` and
+    ahead of `measurement`, so a burst of readings can never delay news that
+    something is wrong (ADR-0012, extended by ADR-0026).
+    """
     store = served
     events = live_events()
     try:
-        opening = [_parse(await anext(events)) for _ in range(3)]
+        opening = [_parse(await anext(events)) for _ in range(4)]
     finally:
         await events.aclose()
 
-    assert [cadence for cadence, _ in opening] == ["state", "measurement", "link"]
+    assert [cadence for cadence, _ in opening] == [
+        "state",
+        "alarm",
+        "measurement",
+        "link",
+    ]
     state = dict(opening)["state"]
     assert state["loaded"] is True
     assert state["revision"] == store.state_revision
@@ -523,7 +533,7 @@ async def test_the_stream_pushes_the_new_state_when_a_switch_moves(
     store = served
     events = live_events()
     try:
-        first = dict([_parse(await anext(events)) for _ in range(3)])["state"]
+        first = dict([_parse(await anext(events)) for _ in range(4)])["state"]
         await store.apply_live({D01_BREAKER: _closed(1)})
         cadence, second = _parse(await asyncio.wait_for(anext(events), timeout=2))
     finally:

@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/api/alarms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Alarms
+         * @description Active alarms for one scope, classified, with evidence.
+         */
+        get: operations["alarms_api_alarms_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ask": {
         parameters: {
             query?: never;
@@ -264,6 +284,46 @@ export interface paths {
         get: operations["health_api_health_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Incidents
+         * @description Alarms grouped into incidents, each with its handling guidance.
+         */
+        get: operations["incidents_api_incidents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/incidents/{incident_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dismiss
+         * @description Mark one open incident as handled locally. Does not ack on OneATS (I1).
+         */
+        post: operations["dismiss_api_incidents__incident_id__dismiss_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -572,6 +632,110 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * AlarmLiveOut
+         * @description The `alarm` cadence: what is annunciated station-wide, right now.
+         *
+         *     Carries the classified list with switch positions and configuration rows
+         *     already filtered out — station-wide that is 243 rows down to a handful. A
+         *     pane that wants a narrower scope, or wants the noise back, calls
+         *     `/api/alarms`; this is the push that tells it something moved.
+         */
+        AlarmLiveOut: {
+            /**
+             * Alarms
+             * @default []
+             */
+            alarms: components["schemas"]["AlarmOut"][];
+            /**
+             * Counts
+             * @default {}
+             */
+            counts: {
+                [key: string]: number;
+            };
+            /**
+             * Has Snapshot
+             * @default false
+             */
+            has_snapshot: boolean;
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
+        };
+        /**
+         * AlarmOut
+         * @description One alarm, already classified. Raw alarms do not cross this boundary.
+         *
+         *     `klass` is what the UI filters on. A healthy station reports 243 active
+         *     alarms of which 90 say a breaker is closed; shipping that list unclassified
+         *     would rebuild the wall of noise this product replaces (ADR-0027).
+         */
+        AlarmOut: {
+            /**
+             * Acknowledged
+             * @default false
+             */
+            acknowledged: boolean;
+            /** Actor */
+            actor?: string | null;
+            /**
+             * Category
+             * @default
+             */
+            category: string;
+            /** Event Id */
+            event_id: string;
+            /** Klass */
+            klass: string;
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /** Point */
+            point: string;
+            /**
+             * Severity
+             * @default 0
+             */
+            severity: number;
+            /** State */
+            state: string;
+            /** Subject */
+            subject: string;
+            /** T Active */
+            t_active?: string | null;
+            /** T Change */
+            t_change?: string | null;
+            /** Value */
+            value?: boolean | number | string | null;
+        };
+        /**
+         * AlarmsOut
+         * @description Active alarms for one scope, with the evidence behind the answer.
+         */
+        AlarmsOut: {
+            /**
+             * Alarms
+             * @default []
+             */
+            alarms: components["schemas"]["AlarmOut"][];
+            /**
+             * Counts
+             * @default {}
+             */
+            counts: {
+                [key: string]: number;
+            };
+            evidence: components["schemas"]["EvidenceRecord"];
+            /** Kind */
+            kind: string;
+            /** Scope */
+            scope: string;
+        };
         /**
          * AnswerOut
          * @description One turn of conversation, with everything behind it.
@@ -1177,6 +1341,69 @@ export interface components {
             source: string;
         };
         /**
+         * IncidentOut
+         * @description A cluster of alarms that belong together in time and in the network.
+         *
+         *     `seed` is the highest-severity fault in the cluster. It is deliberately not
+         *     called a cause: grouping says these belong together, it does not say the
+         *     first one produced the rest. Causality is `trace` (ADR-0024).
+         */
+        IncidentOut: {
+            /** Dismissed At */
+            dismissed_at?: string | null;
+            /** Ended At */
+            ended_at?: string | null;
+            /**
+             * Evidence
+             * @default []
+             */
+            evidence: components["schemas"]["AlarmOut"][];
+            /**
+             * Faults
+             * @default []
+             */
+            faults: components["schemas"]["AlarmOut"][];
+            /**
+             * Flapping Points
+             * @default []
+             */
+            flapping_points: string[];
+            /** Id */
+            id: string;
+            playbook?: components["schemas"]["PlaybookOut"] | null;
+            /**
+             * Scopes
+             * @default []
+             */
+            scopes: string[];
+            seed: components["schemas"]["AlarmOut"];
+            /**
+             * Severity
+             * @default 0
+             */
+            severity: number;
+            /** Started At */
+            started_at?: string | null;
+            /** Subject */
+            subject: string;
+        };
+        /**
+         * IncidentsOut
+         * @description What is actually wrong in one scope, and what to do about it.
+         */
+        IncidentsOut: {
+            evidence: components["schemas"]["EvidenceRecord"];
+            /**
+             * Incidents
+             * @default []
+             */
+            incidents: components["schemas"]["IncidentOut"][];
+            /** Kind */
+            kind: string;
+            /** Scope */
+            scope: string;
+        };
+        /**
          * Island
          * @description A set of nodes that are one conductor, with one verdict for all of them.
          */
@@ -1310,6 +1537,7 @@ export interface components {
          *     applying each cadence.
          */
         LiveOut: {
+            alarm: components["schemas"]["AlarmLiveOut"];
             link: components["schemas"]["LinkOut"];
             measurement: components["schemas"]["MeasurementOut"];
             state: components["schemas"]["StateOut"];
@@ -1393,6 +1621,50 @@ export interface components {
             current_password: string;
             /** New Password */
             new_password: string;
+        };
+        /**
+         * PlaybookOut
+         * @description Handling guidance for one kind of alarm.
+         *
+         *     `status` is not decoration. Everything shipped today is `draft` — composed
+         *     by an agent, reviewed by nobody with authority over this substation — and
+         *     the UI is required to show that next to the text (ADR-0027 §3).
+         */
+        PlaybookOut: {
+            /** Id */
+            id: string;
+            /**
+             * References
+             * @default []
+             */
+            references: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "approved";
+            /**
+             * Steps
+             * @default []
+             */
+            steps: components["schemas"]["PlaybookStepOut"][];
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /** Title */
+            title: string;
+        };
+        /** PlaybookStepOut */
+        PlaybookStepOut: {
+            /**
+             * Caution
+             * @default
+             */
+            caution: string;
+            /** Text */
+            text: string;
         };
         /** Point */
         Point: {
@@ -1969,6 +2241,40 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    alarms_api_alarms_get: {
+        parameters: {
+            query?: {
+                /** @description Scope ref, e.g. station, bay:D03 */
+                scope?: string;
+                /** @description Include switch-position and configuration alarms. Off by default: a healthy station annunciates 90 of them and they are evidence, not faults. */
+                include_status?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlarmsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     ask_api_ask_post: {
         parameters: {
             query?: never;
@@ -2348,6 +2654,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthOut"];
+                };
+            };
+        };
+    };
+    incidents_api_incidents_get: {
+        parameters: {
+            query?: {
+                /** @description Scope ref, e.g. station, bay:D03 */
+                scope?: string;
+                /** @description Clustering window. Default 200 ms, measured: a real cascade spanned 87 ms. */
+                window_ms?: number | null;
+                /** @description Open incidents need attention. Dismissed returns local history after an operator pressed Done — not OneATS acknowledgement. */
+                status?: "open" | "dismissed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IncidentsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_api_incidents__incident_id__dismiss_post: {
+        parameters: {
+            query: {
+                /** @description Scope ref the operator was viewing */
+                scope: string;
+                /** @description Clustering window — must match the open-incidents view. */
+                window_ms?: number | null;
+            };
+            header?: never;
+            path: {
+                incident_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IncidentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

@@ -12,7 +12,7 @@
  */
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next'
+import { MessageSquare, PanelLeftClose, PanelLeftOpen } from 'lucide-vue-next'
 import type { PaneProps } from '@/app/layout/panes'
 import { formatScope } from '@/scope'
 import { useChatStore } from '@/stores/chat'
@@ -20,6 +20,7 @@ import { useSessionStore } from '@/stores/session'
 import { useWorkspaceStore } from '@/stores/workspace'
 import Empty from '@/ui/Empty.vue'
 import { Button } from '@/ui/button'
+import { Separator } from '@/ui/separator'
 import AskBox from './AskBox.vue'
 import ConversationMenu from './ConversationMenu.vue'
 import TurnBlock from './TurnBlock.vue'
@@ -94,10 +95,9 @@ watch(
 <template>
   <Empty v-if="!allowed" :reason="t('chat.notAllowed')" />
 
-  <div v-else class="flex h-full min-h-0 flex-col">
-    <div
-      class="flex shrink-0 items-center gap-2 border-b border-border px-2 py-1.5 text-2xs text-sys-idle"
-    >
+  <div v-else class="flex h-full min-h-0 flex-col bg-background">
+    <div class="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2">
+      <MessageSquare class="size-4 shrink-0 text-primary" />
       <ConversationMenu />
       <Button
         variant="ghost"
@@ -108,7 +108,8 @@ watch(
         <PanelLeftOpen v-if="workspace.chatCollapsed" />
         <PanelLeftClose v-else />
       </Button>
-      <span v-if="provider" class="ml-auto truncate">
+      <Separator orientation="vertical" class="mx-1 h-4" />
+      <span v-if="provider" class="ml-auto truncate text-2xs text-muted-foreground">
         {{
           provider.generated
             ? t('chat.model', { provider: provider.provider })
@@ -117,9 +118,11 @@ watch(
       </span>
     </div>
 
-    <div ref="transcript" class="min-h-0 flex-1 overflow-auto bg-muted/20">
+    <div ref="transcript" class="min-h-0 flex-1 overflow-auto">
       <Empty v-if="!chat.turns.length" :reason="t('chat.empty')" />
-      <TurnBlock v-for="turn in chat.turns" :key="turn.id" :turn="turn" @retry="retry" />
+      <div v-else class="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-6">
+        <TurnBlock v-for="turn in chat.turns" :key="turn.id" :turn="turn" @retry="retry" />
+      </div>
     </div>
 
     <AskBox :busy="chat.busy" :scope="scope" @ask="ask" />

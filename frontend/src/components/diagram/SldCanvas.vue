@@ -28,6 +28,8 @@ const props = defineProps<{
   /** Latest position per device. Keyed by `SymbolView.device_id`. */
   deviceState: Record<string, DeviceLive>
   selectedDeviceId: string | null
+  /** Compact overlay legend for fullscreen / large canvas. */
+  compact?: boolean
 }>()
 defineEmits<{ select: [deviceId: string]; selectBay: [bayId: string] }>()
 
@@ -58,6 +60,27 @@ function fit(): void {
     h: props.diagram.height + PAD * 2,
   }
 }
+
+function zoomBy(factor: number): void {
+  const vb = viewBox.value
+  const cx = vb.x + vb.w / 2
+  const cy = vb.y + vb.h / 2
+  viewBox.value = {
+    x: cx - (vb.w * factor) / 2,
+    y: cy - (vb.h * factor) / 2,
+    w: vb.w * factor,
+    h: vb.h * factor,
+  }
+}
+
+function zoomIn(): void {
+  zoomBy(1 / 1.2)
+}
+
+function zoomOut(): void {
+  zoomBy(1.2)
+}
+
 watch(() => props.diagram, fit, { immediate: true })
 
 /** Zoom the camera onto one voltage-level band. Called by the parent's tabs. */
@@ -70,7 +93,7 @@ function focusSection(top: number, bottom: number): void {
   }
 }
 
-defineExpose({ focusSection, fit })
+defineExpose({ focusSection, fit, zoomIn, zoomOut })
 
 /** Client pixel -> drawing coordinates, honouring the letterboxing of `meet`. */
 function toDrawing(clientX: number, clientY: number): { x: number; y: number; scale: number } {
@@ -161,11 +184,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="canvas">
+  <div class="canvas" :class="{ compact }">
     <svg
       ref="svgEl"
+      class="sld-svg"
       :viewBox="`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`"
       preserveAspectRatio="xMidYMid meet"
+      shape-rendering="geometricPrecision"
+      text-rendering="geometricPrecision"
       @wheel="onWheel"
       @pointerdown="onPointerDown"
       @pointermove="onPointerMove"
@@ -173,6 +199,47 @@ onBeforeUnmount(() => {
       @pointercancel="onPointerUp"
       @click.capture="swallowDragClick"
     >
+      <defs>
+        <pattern id="sld-grid" :width="40" :height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--sld-grid)" stroke-width="0.5" />
+        </pattern>
+      </defs>
+
+      <!-- Deep canvas — matches SCADA single-line background. -->
+      <rect
+        class="sld-bg"
+        :x="viewBox.x"
+        :y="viewBox.y"
+        :width="viewBox.w"
+        :height="viewBox.h"
+        fill="var(--sld-canvas)"
+      />
+      <rect
+        :x="viewBox.x"
+        :y="viewBox.y"
+        :width="viewBox.w"
+        :height="viewBox.h"
+        fill="url(#sld-grid)"
+        opacity="0.55"
+      />
+
+      <!-- Bay columns: faint dashed frames like Grid Designer. -->
+      <g class="bay-frames">
+        <rect
+          v-for="column in diagram.columns"
+          :key="`frame-${column.bay_id}`"
+          :x="column.x - 52"
+          :y="column.top - 8"
+          width="104"
+          :height="column.bottom - column.top + 16"
+          rx="3"
+          fill="none"
+          stroke="var(--sld-frame)"
+          stroke-width="1"
+          stroke-dasharray="4 6"
+        />
+      </g>
+
       <!-- Voltage level bands, so it is obvious where one level ends. -->
       <g v-for="section in diagram.sections" :key="section.voltage_level">
         <text class="level" :x="8" :y="(section.top + section.bottom) / 2">
@@ -191,8 +258,9 @@ onBeforeUnmount(() => {
           :x2="rail.x2"
           :y2="rail.y"
           :stroke="conductor(rail.node_id)"
-          :stroke-width="rail.transfer ? 4 : 5"
-          stroke-linecap="round"
+          :stroke-width="rail.transfer ? 3 : 4"
+          stroke-linecap="butt"
+          vector-effect="non-scaling-stroke"
           :stroke-dasharray="stateOf(rail.node_id) === 'UNKNOWN' ? '6 5' : undefined"
         />
         <text
@@ -213,7 +281,8 @@ onBeforeUnmount(() => {
         fill="none"
         :stroke="conductor(edge.node_id)"
         :stroke-dasharray="stateOf(edge.node_id) === 'UNKNOWN' ? '6 5' : undefined"
-        stroke-width="2"
+        stroke-width="1.5"
+        vector-effect="non-scaling-stroke"
       />
 
       <!-- Junction dot = really connected. No dot = the conductor just crosses. -->
@@ -222,7 +291,8 @@ onBeforeUnmount(() => {
         :key="junction.id"
         :cx="junction.x"
         :cy="junction.y"
-        r="4"
+        r="3.5"
+        vector-effect="non-scaling-stroke"
         :fill="conductor(junction.node_id)"
       />
 
@@ -357,9 +427,7 @@ onBeforeUnmount(() => {
       />
     </svg>
 
-    <button class="fit" title="Vừa màn hình (phím f)" @click="fit()">Vừa màn hình</button>
-
-    <div class="legend">
+    <div class="legend" :class="{ 'legend-compact': compact }">
       <span class="group">Thiết bị:</span>
       <span><i style="background: var(--closed)" />ĐÓNG</span>
       <span><i style="background: var(--open)" />MỞ</span>
@@ -370,8 +438,10 @@ onBeforeUnmount(() => {
       <span><i style="background: var(--dead)" />không điện</span>
       <span><i style="background: var(--earthed)" />đã tiếp địa</span>
       <span><i style="background: var(--undetermined)" />chưa xác định</span>
-      <span class="group">▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa · ◯◯ máy biến áp</span>
-      <span class="group">● có nối · cắt ngang không chấm = không nối</span>
+      <span v-if="!compact" class="group"
+        >▪ máy cắt · ◆ dao cách ly · ⏚ tiếp địa · ◯◯ máy biến áp</span
+      >
+      <span v-if="!compact" class="group">● có nối · cắt ngang không chấm = không nối</span>
       <span class="group">lăn chuột = thu phóng · kéo = di chuyển</span>
     </div>
   </div>
@@ -379,56 +449,84 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .canvas {
+  --sld-canvas: #06080c;
+  --sld-grid: color-mix(in srgb, var(--foreground) 7%, transparent);
+  --sld-frame: color-mix(in srgb, var(--foreground) 14%, transparent);
+
   position: relative;
   overflow: hidden;
-  padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
-svg {
+.canvas.compact .legend {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: var(--radius-md);
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--background) 40%, transparent);
+}
+.sld-svg {
   display: block;
   flex: 1;
   width: 100%;
   min-height: 0;
   cursor: grab;
   touch-action: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-svg:active {
+.sld-svg:active {
   cursor: grabbing;
 }
-svg text {
-  font: 11px var(--mono);
+.sld-bg {
+  pointer-events: none;
+}
+.bay-frames {
+  pointer-events: none;
+}
+.sld-svg text {
+  font: 11px var(--font-sans);
   fill: var(--dim);
+  letter-spacing: 0.02em;
 }
-svg text.bay {
-  font-size: 12px;
-  font-weight: 600;
-}
-svg text.tx {
+.sld-svg text.bay {
   font-size: 13px;
   font-weight: 600;
   fill: var(--fg);
 }
-svg text.level {
-  font-size: 15px;
+.sld-svg text.tx {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--fg);
+}
+.sld-svg text.level {
+  font-size: 16px;
   font-weight: 600;
   fill: var(--dim);
-  opacity: 0.5;
-}
-.fit {
-  position: absolute;
-  top: 18px;
-  right: 18px;
+  opacity: 0.45;
 }
 .legend {
   display: flex;
-  gap: 14px;
+  gap: 10px 14px;
   flex-wrap: wrap;
-  color: var(--dim);
+  color: var(--muted-foreground);
   font-size: 11px;
-  padding: 6px 2px 0;
+  border-top: 1px solid var(--border);
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--muted) 25%, transparent);
+}
+.legend-compact {
+  gap: 6px 10px;
+  font-size: 10px;
+  border-top: none;
 }
 .legend i {
   display: inline-block;
@@ -438,7 +536,7 @@ svg text.level {
   margin-right: 5px;
 }
 .legend .group {
-  color: var(--fg);
+  color: var(--foreground);
   opacity: 0.75;
 }
 .bay-col {

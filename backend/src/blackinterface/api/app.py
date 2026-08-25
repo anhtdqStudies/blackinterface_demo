@@ -26,6 +26,7 @@ from blackinterface.api import accounts, deps
 from blackinterface.api import errors as error_handlers
 from blackinterface.api.routers import (
     agent,
+    alarms,
     assistant,
     auth,
     conversations,
@@ -104,6 +105,8 @@ app.include_router(diagram.router)
 app.include_router(agent.router)
 app.include_router(conversations.router)
 app.include_router(assistant.router)
+# Module B - alarms and incidents (ADR-0026, ADR-0027)
+app.include_router(alarms.router)
 
 
 # ------------------------------------------------------------------- frontend

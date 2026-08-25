@@ -6,10 +6,12 @@
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { AlertCircle } from 'lucide-vue-next'
 import IssueList from '@/features/shared/IssueList.vue'
 import { useStructureStore } from '@/stores/structure'
 import Empty from '@/ui/Empty.vue'
 import PaneSkeleton from '@/ui/PaneSkeleton.vue'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card'
 
 const { t } = useI18n()
 const structure = useStructureStore()
@@ -20,13 +22,20 @@ const modelIssues = computed(() =>
 </script>
 
 <template>
-  <div class="p-3">
-    <PaneSkeleton v-if="structure.loading" variant="row" :count="4" />
-    <IssueList
-      v-else-if="structure.station"
-      :issues="modelIssues"
-      :empty="t('ops.noIssuesAllMatch')"
-    />
-    <Empty v-else :reason="t('pane.noModel')" />
-  </div>
+  <PaneSkeleton v-if="structure.loading" variant="row" :count="4" />
+
+  <Card v-else-if="structure.station" class="rounded-xl border-border/70 shadow-sm">
+    <CardHeader>
+      <CardTitle class="flex items-center gap-2 text-base font-semibold">
+        <AlertCircle class="size-4 text-primary" />
+        {{ t('issues.title') }}
+      </CardTitle>
+      <CardDescription>{{ t('issues.intro') }}</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <IssueList embedded :issues="modelIssues" :empty="t('ops.noIssuesAllMatch')" />
+    </CardContent>
+  </Card>
+
+  <Empty v-else :reason="t('pane.noModel')" />
 </template>

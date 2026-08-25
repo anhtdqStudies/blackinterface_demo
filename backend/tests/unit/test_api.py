@@ -164,6 +164,9 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         # questions and prose, never a reading, so there is no station state to
         # lose here and no path from it to OneATS.
         "DELETE /api/conversations/{conversation_id}",
+        # Local operator workflow: mark an incident as handled (Module B).
+        # Writes `incident_dismissals` in SQLite only — not OAAlarm.Ack* (I1).
+        "POST /api/incidents/{incident_id}/dismiss",
     }
 
 

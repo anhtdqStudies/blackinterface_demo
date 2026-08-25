@@ -1,23 +1,17 @@
 <script setup lang="ts">
 /**
  * What one device is doing, in the operator's vocabulary.
- *
- * **No NodeId, no raw Dbpos, no logical-node name** (ADR-0014 §8, screens.md §1,
- * `check.py` §5). Those belong to the `binding` pane on the engineer surface.
- * They were here until GD 1.5 lô 3 because the pane this replaced was written
- * before the rule existed; keeping them would have put protocol detail on the
- * screen somebody reads while switching a live station, where every extra field
- * is one more thing between them and the answer.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
-import type { BayDetail, Device, Quality, SwitchState } from '@/api/client'
-import { stateColor } from '@/components/diagram/state'
+import { ChevronRight, Cpu } from 'lucide-vue-next'
+import type { BayDetail, Device } from '@/api/client'
+import { cn } from '@/lib/utils'
 import { bayScope, opsPath } from '@/router'
 import { useLiveStore } from '@/stores/live'
-import Field from '@/ui/Field.vue'
-import Panel from '@/ui/Panel.vue'
+import SwitchStateBadge from '@/ui/SwitchStateBadge.vue'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 
 const props = defineProps<{ bay: BayDetail; device: Device }>()
 defineEmits<{ select: [deviceId: string] }>()
@@ -25,11 +19,11 @@ defineEmits<{ select: [deviceId: string] }>()
 const { t } = useI18n()
 const live = useLiveStore()
 
-function stateOf(device: Device): SwitchState {
+function stateOf(device: Device) {
   return live.deviceLive(device.id)?.state ?? device.state
 }
 
-function qualityOf(device: Device): Quality {
+function qualityOf(device: Device) {
   return live.deviceLive(device.id)?.quality ?? device.quality
 }
 
@@ -40,45 +34,97 @@ const timestamp = computed(
 </script>
 
 <template>
-  <div>
-    <Panel :title="t('device.title')">
-      <Field :label="t('device.evnName')">
-        <b>{{ device.name }}</b>
-      </Field>
-      <Field :label="t('device.bay')" :numeric="false">
-        <RouterLink :to="opsPath(bayScope(bay.id))">{{ bay.id }}</RouterLink>
-        — {{ bay.bay_type }}
-      </Field>
-      <Field :label="t('device.role')">{{ device.role }}</Field>
-      <Field :label="t('device.state')">
-        <b :style="{ color: stateColor(stateOf(device)) }">
-          {{ t(`state.${stateOf(device)}`) }}
-        </b>
-      </Field>
-      <Field :label="t('device.quality')">{{ qualityOf(device) }}</Field>
-      <Field :label="t('device.timestamp')">{{ timestamp ?? t('common.dash') }}</Field>
-      <Field :label="t('device.connectsTo')" :numeric="false">
-        <div v-for="node in device.terminals" :key="node">{{ node }}</div>
-      </Field>
-    </Panel>
+  <div class="flex w-full flex-col gap-4">
+    <Card class="rounded-xl border-border/70 shadow-sm">
+      <CardHeader class="pb-3">
+        <CardTitle class="text-base font-semibold">{{ t('device.title') }}</CardTitle>
+      </CardHeader>
+      <CardContent class="grid gap-4 sm:grid-cols-2">
+        <div>
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.evnName') }}
+          </p>
+          <p class="mt-0.5 text-sm font-semibold">{{ device.name }}</p>
+        </div>
+        <div>
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.role') }}
+          </p>
+          <p class="mt-0.5 text-sm">{{ device.role }}</p>
+        </div>
+        <div>
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.bay') }}
+          </p>
+          <p class="mt-0.5 text-sm">
+            <RouterLink :to="opsPath(bayScope(bay.id))" class="text-primary hover:underline">
+              {{ bay.id }}
+            </RouterLink>
+            — {{ bay.bay_type }}
+          </p>
+        </div>
+        <div>
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.state') }}
+          </p>
+          <div class="mt-1">
+            <SwitchStateBadge :state="stateOf(device)" :quality="qualityOf(device)" />
+          </div>
+        </div>
+        <div>
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.timestamp') }}
+          </p>
+          <p class="mt-0.5 font-mono text-sm tabular-nums">
+            {{ timestamp ?? t('common.dash') }}
+          </p>
+        </div>
+        <div v-if="device.terminals.length" class="sm:col-span-2">
+          <p class="text-2xs tracking-wide text-muted-foreground uppercase">
+            {{ t('device.connectsTo') }}
+          </p>
+          <ul class="mt-1 space-y-0.5 font-mono text-2xs text-muted-foreground">
+            <li v-for="node in device.terminals" :key="node">{{ node }}</li>
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
 
-    <Panel :title="t('device.inBay', { bay: bay.id, count: bay.devices.length })">
-      <button
-        v-for="other in bay.devices"
-        :key="other.id"
-        type="button"
-        class="mb-1 flex w-full items-center justify-between gap-2 rounded-[var(--radius)] border border-line px-2 py-1 text-left text-sm hover:border-accent"
-        :class="{ 'border-accent bg-panel-2': other.id === device.id }"
-        @click="$emit('select', other.id)"
-      >
-        <span>
-          {{ other.name }}
-          <small class="text-dim">{{ other.role }}</small>
-        </span>
-        <span class="text-2xs whitespace-nowrap" :style="{ color: stateColor(stateOf(other)) }">
-          {{ t(`state.${stateOf(other)}`) }}
-        </span>
-      </button>
-    </Panel>
+    <Card class="rounded-xl border-border/70 shadow-sm">
+      <CardHeader class="pb-3">
+        <CardTitle class="flex items-center gap-2 text-sm font-semibold">
+          <Cpu class="size-4 text-primary" />
+          {{ t('device.inBay', { bay: bay.id, count: bay.devices.length }) }}
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="space-y-2 pt-0">
+        <button
+          v-for="other in bay.devices"
+          :key="other.id"
+          type="button"
+          class="group flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors"
+          :class="
+            cn(
+              other.id === device.id
+                ? 'border-primary/50 bg-primary/5'
+                : 'border-border/60 bg-muted/10 hover:border-primary/40 hover:bg-muted/25',
+            )
+          "
+          @click="$emit('select', other.id)"
+        >
+          <span>
+            <span class="font-medium text-foreground">{{ other.name }}</span>
+            <span class="ml-2 text-2xs text-muted-foreground">{{ other.role }}</span>
+          </span>
+          <span class="flex shrink-0 items-center gap-2">
+            <SwitchStateBadge :state="stateOf(other)" />
+            <ChevronRight
+              v-if="other.id !== device.id"
+              class="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+            />
+          </span>
+        </button>
+      </CardContent>
+    </Card>
   </div>
 </template>

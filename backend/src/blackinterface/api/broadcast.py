@@ -27,13 +27,22 @@ class Cadence(StrEnum):
     """A rhythm on the shared stream. The value is the SSE event name."""
 
     STATE = "state"
+    ALARM = "alarm"
     MEASUREMENT = "measurement"
     LINK = "link"
 
 
 #: Emission order when more than one cadence is pending. State first, always: a
-#: breaker that moved outranks a load that drifted by half a percent.
-CADENCE_ORDER: tuple[Cadence, ...] = (Cadence.STATE, Cadence.MEASUREMENT, Cadence.LINK)
+#: breaker that moved outranks a load that drifted by half a percent. Alarm sits
+#: immediately behind it and ahead of measurement, and unlike measurement it is
+#: never throttled (`api/throttle.py`) — dropping a reading loses a number that
+#: will be resent, dropping an alarm loses the event itself.
+CADENCE_ORDER: tuple[Cadence, ...] = (
+    Cadence.STATE,
+    Cadence.ALARM,
+    Cadence.MEASUREMENT,
+    Cadence.LINK,
+)
 
 
 class Listener:

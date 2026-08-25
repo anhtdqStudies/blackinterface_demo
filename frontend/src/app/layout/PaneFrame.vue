@@ -18,11 +18,15 @@ const minimalChrome = computed(() => props.pane.params?.chrome === 'minimal')
 </script>
 
 <template>
+  <div v-if="minimalChrome" class="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+    <slot />
+  </div>
+
   <Card
+    v-else
     class="flex h-full min-h-0 min-w-0 flex-col gap-0 rounded-lg border-border py-0 shadow-none"
   >
     <CardHeader
-      v-if="!minimalChrome"
       class="flex shrink-0 flex-row items-center gap-2 border-b border-border px-3 py-2"
     >
       <span class="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
@@ -33,7 +37,7 @@ const minimalChrome = computed(() => props.pane.params?.chrome === 'minimal')
       </SysBadge>
     </CardHeader>
 
-    <div class="min-h-0 flex-1 overflow-auto" :class="minimalChrome ? 'p-0' : 'p-3'">
+    <div class="min-h-0 flex-1 overflow-auto p-3">
       <slot />
     </div>
   </Card>

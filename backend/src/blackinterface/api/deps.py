@@ -17,16 +17,19 @@ from pydantic_ai.models import Model
 from blackinterface.agent.harness import model_for
 from blackinterface.agent.provider import LLMChoice, choice_from_settings
 from blackinterface.agent.session import Conversations
+from blackinterface.api.alarmsource import AlarmStore
 from blackinterface.api.conversations import StoredConversations
 from blackinterface.api.source import StationStore
 from blackinterface.config import Settings, get_settings
 from blackinterface.store.assistant import AssistantRepository
 from blackinterface.store.conversations import ConversationRepository
 from blackinterface.store.db import Database
+from blackinterface.store.incident_dismissals import IncidentDismissalRepository
 
 settings: Settings = get_settings()
 database: Database = Database(settings.db_path)
 store: StationStore = StationStore(settings, database)
+incident_dismissals: IncidentDismissalRepository = IncidentDismissalRepository(database)
 #: Transcripts survive a restart (ADR-0022 §2). Built over `database` at import
 #: like the store, so a test that swaps the database through `use()` gets a
 #: conversation store pointing at the same temporary file.
@@ -51,8 +54,23 @@ def get_database() -> Database:
     return database
 
 
+def get_incident_dismissals() -> IncidentDismissalRepository:
+    return incident_dismissals
+
+
 def get_conversations() -> Conversations:
     return conversations
+
+
+def get_alarms() -> AlarmStore:
+    """What the station is complaining about.
+
+    Lives on the station store rather than beside it, so swapping the store in a
+    test brings its alarms with it — but stays a *separate* object inside,
+    because alarms arrive on their own channels and their own rhythm (ADR-0026)
+    and must not be tied to a graph rebuild (ADR-0012 rule 1).
+    """
+    return store.alarms
 
 
 def get_assistant_repository() -> AssistantRepository:
@@ -126,10 +144,18 @@ def use(
     new_conversations: Conversations | None = None,
 ) -> None:
     """Point the application at a different store. For tests and for nothing else."""
-    global store, database, conversations, _model, _model_built, _provider_pinned
+    global \
+        store, \
+        database, \
+        conversations, \
+        incident_dismissals, \
+        _model, \
+        _model_built, \
+        _provider_pinned
     store = new_store
     if new_database is not None:
         database = new_database
+        incident_dismissals = IncidentDismissalRepository(database)
         # Rebuild rather than leave it pointing at the previous file. A test
         # that swaps in a temp database and then reads a transcript would
         # otherwise be reading the developer's own, which is both a wrong test

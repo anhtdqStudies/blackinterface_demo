@@ -1,0 +1,1538 @@
+{
+  "_source": "DEMO_SAS v654 via opc.tcp://127.0.0.1:48050, OAAlarm.GetActiveAlarm",
+  "_measured": "2026-08-13",
+  "_reproduce": "python tools/probe_dataserver.py --alarms",
+  "_note": "The body whose actor is non-empty is the regression case: an operator toggled CB 431 through OneATS Data Editor, the actor field filled, and the previous decoder - which treated that field as 4 pad bytes - raised OverflowError parsing the timestamps behind it. Keep that row.",
+  "bodies": [
+    {
+      "body_hex": "14000000dbd81df0fcaaba45b97249b1494e9c640000006f00000000010100001e000000494e53554c4154494f4e28415431202d2053454c333837452f383754312968010c00000042696e61727920416c61726d0102b10401030200110000004154312e46383754312e414e4e2e4c4544170000004154312e46383754312e414e4e2e4c45442e4c4544323300000000d0eb96a92f2add019bfec5a92f2add01010100170000004154312e46383754312e414e4e2e4c45442e4c45443233",
+      "expect": {
+        "event_id": "dbd81df0fcaaba45b97249b1494e9c640000006f",
+        "seq": 0,
+        "message": "INSULATION(AT1 - SEL387E/87T1)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "AT1.F87T1.ANN.LED",
+        "source_point": "AT1.F87T1.ANN.LED.LED23",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.113769+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "1400000084667b42cc978f43bbcecdc25105ec4a0000006800000000010100001e00000046414e2047524f555020312052554e4e494e4728424159202d204154312968010c00000042696e61727920416c61726d0102b10401030200080000004154312e46414e310e0000004154312e46414e312e46616e5374000000005dd796a92f2add0144d8c5a92f2add010101040e0000004154312e46414e312e46616e5374",
+      "expect": {
+        "event_id": "84667b42cc978f43bbcecdc25105ec4a00000068",
+        "seq": 0,
+        "message": "FAN GROUP 1 RUNNING(BAY - AT1)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "AT1.FAN1",
+        "source_point": "AT1.FAN1.FanSt",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.804745+00:00",
+        "t_change": "2026-08-12T07:53:29.112787+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "140000004ab961a3c06c4240b4b4cc54d9a7e1b90000006900000000010100001e00000046414e2047524f555020312052554e4e494e4728424159202d204154312968010c00000042696e61727920416c61726d0102b10401030200080000004154312e46414e320e0000004154312e46414e322e46616e537400000000d0eb96a92f2add0144d8c5a92f2add010101040e0000004154312e46414e322e46616e5374",
+      "expect": {
+        "event_id": "4ab961a3c06c4240b4b4cc54d9a7e1b900000069",
+        "seq": 0,
+        "message": "FAN GROUP 1 RUNNING(BAY - AT1)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "AT1.FAN2",
+        "source_point": "AT1.FAN2.FanSt",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.112787+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "14000000d75b55121b86204283d801fa350851280000007605000000010100002600000054414e4b204f494c204c4556454c20414c41524d28424159202d2024284261794e616d65292968010c00000042696e61727920416c61726d0102b10401030200080000004154312e59505452120000004154312e595054522e4f696c4c6576416c6d00000000d0eb96a92f2add01484dc6a92f2add01010104120000004154312e595054522e4f696c4c6576416c6d",
+      "expect": {
+        "event_id": "d75b55121b86204283d801fa3508512800000076",
+        "seq": 5,
+        "message": "TANK OIL LEVEL ALARM(BAY - $(BayName))",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "AT1.YPTR",
+        "source_point": "AT1.YPTR.OilLevAlm",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.115783+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "140000006768562197407341a67be0c62e6399bc000000740100000001010000200000004f494c2054454d5020205452495028424159202d2024284261794e616d65292952030c00000042696e61727920416c61726d0102b10401030200080000004154312e59505452110000004154312e595054522e4f696c546d70547200000000d0eb96a92f2add01484dc6a92f2add01010101110000004154312e595054522e4f696c546d705472",
+      "expect": {
+        "event_id": "6768562197407341a67be0c62e6399bc00000074",
+        "seq": 1,
+        "message": "OIL TEMP  TRIP(BAY - $(BayName))",
+        "severity_raw": 850,
+        "category": "Binary Alarm",
+        "source_object": "AT1.YPTR",
+        "source_point": "AT1.YPTR.OilTmpTr",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.115783+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "140000002526b16c0c5e204da3b7614c125914f5000000e703000000010100002200000052454c415920494e2047524f5550203128313132202d2053454c3435312f4243552968010c00000042696e61727920416c61726d0102b104010302000e0000004530352e4243552e414e4e2e5354120000004530352e4243552e414e4e2e53542e53473100000000d0eb96a92f2add0188f4e6a92f2add01010104120000004530352e4243552e414e4e2e53542e534731",
+      "expect": {
+        "event_id": "2526b16c0c5e204da3b7614c125914f5000000e7",
+        "seq": 3,
+        "message": "RELAY IN GROUP 1(112 - SEL451/BCU)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "E05.BCU.ANN.ST",
+        "source_point": "E05.BCU.ANN.ST.SG1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.329780+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "140000002dfd5cc4390c014aae779f90dc2e134b000000f805000000010100002200000052454c415920494e2047524f5550203128313331202d2053454c3335312f4636372968010c00000042696e61727920416c61726d0102b104010302000e0000004530372e4636372e414e4e2e5354120000004530372e4636372e414e4e2e53542e53473100000000d0eb96a92f2add014f45e8a92f2add01010104120000004530372e4636372e414e4e2e53542e534731",
+      "expect": {
+        "event_id": "2dfd5cc4390c014aae779f90dc2e134b000000f8",
+        "seq": 5,
+        "message": "RELAY IN GROUP 1(131 - SEL351/F67)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "E07.F67.ANN.ST",
+        "source_point": "E07.F67.ANN.ST.SG1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.338401+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "140000001511d6981db8cd4190d1ed8a1909c9af000000fa03000000010100002400000052454c415920494e2047524f5550203128454242202d2053454c343837422f383742332968010c00000042696e61727920416c61726d0102b10401030200100000004542422e46383742332e414e4e2e5354140000004542422e46383742332e414e4e2e53542e53473100000000d0eb96a92f2add01dfc6e8a92f2add01010104140000004542422e46383742332e414e4e2e53542e534731",
+      "expect": {
+        "event_id": "1511d6981db8cd4190d1ed8a1909c9af000000fa",
+        "seq": 3,
+        "message": "RELAY IN GROUP 1(EBB - SEL487B/87B3)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "EBB.F87B3.ANN.ST",
+        "source_point": "EBB.F87B3.ANN.ST.SG1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.341718+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "14000000c94099e9fc4a8a4199106de271af4d12000000fb05000000010100002d00000052454c41592054494d452053594e4348524f5a4154494f4e204641494c28202d2053454c323434302f4243552968010c00000042696e61727920416c61726d0102b104010302000e000000494f2e424355312e414e4e2e535417000000494f2e424355312e414e4e2e53542e54696d654661696c000000001750e9a92f2add011750e9a92f2add0101010417000000494f2e424355312e414e4e2e53542e54696d654661696c",
+      "expect": {
+        "event_id": "c94099e9fc4a8a4199106de271af4d12000000fb",
+        "seq": 5,
+        "message": "RELAY TIME SYNCHROZATION FAIL( - SEL2440/BCU)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "IO.BCU1.ANN.ST",
+        "source_point": "IO.BCU1.ANN.ST.TimeFail",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:29.345231+00:00",
+        "t_change": "2026-08-12T07:53:29.345231+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "1400000046a32cf9ff37e145b952eda601cc1c3a000000fc05000000010100002d00000052454c41592054494d452053594e4348524f5a4154494f4e204641494c28202d2053454c323434302f494f312968010c00000042696e61727920416c61726d0102b104010302000e000000494f2e424355322e414e4e2e535417000000494f2e424355322e414e4e2e53542e54696d654661696c00000000a163e9a92f2add01a163e9a92f2add0101010417000000494f2e424355322e414e4e2e53542e54696d654661696c",
+      "expect": {
+        "event_id": "46a32cf9ff37e145b952eda601cc1c3a000000fc",
+        "seq": 5,
+        "message": "RELAY TIME SYNCHROZATION FAIL( - SEL2440/IO1)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "IO.BCU2.ANN.ST",
+        "source_point": "IO.BCU2.ANN.ST.TimeFail",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:29.345731+00:00",
+        "t_change": "2026-08-12T07:53:29.345731+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "1400000015544cf47f563841a174909fb0a7e8b7000000fe05000000010100002f00000052454c41592054494d452053594e4348524f5a4154494f4e204641494c28343331202d2053454c3435312f4243552968010c00000042696e61727920416c61726d0102b104010302000e0000004a30312e4243552e414e4e2e5354170000004a30312e4243552e414e4e2e53542e54696d654661696c000000002977e9a92f2add012977e9a92f2add01010104170000004a30312e4243552e414e4e2e53542e54696d654661696c",
+      "expect": {
+        "event_id": "15544cf47f563841a174909fb0a7e8b7000000fe",
+        "seq": 5,
+        "message": "RELAY TIME SYNCHROZATION FAIL(431 - SEL451/BCU)",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "J01.BCU.ANN.ST",
+        "source_point": "J01.BCU.ANN.ST.TimeFail",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:29.346231+00:00",
+        "t_change": "2026-08-12T07:53:29.346231+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "1400000088c93cd9d9871044a5e79f5b5ad80e850000000205000000010100001200000053554253544154494f4e20434f4e54524f4c68010c00000042696e61727920416c61726d0102b104010302000b000000537562732e53797374656d16000000537562732e53797374656d2e5375627343746c4c657600000000796ab1a92f2add01796ab1a92f2add0101010416000000537562732e53797374656d2e5375627343746c4c6576",
+      "expect": {
+        "event_id": "88c93cd9d9871044a5e79f5b5ad80e8500000002",
+        "seq": 5,
+        "message": "SUBSTATION CONTROL",
+        "severity_raw": 360,
+        "category": "Binary Alarm",
+        "source_object": "Subs.System",
+        "source_point": "Subs.System.SubsCtlLev",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.978904+00:00",
+        "t_change": "2026-08-12T07:53:28.978904+00:00",
+        "value_type": "Boolean",
+        "value": true
+      }
+    },
+    {
+      "body_hex": "1400000021fbdfe5dd97814e8afc1f34f743a1cd00000004050000000101000014000000464143303020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740e00000041432e506f7353742e46414330300000000015b096a92f2add01d07ab2a92f2add010c060000003020284f4e29040e00000041432e506f7353742e4641433030",
+      "expect": {
+        "event_id": "21fbdfe5dd97814e8afc1f34f743a1cd00000004",
+        "seq": 5,
+        "message": "FAC00 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC00",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:28.985876+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000005e9006ea9a4c4f4bb1afd0c63470915e0000003505000000010100001500000046414331303120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303100000000225095a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313031",
+      "expect": {
+        "event_id": "5e9006ea9a4c4f4bb1afd0c63470915e00000035",
+        "seq": 5,
+        "message": "FAC101 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC101",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.794729+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000d581e2d8a3b3244c8abe9a3d9609c8fe0000002e05000000010100001500000046414331303220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303200000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313032",
+      "expect": {
+        "event_id": "d581e2d8a3b3244c8abe9a3d9609c8fe0000002e",
+        "seq": 5,
+        "message": "FAC102 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC102",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000009a309ab5f6e3a446b91b0070e03956140000002d05000000010100001500000046414331303320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303300000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313033",
+      "expect": {
+        "event_id": "9a309ab5f6e3a446b91b0070e03956140000002d",
+        "seq": 5,
+        "message": "FAC103 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC103",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000a0a5531b76f2e74e9b4996a0b9f54a320000002305000000010100001500000046414331303420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433130340000000049ad92a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313034",
+      "expect": {
+        "event_id": "a0a5531b76f2e74e9b4996a0b9f54a3200000023",
+        "seq": 5,
+        "message": "FAC104 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC104",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.777453+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000049c88583382b484a9cdcb530706edc980000002605000000010100001500000046414331303520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303500000000b77093a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313035",
+      "expect": {
+        "event_id": "49c88583382b484a9cdcb530706edc9800000026",
+        "seq": 5,
+        "message": "FAC105 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC105",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.782456+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000b26372d4f0cf854fa5118aa0fed3033e0000002a05000000010100001500000046414331303620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303600000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313036",
+      "expect": {
+        "event_id": "b26372d4f0cf854fa5118aa0fed3033e0000002a",
+        "seq": 5,
+        "message": "FAC106 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC106",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000009c863aa4bdc91c40951037060636f8c80000002c05000000010100001500000046414331303720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303700000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313037",
+      "expect": {
+        "event_id": "9c863aa4bdc91c40951037060636f8c80000002c",
+        "seq": 5,
+        "message": "FAC107 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC107",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000eedec2a02e2937469b57af51317b161b0000002905000000010100001500000046414331303820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433130380000000077ec93a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313038",
+      "expect": {
+        "event_id": "eedec2a02e2937469b57af51317b161b00000029",
+        "seq": 5,
+        "message": "FAC108 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC108",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.785624+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000000419cd03678e6942a8888144b701143a0000002b05000000010100001500000046414331303920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331303900000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313039",
+      "expect": {
+        "event_id": "0419cd03678e6942a8888144b701143a0000002b",
+        "seq": 5,
+        "message": "FAC109 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC109",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000061f3f8e4e89de94a9a3b9b3b53a4bba600000005050000000101000014000000464143313120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740e00000041432e506f7353742e46414331310000000015b096a92f2add01658eb2a92f2add010c060000003020284f4e29040e00000041432e506f7353742e4641433131",
+      "expect": {
+        "event_id": "61f3f8e4e89de94a9a3b9b3b53a4bba600000005",
+        "seq": 5,
+        "message": "FAC11 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC11",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:28.986378+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000016e7fb72beb5d842aa4b7373353978730000002505000000010100001500000046414331313020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313000000000952293a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313130",
+      "expect": {
+        "event_id": "16e7fb72beb5d842aa4b73733539787300000025",
+        "seq": 5,
+        "message": "FAC110 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC110",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.780456+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000aa1f0b1fba4bd14ea596cb939c4301e00000002f05000000010100001500000046414331313120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313100000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313131",
+      "expect": {
+        "event_id": "aa1f0b1fba4bd14ea596cb939c4301e00000002f",
+        "seq": 5,
+        "message": "FAC111 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC111",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f89e770a7e42ac46ad0c4d23b83a84bf0000002705000000010100001500000046414331313220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433131320000000011b293a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313132",
+      "expect": {
+        "event_id": "f89e770a7e42ac46ad0c4d23b83a84bf00000027",
+        "seq": 5,
+        "message": "FAC112 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC112",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.784129+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000007f48a5dd1ef6ad48b0f2f3e84ffe25f90000003005000000010100001500000046414331313320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313300000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313133",
+      "expect": {
+        "event_id": "7f48a5dd1ef6ad48b0f2f3e84ffe25f900000030",
+        "seq": 5,
+        "message": "FAC113 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC113",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000b9a666a9f84b944aa1f04cbc65eb8e510000003205000000010100001500000046414331313420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313400000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313134",
+      "expect": {
+        "event_id": "b9a666a9f84b944aa1f04cbc65eb8e5100000032",
+        "seq": 5,
+        "message": "FAC114 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC114",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000087e6153241db444a0cd43993487c5710000003105000000010100001500000046414331313520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313500000000a81394a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313135",
+      "expect": {
+        "event_id": "087e6153241db444a0cd43993487c57100000031",
+        "seq": 5,
+        "message": "FAC115 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC115",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.786628+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000088566f2778f23a428323a0afa7b958310000002405000000010100001500000046414331313620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313600000000ffe792a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313136",
+      "expect": {
+        "event_id": "88566f2778f23a428323a0afa7b9583100000024",
+        "seq": 5,
+        "message": "FAC116 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC116",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.778956+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000ba1c7b9a59ad1e46b193a6aa81065acd0000003705000000010100001500000046414331313720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313700000000aa6395a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313137",
+      "expect": {
+        "event_id": "ba1c7b9a59ad1e46b193a6aa81065acd00000037",
+        "seq": 5,
+        "message": "FAC117 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC117",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.795229+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000010b487f58f0b1249a9abf8d1d03990f70000002805000000010100001500000046414331313820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433131380000000077ec93a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313138",
+      "expect": {
+        "event_id": "10b487f58f0b1249a9abf8d1d03990f700000028",
+        "seq": 5,
+        "message": "FAC118 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC118",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.785624+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000dc6efa7a1e0e174a99b08dd675aa88a70000003b05000000010100001500000046414331313920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331313900000000979c96a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313139",
+      "expect": {
+        "event_id": "dc6efa7a1e0e174a99b08dd675aa88a70000003b",
+        "seq": 5,
+        "message": "FAC119 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC119",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803240+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000a44da4e072923c4cad7e9c5b4403434d00000007050000000101000014000000464143313220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740e00000041432e506f7353742e46414331320000000015b096a92f2add01658eb2a92f2add010c060000003020284f4e29040e00000041432e506f7353742e4641433132",
+      "expect": {
+        "event_id": "a44da4e072923c4cad7e9c5b4403434d00000007",
+        "seq": 5,
+        "message": "FAC12 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC12",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:28.986378+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000ef9952da966d634e9662f4ebcbbc639f0000003c05000000010100001500000046414331323020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323000000000979c96a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313230",
+      "expect": {
+        "event_id": "ef9952da966d634e9662f4ebcbbc639f0000003c",
+        "seq": 5,
+        "message": "FAC120 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC120",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803240+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f0557246b70eb944bccc7a9efcb2615c0000003a05000000010100001500000046414331323120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323100000000a26296a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313231",
+      "expect": {
+        "event_id": "f0557246b70eb944bccc7a9efcb2615c0000003a",
+        "seq": 5,
+        "message": "FAC121 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC121",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.801757+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000fc41e5c5efc1f546ac040df5679fae7e0000003d05000000010100001500000046414331323220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323200000000979c96a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313232",
+      "expect": {
+        "event_id": "fc41e5c5efc1f546ac040df5679fae7e0000003d",
+        "seq": 5,
+        "message": "FAC122 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC122",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803240+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000040379a0cf67ffb42be441031263d6a230000003e05000000010100001500000046414331323320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323300000000979c96a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313233",
+      "expect": {
+        "event_id": "40379a0cf67ffb42be441031263d6a230000003e",
+        "seq": 5,
+        "message": "FAC123 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC123",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803240+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000007edcef789dafeb478c33b35c8c0216870000003605000000010100001500000046414331323420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323400000000225095a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313234",
+      "expect": {
+        "event_id": "7edcef789dafeb478c33b35c8c02168700000036",
+        "seq": 5,
+        "message": "FAC124 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC124",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.794729+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000d7e8b3a735cd364788f385d92115b1720000003405000000010100001500000046414331323520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433132350000000065fe94a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313235",
+      "expect": {
+        "event_id": "d7e8b3a735cd364788f385d92115b17200000034",
+        "seq": 5,
+        "message": "FAC125 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC125",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.792637+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000072074090efa83147b6d4f702a977a4890000003f05000000010100001500000046414331323620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433132360000000015b096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313236",
+      "expect": {
+        "event_id": "72074090efa83147b6d4f702a977a4890000003f",
+        "seq": 5,
+        "message": "FAC126 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC126",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000009f489418d61fb646bf53592a477475490000003305000000010100001500000046414331323720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414331323700000000542794a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313237",
+      "expect": {
+        "event_id": "9f489418d61fb646bf53592a4774754900000033",
+        "seq": 5,
+        "message": "FAC127 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC127",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.787131+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000002f2fe22ead55aa4da23dab2285bfe9070000004005000000010100001500000046414331323820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433132380000000015b096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313238",
+      "expect": {
+        "event_id": "2f2fe22ead55aa4da23dab2285bfe90700000040",
+        "seq": 5,
+        "message": "FAC128 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC128",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000006014288060f3c042b723b9c116601a200000004105000000010100001500000046414331323920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433132390000000015b096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313239",
+      "expect": {
+        "event_id": "6014288060f3c042b723b9c116601a2000000041",
+        "seq": 5,
+        "message": "FAC129 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC129",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000ec2c5accb822e14980022007fac89c110000003905000000010100001500000046414331333020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e464143313330000000005f0096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313330",
+      "expect": {
+        "event_id": "ec2c5accb822e14980022007fac89c1100000039",
+        "seq": 5,
+        "message": "FAC130 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC130",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.799241+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000087712774bfcd0044bfacf2c5d6cb1daf0000004205000000010100001500000046414331333120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433133310000000015b096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313331",
+      "expect": {
+        "event_id": "87712774bfcd0044bfacf2c5d6cb1daf00000042",
+        "seq": 5,
+        "message": "FAC131 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC131",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000d07d64d9a48a514aaaa64adb18ddb0620000004305000000010100001500000046414331333220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433133320000000015b096a92f2add01fe73c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143313332",
+      "expect": {
+        "event_id": "d07d64d9a48a514aaaa64adb18ddb06200000043",
+        "seq": 5,
+        "message": "FAC132 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC132",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.110220+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000004cb2761629ae5d418f4fdbfb2dfeb4530000005205000000010100001500000046414332303120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230310000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323031",
+      "expect": {
+        "event_id": "4cb2761629ae5d418f4fdbfb2dfeb45300000052",
+        "seq": 5,
+        "message": "FAC201 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC201",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000005c7c927ea3b9ac4598fb696fd20bd84b0000005005000000010100001500000046414332303220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230320000000052c595a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323032",
+      "expect": {
+        "event_id": "5c7c927ea3b9ac4598fb696fd20bd84b00000050",
+        "seq": 5,
+        "message": "FAC202 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC202",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.797729+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000cb6314c894aff24290076d585f1655990000005105000000010100001500000046414332303320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332303300000000118996a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323033",
+      "expect": {
+        "event_id": "cb6314c894aff24290076d585f16559900000051",
+        "seq": 5,
+        "message": "FAC203 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC203",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.802740+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f35151bae208724ab362283999db6ccd0000004d05000000010100001500000046414332303420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332303400000000804e94a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323034",
+      "expect": {
+        "event_id": "f35151bae208724ab362283999db6ccd0000004d",
+        "seq": 5,
+        "message": "FAC204 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC204",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.788134+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000098ec118f1948042a85c76575b12056a0000005305000000010100001500000046414332303520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230350000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323035",
+      "expect": {
+        "event_id": "098ec118f1948042a85c76575b12056a00000053",
+        "seq": 5,
+        "message": "FAC205 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC205",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000003c21cc393c784283cd58ccbf6121920000005405000000010100001500000046414332303620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230360000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323036",
+      "expect": {
+        "event_id": "003c21cc393c784283cd58ccbf61219200000054",
+        "seq": 5,
+        "message": "FAC206 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC206",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000cc1057d9f43819469005b61359f673ac0000005505000000010100001500000046414332303720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230370000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323037",
+      "expect": {
+        "event_id": "cc1057d9f43819469005b61359f673ac00000055",
+        "seq": 5,
+        "message": "FAC207 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC207",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000b4758167da936443a6ee9107483fc93a0000005605000000010100001500000046414332303820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433230380000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323038",
+      "expect": {
+        "event_id": "b4758167da936443a6ee9107483fc93a00000056",
+        "seq": 5,
+        "message": "FAC208 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC208",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000009023b818e2bb724199cd7394f8d534c90000004605000000010100001500000046414332303920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332303900000000238692a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323039",
+      "expect": {
+        "event_id": "9023b818e2bb724199cd7394f8d534c900000046",
+        "seq": 5,
+        "message": "FAC209 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC209",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.776451+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000074d4482b30b5a843b03e8499a600a5e000000006050000000101000014000000464143323120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740e00000041432e506f7353742e46414332310000000015b096a92f2add01658eb2a92f2add010c060000003020284f4e29040e00000041432e506f7353742e4641433231",
+      "expect": {
+        "event_id": "74d4482b30b5a843b03e8499a600a5e000000006",
+        "seq": 5,
+        "message": "FAC21 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC21",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:28.986378+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f8054c5e8a7f1940a9dbde54b5ed04460000005705000000010100001500000046414332313020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231300000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323130",
+      "expect": {
+        "event_id": "f8054c5e8a7f1940a9dbde54b5ed044600000057",
+        "seq": 5,
+        "message": "FAC210 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC210",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000a3441f72b9420f4397036c65caf758cc0000005805000000010100001500000046414332313120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231310000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323131",
+      "expect": {
+        "event_id": "a3441f72b9420f4397036c65caf758cc00000058",
+        "seq": 5,
+        "message": "FAC211 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC211",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000798ded8da8c24140972a73f5631a27b00000005905000000010100001500000046414332313220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231320000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323132",
+      "expect": {
+        "event_id": "798ded8da8c24140972a73f5631a27b000000059",
+        "seq": 5,
+        "message": "FAC212 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC212",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000c231b8b11441c947bd0f88466b41d31c0000005a05000000010100001500000046414332313320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231330000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323133",
+      "expect": {
+        "event_id": "c231b8b11441c947bd0f88466b41d31c0000005a",
+        "seq": 5,
+        "message": "FAC213 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC213",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000068e5d0be38428544bbca382203ac16850000005b05000000010100001500000046414332313420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231340000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323134",
+      "expect": {
+        "event_id": "68e5d0be38428544bbca382203ac16850000005b",
+        "seq": 5,
+        "message": "FAC214 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC214",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000000b1b69385434404b92e5027ab0e96e5f0000005c05000000010100001500000046414332313520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231350000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323135",
+      "expect": {
+        "event_id": "0b1b69385434404b92e5027ab0e96e5f0000005c",
+        "seq": 5,
+        "message": "FAC215 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC215",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000008be57c92b900514f8f8c6ddf65fc9f9a0000005d05000000010100001500000046414332313620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231360000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323136",
+      "expect": {
+        "event_id": "8be57c92b900514f8f8c6ddf65fc9f9a0000005d",
+        "seq": 5,
+        "message": "FAC216 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC216",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000001caee666d7d6de499c4809e40787c2b80000005e05000000010100001500000046414332313720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231370000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323137",
+      "expect": {
+        "event_id": "1caee666d7d6de499c4809e40787c2b80000005e",
+        "seq": 5,
+        "message": "FAC217 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC217",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000a0164db57fbe7244821d9db278b5d5430000004805000000010100001500000046414332313820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332313800000000f0c092a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323138",
+      "expect": {
+        "event_id": "a0164db57fbe7244821d9db278b5d54300000048",
+        "seq": 5,
+        "message": "FAC218 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC218",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.777956+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000005b4679954d8eab4d89e8725b349039b40000005f05000000010100001500000046414332313920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433231390000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323139",
+      "expect": {
+        "event_id": "5b4679954d8eab4d89e8725b349039b40000005f",
+        "seq": 5,
+        "message": "FAC219 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC219",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000ac70847b6f39ed429256259542e6eaed00000008050000000101000014000000464143323220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740e00000041432e506f7353742e46414332320000000015b096a92f2add01658eb2a92f2add010c060000003020284f4e29040e00000041432e506f7353742e4641433232",
+      "expect": {
+        "event_id": "ac70847b6f39ed429256259542e6eaed00000008",
+        "seq": 5,
+        "message": "FAC22 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC22",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:28.986378+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000057b1886c20cab4e8052bb03c10187830000004705000000010100001500000046414332323020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232300000000049ad92a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323230",
+      "expect": {
+        "event_id": "057b1886c20cab4e8052bb03c101878300000047",
+        "seq": 5,
+        "message": "FAC220 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC220",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.777453+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000005863fc7322061f4592a1919d8d9436840000004b05000000010100001500000046414332323120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332323100000000a74993a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323231",
+      "expect": {
+        "event_id": "5863fc7322061f4592a1919d8d9436840000004b",
+        "seq": 5,
+        "message": "FAC221 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC221",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.781456+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000080c615ead2f2554ea4fc93603990c42e0000006005000000010100001500000046414332323220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232320000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323232",
+      "expect": {
+        "event_id": "80c615ead2f2554ea4fc93603990c42e00000060",
+        "seq": 5,
+        "message": "FAC222 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC222",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000053d4369c05b2cb46a61cf2c8440c5ff60000006105000000010100001500000046414332323320535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232330000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323233",
+      "expect": {
+        "event_id": "53d4369c05b2cb46a61cf2c8440c5ff600000061",
+        "seq": 5,
+        "message": "FAC223 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC223",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f317334124a95445b6941b6a6a3f18aa0000004905000000010100001500000046414332323420535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332323400000000952293a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323234",
+      "expect": {
+        "event_id": "f317334124a95445b6941b6a6a3f18aa00000049",
+        "seq": 5,
+        "message": "FAC224 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC224",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.780456+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000b1c03bc21634f048ad34f67fed0e85390000004a05000000010100001500000046414332323520535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e46414332323500000000a74993a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323235",
+      "expect": {
+        "event_id": "b1c03bc21634f048ad34f67fed0e85390000004a",
+        "seq": 5,
+        "message": "FAC225 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC225",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.781456+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000010a3500b0d697f40bef53557cf0a33a60000006205000000010100001500000046414332323620535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232360000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323236",
+      "expect": {
+        "event_id": "10a3500b0d697f40bef53557cf0a33a600000062",
+        "seq": 5,
+        "message": "FAC226 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC226",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000079b5e5a78e659b4eaae4d1e06985f8b10000006305000000010100001500000046414332323720535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232370000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323237",
+      "expect": {
+        "event_id": "79b5e5a78e659b4eaae4d1e06985f8b100000063",
+        "seq": 5,
+        "message": "FAC227 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC227",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f1c9498620075341b4260399eac530cb0000004e05000000010100001500000046414332323820535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232380000000045b094a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323238",
+      "expect": {
+        "event_id": "f1c9498620075341b4260399eac530cb0000004e",
+        "seq": 5,
+        "message": "FAC228 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC228",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.790637+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "1400000028828388c20fdc4ca2a831975807d5390000004f05000000010100001500000046414332323920535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433232390000000045b094a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323239",
+      "expect": {
+        "event_id": "28828388c20fdc4ca2a831975807d5390000004f",
+        "seq": 5,
+        "message": "FAC229 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC229",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.790637+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000bb48fdae9ae3f547b32b114ebd7b3e4d0000006405000000010100001500000046414332333020535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433233300000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323330",
+      "expect": {
+        "event_id": "bb48fdae9ae3f547b32b114ebd7b3e4d00000064",
+        "seq": 5,
+        "message": "FAC230 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC230",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000f619e92a214e3d4ca2bbdb81592b31c30000006505000000010100001500000046414332333120535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433233310000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323331",
+      "expect": {
+        "event_id": "f619e92a214e3d4ca2bbdb81592b31c300000065",
+        "seq": 5,
+        "message": "FAC231 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC231",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "140000006d381b10005355408f4eeaabce562adc0000006605000000010100001500000046414332333220535441545553284175782d41432968010e000000446973637265746520416c61726d0102b304010302000800000041432e506f7353740f00000041432e506f7353742e4641433233320000000015b096a92f2add0185b1c5a92f2add010c060000003020284f4e29040f00000041432e506f7353742e464143323332",
+      "expect": {
+        "event_id": "6d381b10005355408f4eeaabce562adc00000066",
+        "seq": 5,
+        "message": "FAC232 STATUS(Aux-AC)",
+        "severity_raw": 360,
+        "category": "Discrete Alarm",
+        "source_object": "AC.PosSt",
+        "source_point": "AC.PosSt.FAC232",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.803739+00:00",
+        "t_change": "2026-08-12T07:53:29.111795+00:00",
+        "value_type": "String",
+        "value": "0 (ON)"
+      }
+    },
+    {
+      "body_hex": "14000000a00e91b2ff8d3846b8da8a3dc62a8ba3000000bf2f000000010100000d00000043422031373120535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004530312e5843425231100000004530312e58434252312e506f7353743100000000d0eb96a92f2add013e4ce5a92f2add010c0a000000322028434c4f5345442904100000004530312e58434252312e506f73537431",
+      "expect": {
+        "event_id": "a00e91b2ff8d3846b8da8a3dc62a8ba3000000bf",
+        "seq": 47,
+        "message": "CB 171 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "E01.XCBR1",
+        "source_point": "E01.XCBR1.PosSt1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.318918+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "14000000b5e4f1bd2f986f4a89314f4c7523521f000000e52f000000010100000d00000043422031313220535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004530352e5843425231100000004530352e58434252312e506f7353743100000000d0eb96a92f2add0103e1e6a92f2add010c0a000000322028434c4f5345442904100000004530352e58434252312e506f73537431",
+      "expect": {
+        "event_id": "b5e4f1bd2f986f4a89314f4c7523521f000000e5",
+        "seq": 47,
+        "message": "CB 112 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "E05.XCBR1",
+        "source_point": "E05.XCBR1.PosSt1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.329280+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "14000000ed419cbfc4871d42bc935d76053056070000010006000000010100000d00000043422034333120535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004a30312e58434252310f0000004a30312e58434252312e506f73537400000000d0eb96a92f2add012977e9a92f2add010c0a000000322028434c4f53454429040f0000004a30312e58434252312e506f735374",
+      "expect": {
+        "event_id": "ed419cbfc4871d42bc935d760530560700000100",
+        "seq": 6,
+        "message": "CB 431 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "J01.XCBR1",
+        "source_point": "J01.XCBR1.PosSt",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.346231+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "14000000bdbcc2a9bb435548a1e61ea4afbf6a83000001012f000000010100000d00000043422034333120535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004a30312e5843425231100000004a30312e58434252312e506f7353743100000000d0eb96a92f2add012977e9a92f2add010c0a000000322028434c4f5345442904100000004a30312e58434252312e506f73537431",
+      "expect": {
+        "event_id": "bdbcc2a9bb435548a1e61ea4afbf6a8300000101",
+        "seq": 47,
+        "message": "CB 431 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "J01.XCBR1",
+        "source_point": "J01.XCBR1.PosSt1",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.346231+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "14000000b44476aa0dc48b4bbcaac91fd465915a0000010c2f000000010100000d00000043422034333120535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004a30312e5843425231100000004a30312e58434252312e506f735374312600000041646d696e6973747261746f72404f6e654154535f44617461456469746f723a416e68746471fc97eebedd2add01fc97eebedd2add010c0a000000322028434c4f5345442904100000004a30312e58434252312e506f73537431",
+      "expect": {
+        "event_id": "b44476aa0dc48b4bbcaac91fd465915a0000010c",
+        "seq": 47,
+        "message": "CB 431 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "J01.XCBR1",
+        "source_point": "J01.XCBR1.PosSt1",
+        "actor": "Administrator@OneATS_DataEditor:Anhtdq",
+        "t_active": "2026-08-13T04:39:37.042943+00:00",
+        "t_change": "2026-08-13T04:39:37.042943+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "14000000c4e71c72790a134caa3439c95da4cd2200000102060000000101000011000000445320343331202d203320535441545553c8000e000000446973637265746520416c61726d0102b30401030200090000004a30312e58535749330f0000004a30312e58535749332e506f73537400000000d0eb96a92f2add01fe8ee9a92f2add010c0a000000322028434c4f53454429040f0000004a30312e58535749332e506f735374",
+      "expect": {
+        "event_id": "c4e71c72790a134caa3439c95da4cd2200000102",
+        "seq": 6,
+        "message": "DS 431 - 3 STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "J01.XSWI3",
+        "source_point": "J01.XSWI3.PosSt",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.346841+00:00",
+        "value_type": "String",
+        "value": "2 (CLOSED)"
+      }
+    },
+    {
+      "body_hex": "140000003a54b64f03aeb54282442d734f87abc7000000ff060000000101000013000000455320343331202d2033352020535441545553c8000e000000446973637265746520416c61726d0102b304010302000a0000004a30312e585357493331100000004a30312e5853574933312e506f73537400000000d0eb96a92f2add012977e9a92f2add010c0a0000003120284f50454e45442904100000004a30312e5853574933312e506f735374",
+      "expect": {
+        "event_id": "3a54b64f03aeb54282442d734f87abc7000000ff",
+        "seq": 6,
+        "message": "ES 431 - 35  STATUS",
+        "severity_raw": 200,
+        "category": "Discrete Alarm",
+        "source_object": "J01.XSWI31",
+        "source_point": "J01.XSWI31.PosSt",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.805268+00:00",
+        "t_change": "2026-08-12T07:53:29.346231+00:00",
+        "value_type": "String",
+        "value": "1 (OPENED)"
+      }
+    },
+    {
+      "body_hex": "14000000cb21ba141c5fcb429d0f19dbb85651420000001402000000010100001000000041424e4f524d414c20564f4c544147458a020b0000004c696d697420416c61726d0102b50401030200090000004431322e4d4d5855310e0000004431322e4d4d5855312e566c696e000000005ef4b2a92f2add015ef4b2a92f2add010a00000000000e0000004431322e4d4d5855312e566c696e",
+      "expect": {
+        "event_id": "cb21ba141c5fcb429d0f19dbb856514200000014",
+        "seq": 2,
+        "message": "ABNORMAL VOLTAGE",
+        "severity_raw": 650,
+        "category": "Limit Alarm",
+        "source_object": "D12.MMXU1",
+        "source_point": "D12.MMXU1.Vlin",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.988988+00:00",
+        "t_change": "2026-08-12T07:53:28.988988+00:00",
+        "value_type": "Float",
+        "value": 0.0
+      }
+    },
+    {
+      "body_hex": "1400000090eda13343bf314a9700d09d893ba7720000000f02000000010100001000000041424e4f524d414c20564f4c415447458a020b0000004c696d697420416c61726d0102b5040103020009000000537562732e4242323910000000537562732e424232392e5050566d61780000000006dab2a92f2add0106dab2a92f2add010a000000003210000000537562732e424232392e5050566d6178",
+      "expect": {
+        "event_id": "90eda13343bf314a9700d09d893ba7720000000f",
+        "seq": 2,
+        "message": "ABNORMAL VOLATGE",
+        "severity_raw": 650,
+        "category": "Limit Alarm",
+        "source_object": "Subs.BB29",
+        "source_point": "Subs.BB29.PPVmax",
+        "actor": "",
+        "t_active": "2026-08-12T07:53:28.988314+00:00",
+        "t_change": "2026-08-12T07:53:28.988314+00:00",
+        "value_type": "Float",
+        "value": 0.0
+      }
+    }
+  ]
+}

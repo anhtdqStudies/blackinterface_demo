@@ -12,9 +12,12 @@ process, and the caller supplies it rather than the mapper going to look.
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import UTC, datetime
 
+from blackinterface.api.alarmsource import AlarmStore
 from blackinterface.api.schemas import (
+    AlarmLiveOut,
     BayOut,
     BusbarOut,
     DeviceLiveOut,
@@ -29,6 +32,7 @@ from blackinterface.api.schemas import (
     ValidationIssueOut,
 )
 from blackinterface.api.source import StationStore
+from blackinterface.domain.alarm import AlarmClass
 from blackinterface.domain.energization import LiveState, solve_energization
 from blackinterface.domain.issue_groups import issue_group
 from blackinterface.domain.measurement import Reading
@@ -221,12 +225,35 @@ def measurement_out(store: StationStore) -> MeasurementOut:
     )
 
 
-def live_out(store: StationStore) -> LiveOut:
-    """All three cadences at once — what a client needs on its first load."""
+def alarm_live_out(alarms: AlarmStore) -> AlarmLiveOut:
+    """The alarm cadence. Noise classes are dropped here, not in the client.
+
+    Filtering server-side means every consumer — pane, stream, and any later
+    client — agrees on what counts as an alarm worth showing, instead of each
+    reimplementing the rule and drifting.
+    """
+    from blackinterface.api.alarms import alarm_out
+
+    active = alarms.active
+    shown = [a for a in active if a.klass not in (AlarmClass.STATUS, AlarmClass.CONFIG)]
+    shown.sort(key=lambda a: (-a.severity, a.point.ref))
+    return AlarmLiveOut(
+        revision=alarms.revision,
+        has_snapshot=alarms.has_snapshot,
+        counts=dict(sorted(Counter(a.klass.value for a in active).items())),
+        alarms=[alarm_out(a) for a in shown],
+    )
+
+
+def live_out(store: StationStore, alarms: AlarmStore | None = None) -> LiveOut:
+    """All four cadences at once — what a client needs on its first load."""
+    from blackinterface.api.deps import get_alarms
+
     return LiveOut(
         state=state_out(store),
         measurement=measurement_out(store),
         link=link_out(store),
+        alarm=alarm_live_out(alarms if alarms is not None else get_alarms()),
     )
 
 

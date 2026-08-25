@@ -51,6 +51,19 @@ export type DeviceLive = components['schemas']['DeviceLiveOut']
 export type Link = components['schemas']['LinkOut']
 /** How one scope is doing, with the evidence behind the answer. */
 export type Summary = components['schemas']['SummaryOut']
+
+// Module B — alarms and incidents (ADR-0026 channels, ADR-0027 model).
+/** One alarm, already classified: `klass` is what the pane filters on. */
+export type Alarm = components['schemas']['AlarmOut']
+export type Alarms = components['schemas']['AlarmsOut']
+/** A cluster of alarms that belong together in time and in the network. */
+export type Incident = components['schemas']['IncidentOut']
+export type Incidents = components['schemas']['IncidentsOut']
+/** Handling guidance. `status` says whether anybody has approved it. */
+export type Playbook = components['schemas']['PlaybookOut']
+export type PlaybookStep = components['schemas']['PlaybookStepOut']
+/** The `alarm` cadence on the shared stream. */
+export type AlarmLive = components['schemas']['AlarmLiveOut']
 export type Evidence = components['schemas']['EvidenceRecord']
 export type Limit = components['schemas']['Limit']
 export type LimitCode = components['schemas']['LimitCode']
@@ -245,6 +258,26 @@ export const api = {
   /** How one scope is doing, with the evidence behind it (ADR-0013). */
   summary: (scope: string) =>
     request<Summary>(`/api/summary?scope=${encodeURIComponent(scope)}`),
+  /**
+   * Active alarms for one scope.
+   *
+   * Switch positions are excluded unless asked for: a healthy station
+   * annunciates 90 of them and they are evidence, not faults (ADR-0027).
+   */
+  alarms: (scope: string, includeStatus = false) =>
+    request<Alarms>(
+      `/api/alarms?scope=${encodeURIComponent(scope)}` +
+        (includeStatus ? '&include_status=true' : ''),
+    ),
+  /** Alarms grouped into incidents, each carrying its handling guidance. */
+  incidents: (scope: string, status: 'open' | 'dismissed' = 'open') =>
+    request<Incidents>(`/api/incidents?scope=${encodeURIComponent(scope)}&status=${status}`),
+  /** Mark one open incident as handled locally — not OneATS acknowledgement (I1). */
+  dismissIncident: (incidentId: string, scope: string) =>
+    request<Incident>(
+      `/api/incidents/${encodeURIComponent(incidentId)}/dismiss?scope=${encodeURIComponent(scope)}`,
+      { method: 'POST' },
+    ),
   /** One voltage level on its own. Kept for tooling and manual inspection. */
   diagram: (voltageLevel: string) =>
     request<Diagram>(`/api/diagram/${encodeURIComponent(voltageLevel)}`),

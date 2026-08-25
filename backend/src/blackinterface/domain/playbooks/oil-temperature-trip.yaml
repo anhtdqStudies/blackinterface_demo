@@ -1,0 +1,35 @@
+# DRAFT - soan boi agent, CHUA duoc nguoi co tham quyen van hanh duyet.
+# Tram chua co tai lieu xu ly su co (2026-08-13). Noi dung duoi day suy ra tu
+# dinh nghia alarm va thuc hanh chung, KHONG phai quy trinh cua tram nay.
+id: oil-temperature-trip
+title: Máy biến áp cắt do nhiệt độ dầu
+status: draft
+suffixes: [OilTmpTr]
+
+summary: >
+  Rơ le nhiệt độ dầu máy biến áp đã tác động cắt. Đây là mức bảo vệ, không phải
+  cảnh báo — máy biến áp nhiều khả năng đã bị cô lập khỏi lưới.
+
+steps:
+  - text: >
+      Xác nhận vị trí thực tế của các máy cắt hai phía máy biến áp trên sơ đồ.
+      Nếu trạng thái là UNDETERMINED thì chưa được kết luận đã cắt hay chưa.
+    caution: >
+      Không suy ra "đã cô lập" từ việc alarm xuất hiện. Alarm nói bảo vệ đã tác
+      động, không nói máy cắt đã mở thành công.
+  - text: >
+      Đọc nhiệt độ dầu và nhiệt độ cuộn dây hiện tại, cùng tuổi của số đo. Số đo
+      cũ hơn vài phút thì không phản ánh tình trạng bây giờ.
+  - text: >
+      Kiểm tra nhóm quạt làm mát (FanSt) và mức dầu (OilLevAlm) để phân biệt quá
+      tải với hỏng hệ thống làm mát.
+  - text: >
+      Kiểm tra phụ tải các ngăn còn lại — mất một máy biến áp có thể đẩy quá tải
+      sang máy còn lại.
+  - text: >
+      Báo điều độ và ghi nhận thời điểm tác động lấy từ dấu thời gian của alarm,
+      không lấy thời điểm người vận hành nhìn thấy.
+
+references:
+  - "Alarm gốc: <đối tượng>.YPTR.OilTmpTr, severity 850"
+  - "CHƯA có quy trình vận hành của trạm cho tình huống này"

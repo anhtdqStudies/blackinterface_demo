@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { LogIn, Zap } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import { landingFor } from '@/router'
 import { useSessionStore } from '@/stores/session'
@@ -39,45 +40,69 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="flex min-h-full items-center justify-center p-6">
-    <Card class="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle class="text-lg">{{ t('app.brand') }}</CardTitle>
-        <CardDescription>{{ t('login.subtitle') }}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form class="flex flex-col gap-4" @submit.prevent="submit">
-          <div class="flex flex-col gap-1.5">
-            <Label for="username">{{ t('login.username') }}</Label>
-            <Input
-              id="username"
-              v-model="username"
-              autocomplete="username"
-              autofocus
-              required
-            />
-          </div>
+  <div class="relative flex min-h-full flex-col items-center justify-center px-4 py-10">
+    <div
+      class="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/8 via-background to-background"
+      aria-hidden="true"
+    />
 
-          <div class="flex flex-col gap-1.5">
-            <Label for="password">{{ t('login.password') }}</Label>
-            <Input
-              id="password"
-              v-model="password"
-              type="password"
-              autocomplete="current-password"
-              required
-            />
-          </div>
+    <div class="relative w-full max-w-md space-y-6">
+      <div class="flex flex-col items-center gap-3 text-center">
+        <span
+          class="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20"
+        >
+          <Zap class="size-6" />
+        </span>
+        <div class="space-y-1">
+          <h1 class="text-2xl font-semibold tracking-tight text-foreground">
+            {{ t('app.brand') }}
+          </h1>
+          <p class="text-sm text-muted-foreground">{{ t('login.subtitle') }}</p>
+        </div>
+      </div>
 
-          <Alert v-if="error" variant="destructive">
-            <AlertDescription>{{ error }}</AlertDescription>
-          </Alert>
+      <Card class="rounded-2xl border-border/70 shadow-lg">
+        <CardHeader class="sr-only">
+          <CardTitle>{{ t('login.signIn') }}</CardTitle>
+          <CardDescription>{{ t('login.subtitle') }}</CardDescription>
+        </CardHeader>
+        <CardContent class="pt-6">
+          <form class="flex flex-col gap-5" @submit.prevent="submit">
+            <div class="flex flex-col gap-2">
+              <Label for="username">{{ t('login.username') }}</Label>
+              <Input
+                id="username"
+                v-model="username"
+                autocomplete="username"
+                autofocus
+                required
+                class="h-10"
+              />
+            </div>
 
-          <Button type="submit" class="w-full" :disabled="busy">
-            {{ busy ? t('login.signingIn') : t('login.signIn') }}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            <div class="flex flex-col gap-2">
+              <Label for="password">{{ t('login.password') }}</Label>
+              <Input
+                id="password"
+                v-model="password"
+                type="password"
+                autocomplete="current-password"
+                required
+                class="h-10"
+              />
+            </div>
+
+            <Alert v-if="error" variant="destructive">
+              <AlertDescription>{{ error }}</AlertDescription>
+            </Alert>
+
+            <Button type="submit" class="h-10 w-full gap-2" :disabled="busy">
+              <LogIn class="size-4" />
+              {{ busy ? t('login.signingIn') : t('login.signIn') }}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>

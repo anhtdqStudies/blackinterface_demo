@@ -13,13 +13,14 @@
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { Link, Measurement, State } from '@/api/client'
+import type { AlarmLive, Link, Measurement, State } from '@/api/client'
 import { api } from '@/api/client'
+import { useAlarmsStore } from '@/stores/alarms'
 import { useLiveStore } from '@/stores/live'
 import { useMeasurementsStore } from '@/stores/measurements'
 
 /** SSE event names, mirroring `api/broadcast.py::Cadence`. */
-const CADENCES = ['state', 'measurement', 'link'] as const
+const CADENCES = ['state', 'alarm', 'measurement', 'link'] as const
 type Cadence = (typeof CADENCES)[number]
 
 export const useStreamStore = defineStore('stream', () => {
@@ -32,6 +33,9 @@ export const useStreamStore = defineStore('stream', () => {
     switch (cadence) {
       case 'state':
         useLiveStore().adopt(payload as State)
+        return
+      case 'alarm':
+        useAlarmsStore().adopt(payload as AlarmLive)
         return
       case 'measurement':
         useMeasurementsStore().adopt(payload as Measurement)
@@ -48,6 +52,7 @@ export const useStreamStore = defineStore('stream', () => {
       useLiveStore().adopt(live.state)
       useLiveStore().adoptLink(live.link)
       useMeasurementsStore().adopt(live.measurement)
+      useAlarmsStore().adopt(live.alarm)
     } catch {
       // The structure store already reports why nothing is loaded.
     }

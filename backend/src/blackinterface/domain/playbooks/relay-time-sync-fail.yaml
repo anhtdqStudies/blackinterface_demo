@@ -1,0 +1,29 @@
+# DRAFT - soan boi agent, CHUA duoc nguoi co tham quyen van hanh duyet.
+id: relay-time-sync-fail
+title: Rơ le mất đồng bộ thời gian
+status: draft
+suffixes: [TimeFail]
+
+summary: >
+  Rơ le mất đồng bộ với nguồn thời gian của trạm. Không ảnh hưởng tới bảo vệ,
+  nhưng làm hỏng thứ tự bản ghi sự kiện — nghĩa là lần sự cố tới, chuỗi nhân quả
+  dựng lại từ các rơ le này sẽ không đáng tin.
+
+steps:
+  - text: >
+      Đếm xem có bao nhiêu rơ le cùng mất đồng bộ. Một rơ le là vấn đề của thiết
+      bị đó; nhiều rơ le cùng lúc là vấn đề của nguồn thời gian.
+  - text: >
+      Kiểm tra nguồn đồng bộ của trạm (GPS/NTP) và đường mạng tới các rơ le bị
+      ảnh hưởng.
+  - text: >
+      Ghi nhận khoảng thời gian mất đồng bộ. Mọi bản ghi sự kiện trong khoảng đó
+      phải được coi là không tin được về mặt thứ tự.
+    caution: >
+      Đây là lý do nên xử lý sớm dù nó không cắt điện gì: nó âm thầm phá giá trị
+      của dữ liệu phục vụ phân tích sự cố về sau.
+
+references:
+  - "Alarm gốc: <đối tượng>.ANN.ST.TimeFail, severity 360"
+  - "Đo 2026-08-13 trên DEMO_SAS: 41 rơ le cùng báo mất đồng bộ"
+  - "CHƯA có quy trình vận hành của trạm cho tình huống này"

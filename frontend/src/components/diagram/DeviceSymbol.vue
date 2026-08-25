@@ -140,7 +140,8 @@ const labelY = computed(() =>
   stroke-width: 2;
 }
 text {
-  font: 10px var(--mono);
+  font: 10px var(--font-sans);
   fill: var(--dim);
+  letter-spacing: 0.02em;
 }
 </style>

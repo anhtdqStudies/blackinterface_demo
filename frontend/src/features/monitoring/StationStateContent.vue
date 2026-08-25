@@ -1,19 +1,18 @@
 <script setup lang="ts">
 /**
  * Station-wide switch positions — browse bays, drill into one (ADR-0018).
- *
- * Uses `structure.bays` (no per-bay fetch). Live positions come from `live`
- * when available, otherwise the snapshot from the last structure load.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ChevronRight, LayoutGrid, Map as MapIcon } from 'lucide-vue-next'
 import type { Bay } from '@/api/client'
 import { bay as bayScope } from '@/scope'
 import { useLiveStore } from '@/stores/live'
 import { useStructureStore } from '@/stores/structure'
 import { useWorkspaceStore } from '@/stores/workspace'
-import Panel from '@/ui/Panel.vue'
-import SysBadge from '@/ui/SysBadge.vue'
+import { Badge } from '@/ui/badge'
+import { Button } from '@/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 
 const props = defineProps<{ voltageFilter?: string | null }>()
 
@@ -63,38 +62,61 @@ function liveLabel(bay: Bay): string {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
-    <Panel :title="t('state.stationOverview')">
-      <p v-if="stationMeta" class="m-0 mb-2 text-sm text-muted-foreground">{{ stationMeta }}</p>
-      <button type="button" class="text-sm text-primary hover:underline" @click="openSld">
-        {{ t('state.openSld') }}
-      </button>
-    </Panel>
+  <div class="flex w-full flex-col gap-4">
+    <Card class="rounded-xl border-border/70 shadow-sm">
+      <CardHeader class="flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle class="flex items-center gap-2 text-base font-semibold">
+          <LayoutGrid class="size-4 text-primary" />
+          {{ t('state.stationOverview') }}
+        </CardTitle>
+        <Button variant="outline" size="sm" class="gap-1.5" @click="openSld">
+          <MapIcon class="size-3.5" />
+          {{ t('state.openSld') }}
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <p v-if="stationMeta" class="m-0 text-sm text-muted-foreground">{{ stationMeta }}</p>
+      </CardContent>
+    </Card>
 
-    <Panel
+    <Card
       v-for="[level, levelBays] in grouped"
       :key="level"
-      :title="t('state.baysAtLevel', { level, count: levelBays.length })"
+      class="rounded-xl border-border/70 shadow-sm"
     >
-      <button
-        v-for="bay in levelBays"
-        :key="bay.id"
-        type="button"
-        class="mb-1 flex w-full items-center justify-between gap-2 rounded-[var(--radius)] border border-line px-2 py-1.5 text-left text-sm hover:border-accent"
-        @click="openBay(bay.id)"
-      >
-        <span>
-          <b>{{ bay.id }}</b>
-          <span v-if="bay.name && bay.name !== bay.id" class="text-muted-foreground">
-            · {{ bay.name }}
+      <CardHeader class="pb-3">
+        <CardTitle class="text-sm font-semibold">
+          {{ t('state.baysAtLevel', { level, count: levelBays.length }) }}
+        </CardTitle>
+      </CardHeader>
+      <CardContent class="space-y-2 pt-0">
+        <button
+          v-for="bay in levelBays"
+          :key="bay.id"
+          type="button"
+          class="group flex w-full items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/10 px-3 py-2.5 text-left text-sm transition-colors hover:border-primary/40 hover:bg-muted/25"
+          @click="openBay(bay.id)"
+        >
+          <span class="min-w-0">
+            <span class="font-medium text-foreground">{{ bay.id }}</span>
+            <span v-if="bay.name && bay.name !== bay.id" class="text-muted-foreground">
+              · {{ bay.name }}
+            </span>
+            <Badge variant="outline" class="ml-2 font-mono text-2xs font-normal capitalize">
+              {{ bay.bay_type }}
+            </Badge>
           </span>
-          <small class="ml-1 text-dim">{{ bay.bay_type }}</small>
-        </span>
-        <span class="flex shrink-0 items-center gap-2 text-2xs whitespace-nowrap">
-          <SysBadge tone="neutral">{{ bay.device_count }}</SysBadge>
-          <span class="text-muted-foreground">{{ liveLabel(bay) }}</span>
-        </span>
-      </button>
-    </Panel>
+          <span class="flex shrink-0 items-center gap-2">
+            <Badge variant="secondary" class="font-normal tabular-nums">
+              {{ bay.device_count }}
+            </Badge>
+            <span class="text-2xs text-muted-foreground">{{ liveLabel(bay) }}</span>
+            <ChevronRight
+              class="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+            />
+          </span>
+        </button>
+      </CardContent>
+    </Card>
   </div>
 </template>

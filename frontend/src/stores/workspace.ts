@@ -28,12 +28,21 @@ import {
 import { useStructureStore } from '@/stores/structure'
 
 const CHAT_COLLAPSED_KEY = 'bi.chat.collapsed'
+const NAV_COLLAPSED_KEY = 'bi.workspace.navCollapsed'
 
-function loadChatCollapsed(): boolean {
+function loadFlag(key: string): boolean {
   try {
-    return localStorage.getItem(CHAT_COLLAPSED_KEY) === '1'
+    return localStorage.getItem(key) === '1'
   } catch {
     return false
+  }
+}
+
+function saveFlag(key: string, on: boolean): void {
+  try {
+    localStorage.setItem(key, on ? '1' : '0')
+  } catch {
+    /* ignore */
   }
 }
 
@@ -105,6 +114,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   watch(scope, () => {
     tabPinnedByUser.value = false
+    detailsDismissed.value = false
   })
 
   watch(
@@ -117,15 +127,27 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   /* --- chat column collapse ------------------------------------------------ */
 
-  const chatCollapsed = ref(loadChatCollapsed())
+  const chatCollapsed = ref(loadFlag(CHAT_COLLAPSED_KEY))
+  const navCollapsed = ref(loadFlag(NAV_COLLAPSED_KEY))
+  /** User closed the SLD details rail for the current scope. */
+  const detailsDismissed = ref(false)
 
   function toggleChatCollapsed(): void {
     chatCollapsed.value = !chatCollapsed.value
-    try {
-      localStorage.setItem(CHAT_COLLAPSED_KEY, chatCollapsed.value ? '1' : '0')
-    } catch {
-      /* ignore */
-    }
+    saveFlag(CHAT_COLLAPSED_KEY, chatCollapsed.value)
+  }
+
+  function toggleNavCollapsed(): void {
+    navCollapsed.value = !navCollapsed.value
+    saveFlag(NAV_COLLAPSED_KEY, navCollapsed.value)
+  }
+
+  function dismissDetails(): void {
+    detailsDismissed.value = true
+  }
+
+  function reopenDetails(): void {
+    detailsDismissed.value = false
   }
 
   function scopeOf(pane: Pane): ScopeRef {
@@ -144,6 +166,11 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     markTabPinnedByUser,
     chatCollapsed,
     toggleChatCollapsed,
+    navCollapsed,
+    toggleNavCollapsed,
+    detailsDismissed,
+    dismissDetails,
+    reopenDetails,
     scopeOf,
   }
 })

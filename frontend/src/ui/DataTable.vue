@@ -17,10 +17,14 @@ const props = defineProps<{
   rows: T[]
   rowKey: (row: T) => string
   class?: string
+  defaultSortColumn?: string
+  defaultSortDirection?: 'asc' | 'desc'
+  /** When true, wraps the table in a bordered card shell. */
+  framed?: boolean
 }>()
 
-const sortColumnId = ref<string | null>(null)
-const sortDirection = ref<'asc' | 'desc'>('asc')
+const sortColumnId = ref<string | null>(props.defaultSortColumn ?? null)
+const sortDirection = ref<'asc' | 'desc'>(props.defaultSortDirection ?? 'asc')
 
 const sortedRows = computed(() => {
   if (!sortColumnId.value) return props.rows
@@ -57,15 +61,28 @@ function sortLabel(columnId: string): string {
 </script>
 
 <template>
-  <div :class="cn('overflow-x-auto', props.class)">
+  <div
+    :class="
+      cn(
+        'overflow-x-auto',
+        framed && 'overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm',
+        props.class,
+      )
+    "
+  >
     <Table class="text-sm">
-      <TableHeader>
-        <TableRow class="hover:bg-transparent">
+      <TableHeader
+        :class="framed ? 'sticky top-0 z-10 bg-muted/40 backdrop-blur-sm' : undefined"
+      >
+        <TableRow class="border-border/60 hover:bg-transparent">
           <TableHead
             v-for="column in columns"
             :key="column.id"
             :class="
-              cn('text-xs tracking-wide uppercase', column.align === 'right' && 'text-right')
+              cn(
+                'h-10 text-xs font-medium tracking-wide text-muted-foreground uppercase',
+                column.align === 'right' && 'text-right',
+              )
             "
             :aria-sort="
               sortColumnId === column.id
@@ -79,11 +96,11 @@ function sortLabel(columnId: string): string {
               v-if="column.sortable"
               variant="ghost"
               size="xs"
-              class="h-auto px-0 text-inherit hover:bg-transparent"
+              class="h-auto gap-1 px-0 font-medium text-inherit uppercase hover:bg-transparent hover:text-foreground"
               @click="toggleSort(column.id)"
             >
               {{ column.label }}
-              <span class="text-2xs text-sys-idle" aria-hidden="true">{{
+              <span class="text-2xs text-muted-foreground" aria-hidden="true">{{
                 sortLabel(column.id)
               }}</span>
             </Button>
@@ -92,11 +109,15 @@ function sortLabel(columnId: string): string {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow v-for="row in sortedRows" :key="rowKey(row)">
+        <TableRow
+          v-for="(row, index) in sortedRows"
+          :key="rowKey(row)"
+          :class="cn(index % 2 === 1 && framed && 'bg-muted/15')"
+        >
           <TableCell
             v-for="column in columns"
             :key="column.id"
-            :class="cn('py-1', column.align === 'right' && 'text-right')"
+            :class="cn('py-2.5', column.align === 'right' && 'text-right')"
           >
             <slot :name="`cell-${column.id}`" :row="row" />
           </TableCell>

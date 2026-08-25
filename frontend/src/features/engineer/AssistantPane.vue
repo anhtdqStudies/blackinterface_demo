@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Bot, KeyRound, Zap } from 'lucide-vue-next'
 import { ApiError, api, type AssistantConfig, type AssistantProbe } from '@/api/client'
 import SysBadge from '@/ui/SysBadge.vue'
+import { Alert, AlertDescription } from '@/ui/alert'
 import ErrorBox from '@/ui/ErrorBox.vue'
 import Field from '@/ui/Field.vue'
-import Panel from '@/ui/Panel.vue'
 import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 import { Button } from '@/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card'
 import { Input } from '@/ui/input'
+import { Label } from '@/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/select'
+import { Separator } from '@/ui/separator'
 
 const { t, locale } = useI18n()
 
@@ -107,23 +111,29 @@ onMounted(() => void load())
 </script>
 
 <template>
-  <div class="p-3">
-    <PaneSkeleton v-if="loading" variant="row" :count="3" />
-    <ErrorBox v-else-if="error" :code="error.code" :message="error.message" @retry="load" />
+  <PaneSkeleton v-if="loading" variant="row" :count="3" />
+  <ErrorBox v-else-if="error" :code="error.code" :message="error.message" @retry="load" />
 
-    <Panel v-else :title="t('assistant.title')">
-      <template #title-extra>
+  <Card v-else class="rounded-xl border-border/70 shadow-sm">
+    <CardHeader>
+      <div class="flex flex-wrap items-center gap-2">
+        <CardTitle class="flex items-center gap-2 text-base font-semibold">
+          <Bot class="size-4 text-primary" />
+          {{ t('assistant.title') }}
+        </CardTitle>
         <SysBadge v-if="config?.source === 'env'" tone="neutral">{{
           t('assistant.fromEnv')
         }}</SysBadge>
-      </template>
+      </div>
+      <CardDescription>{{ t('assistant.intro') }}</CardDescription>
+    </CardHeader>
 
-      <p class="mb-3 text-xs text-muted-foreground">{{ t('assistant.intro') }}</p>
-
-      <form class="flex flex-col gap-3" @submit.prevent="save">
-        <Field :label="t('assistant.provider')" :numeric="false">
+    <CardContent class="space-y-5">
+      <form class="space-y-4" @submit.prevent="save">
+        <div class="space-y-2">
+          <Label>{{ t('assistant.provider') }}</Label>
           <Select v-model="provider">
-            <SelectTrigger class="w-full">
+            <SelectTrigger class="w-full sm:max-w-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -131,17 +141,32 @@ onMounted(() => void load())
               <SelectItem value="openai">{{ t('assistant.providerOpenai') }}</SelectItem>
             </SelectContent>
           </Select>
-        </Field>
+        </div>
 
-        <template v-if="provider === 'openai'">
-          <Field :label="t('assistant.baseUrl')" :numeric="false">
-            <Input v-model="baseUrl" placeholder="https://openrouter.ai/api/v1" />
-          </Field>
-          <Field :label="t('assistant.model')" :numeric="false">
-            <Input v-model="model" required />
-          </Field>
-          <Field :label="t('assistant.apiKey')" :numeric="false">
+        <div
+          v-if="provider === 'openai'"
+          class="space-y-4 rounded-xl border border-border/60 bg-muted/15 p-4"
+        >
+          <div class="space-y-2">
+            <Label for="assistant-base-url">{{ t('assistant.baseUrl') }}</Label>
             <Input
+              id="assistant-base-url"
+              v-model="baseUrl"
+              class="font-mono text-sm"
+              placeholder="https://openrouter.ai/api/v1"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="assistant-model">{{ t('assistant.model') }}</Label>
+            <Input id="assistant-model" v-model="model" required />
+          </div>
+          <div class="space-y-2">
+            <Label for="assistant-api-key" class="flex items-center gap-1.5">
+              <KeyRound class="size-3.5 text-muted-foreground" />
+              {{ t('assistant.apiKey') }}
+            </Label>
+            <Input
+              id="assistant-api-key"
               v-model="apiKey"
               type="password"
               autocomplete="off"
@@ -150,11 +175,13 @@ onMounted(() => void load())
                 config?.has_key ? t('assistant.keyStored') : t('assistant.keyPlaceholder')
               "
             />
-          </Field>
-          <p v-if="!config?.can_store_key" class="m-0 text-xs text-sys-warn">
-            {{ t('assistant.noSecretKey') }}
-          </p>
-        </template>
+          </div>
+          <Alert v-if="!config?.can_store_key" class="border-sys-warn/30 bg-sys-warn/5">
+            <AlertDescription class="text-xs text-muted-foreground">
+              {{ t('assistant.noSecretKey') }}
+            </AlertDescription>
+          </Alert>
+        </div>
 
         <div class="flex flex-wrap items-center gap-2">
           <Button type="submit" size="sm" :disabled="saving">
@@ -164,15 +191,17 @@ onMounted(() => void load())
             type="button"
             variant="outline"
             size="sm"
+            class="gap-1.5"
             :disabled="testing || provider === 'off'"
             @click="test"
           >
+            <Zap class="size-3.5" />
             {{ testing ? t('assistant.testing') : t('assistant.test') }}
           </Button>
           <Button
             v-if="config?.has_key && config.source === 'store'"
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
             :disabled="saving"
             @click="clearKey"
@@ -182,7 +211,9 @@ onMounted(() => void load())
         </div>
       </form>
 
-      <dl class="mt-3 text-xs">
+      <Separator />
+
+      <dl class="grid gap-2 text-sm sm:grid-cols-2">
         <Field :label="t('assistant.verified')">
           <span :class="config?.verified_at ? 'text-foreground' : 'text-sys-warn'">
             {{ config?.verified_at ? when(config.verified_at) : t('assistant.neverVerified') }}
@@ -193,17 +224,19 @@ onMounted(() => void load())
         </Field>
       </dl>
 
-      <p
+      <Alert
         v-if="probe"
-        class="m-0 mt-2 text-xs"
-        :class="probe.ok ? 'text-foreground' : 'text-sys-down'"
+        :variant="probe.ok ? 'default' : 'destructive'"
+        :class="probe.ok ? 'border-border/60 bg-muted/20' : undefined"
       >
-        {{
-          probe.ok
-            ? t('assistant.probeOk', { provider: probe.provider, reply: probe.reply })
-            : t('assistant.probeFailed', { error: probe.error ?? '' })
-        }}
-      </p>
-    </Panel>
-  </div>
+        <AlertDescription class="text-sm">
+          {{
+            probe.ok
+              ? t('assistant.probeOk', { provider: probe.provider, reply: probe.reply })
+              : t('assistant.probeFailed', { error: probe.error ?? '' })
+          }}
+        </AlertDescription>
+      </Alert>
+    </CardContent>
+  </Card>
 </template>

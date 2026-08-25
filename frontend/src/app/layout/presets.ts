@@ -18,6 +18,9 @@ const WORKSPACE_TABS = [
   'state',
   'measurements',
   'energization',
+  'alarm-list',
+  // Open incidents only — dismissed ones live under Alarm list → History.
+  'alarms',
   'anomalies',
   'evidence',
 ] as const satisfies readonly PaneKind[]
@@ -38,11 +41,11 @@ export function isWorkspaceTab(value: string): value is WorkspaceTabKind {
 export const OPERATOR_LAYOUT: Layout = {
   cols: [
     {
-      size: 42,
+      size: 30,
       rows: [{ size: 100, pane: pane('chat', { chrome: 'minimal' }) }],
     },
     {
-      size: 58,
+      size: 70,
       rows: [
         {
           size: 100,

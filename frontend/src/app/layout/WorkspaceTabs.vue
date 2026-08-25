@@ -1,25 +1,17 @@
 <script setup lang="ts">
 /**
- * Tabbed workspace column (ADR-0018) — SLD and monitoring panes share one bar.
- *
- * Renders panes through PANE_COMPONENTS only; no branch on `kind` beyond the
- * register lookup that `PaneHost` already uses for single panes.
+ * Workspace column — vertical nav + scope header + pane (+ optional details rail on SLD).
  */
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { SplitterGroup, SplitterPanel, SplitterResizeHandle } from 'reka-ui'
 import ScopeHeader from '@/features/monitoring/ScopeHeader.vue'
-import {
-  PANE_COMPONENTS,
-  PANE_TITLE_KEY,
-  type LayoutTabs,
-  type Pane,
-  type PaneKind,
-} from './panes'
+import WorkspaceDetails from './WorkspaceDetails.vue'
+import WorkspaceNav from './WorkspaceNav.vue'
+import { PANE_COMPONENTS, type LayoutTabs, type Pane, type PaneKind } from './panes'
 import type { ScopeRef } from '@/scope'
-import { useStructureStore } from '@/stores/structure'
+import { useAlarmsStore } from '@/stores/alarms'
 import { useWorkspaceStore } from '@/stores/workspace'
-import { Badge } from '@/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs'
 
 const props = defineProps<{
   tabs: LayoutTabs
@@ -28,73 +20,109 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const workspace = useWorkspaceStore()
-const structure = useStructureStore()
+const alarms = useAlarmsStore()
+
+onMounted(() => {
+  alarms.followIncidents()
+})
 
 const panes = computed(() => props.tabs.panes)
 
-const anomalyCount = computed(() => structure.issues.filter((i) => i.group === 'C').length)
+const activePane = computed(
+  () => panes.value.find((p) => p.kind === workspace.tab) ?? panes.value[0],
+)
 
-const activeScope = computed(() => props.scopeFor(panes.value[0] ?? { id: 'sld', kind: 'sld' }))
+const activeScope = computed(() =>
+  activePane.value ? props.scopeFor(activePane.value) : props.scopeFor(panes.value[0]!),
+)
 
-function badgeFor(kind: PaneKind): number | undefined {
-  if (kind === 'anomalies' && anomalyCount.value > 0) return anomalyCount.value
-  return undefined
-}
-
-function onTabChange(value: string | number): void {
-  workspace.setTab(String(value) as PaneKind)
-  workspace.markTabPinnedByUser()
-}
+const detailsEligible = computed(
+  () =>
+    workspace.tab === 'sld' &&
+    (activeScope.value.kind === 'bay' || activeScope.value.kind === 'device') &&
+    !workspace.detailsDismissed,
+)
 
 function panePadding(kind: PaneKind): string {
-  return kind === 'sld' ? 'p-0' : 'p-3'
+  return kind === 'sld' ? 'p-0' : 'p-4'
 }
 </script>
 
 <template>
-  <div class="flex h-full min-h-0 flex-col bg-card">
+  <div class="flex h-full min-h-0 flex-col bg-background">
     <ScopeHeader :scope="activeScope" />
 
-    <Tabs
-      :model-value="workspace.tab"
-      class="flex min-h-0 flex-1 flex-col gap-0"
-      @update:model-value="onTabChange"
-    >
-      <TabsList
-        variant="line"
-        class="h-9 w-full shrink-0 justify-start rounded-none border-b border-border bg-transparent px-2"
-      >
-        <TabsTrigger
-          v-for="p in panes"
-          :key="p.id"
-          :value="p.kind"
-          class="gap-1.5 px-3 text-xs data-[state=active]:bg-muted"
-        >
-          {{ t(PANE_TITLE_KEY[p.kind]) }}
-          <Badge
-            v-if="badgeFor(p.kind)"
-            variant="destructive"
-            class="h-4 min-w-4 px-1 text-2xs tabular-nums"
-          >
-            {{ badgeFor(p.kind) }}
-          </Badge>
-        </TabsTrigger>
-      </TabsList>
+    <div class="flex min-h-0 flex-1">
+      <WorkspaceNav :tabs="tabs" />
 
-      <TabsContent
-        v-for="p in panes"
-        :key="p.id"
-        :value="p.kind"
-        class="mt-0 min-h-0 flex-1 overflow-auto data-[state=inactive]:hidden"
-        :class="panePadding(p.kind)"
+      <SplitterGroup
+        v-if="detailsEligible"
+        direction="horizontal"
+        auto-save-id="bi.layout.ops.details"
+        class="min-h-0 min-w-0 flex-1"
       >
-        <component
-          :is="PANE_COMPONENTS[p.kind]"
-          :pane="p"
-          :scope="scopeFor(p)"
-          class="h-full min-h-0"
+        <SplitterPanel :default-size="72" :min-size="40" class="min-h-0 min-w-0">
+          <div
+            v-if="activePane"
+            class="h-full min-h-0 overflow-auto"
+            :class="panePadding(activePane.kind)"
+          >
+            <component
+              :is="PANE_COMPONENTS[activePane.kind]"
+              :pane="activePane"
+              :scope="scopeFor(activePane)"
+              class="h-full min-h-0"
+            />
+          </div>
+        </SplitterPanel>
+
+        <SplitterResizeHandle
+          class="w-px shrink-0 bg-border transition-colors data-[state=drag]:bg-primary/60 hover:bg-primary/40"
         />
-      </TabsContent>
-    </Tabs>
+
+        <SplitterPanel
+          :default-size="28"
+          :min-size="18"
+          :max-size="40"
+          collapsible
+          :collapsed-size="0"
+          class="min-h-0"
+        >
+          <WorkspaceDetails :scope="activeScope" />
+        </SplitterPanel>
+      </SplitterGroup>
+
+      <div v-else class="min-h-0 min-w-0 flex-1 overflow-hidden">
+        <div
+          v-if="activePane"
+          class="h-full min-h-0 overflow-auto"
+          :class="panePadding(activePane.kind)"
+        >
+          <component
+            :is="PANE_COMPONENTS[activePane.kind]"
+            :pane="activePane"
+            :scope="scopeFor(activePane)"
+            class="h-full min-h-0"
+          />
+        </div>
+      </div>
+    </div>
+
+    <p
+      v-if="
+        workspace.tab === 'sld' &&
+        (activeScope.kind === 'bay' || activeScope.kind === 'device') &&
+        workspace.detailsDismissed
+      "
+      class="shrink-0 border-t border-border/60 px-4 py-1.5 text-center text-2xs text-muted-foreground"
+    >
+      <button
+        type="button"
+        class="text-primary underline-offset-2 hover:underline"
+        @click="workspace.reopenDetails()"
+      >
+        {{ t('workspace.detailsReopen') }}
+      </button>
+    </p>
   </div>
 </template>

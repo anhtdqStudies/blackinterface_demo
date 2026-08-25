@@ -4,12 +4,13 @@
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Zap } from 'lucide-vue-next'
 import type { LiveState } from '@/api/client'
 import { LIVE_COLOR } from '@/components/diagram/state'
 import { useLiveStore } from '@/stores/live'
 import { useStructureStore } from '@/stores/structure'
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card'
 import Empty from '@/ui/Empty.vue'
-import Panel from '@/ui/Panel.vue'
 import PaneSkeleton from '@/ui/PaneSkeleton.vue'
 
 const { t } = useI18n()
@@ -56,49 +57,77 @@ function where(island: NonNullable<typeof energization.value>['islands'][number]
 </script>
 
 <template>
-  <div class="p-3">
+  <div class="w-full space-y-4">
+    <div class="rounded-lg border border-border/60 bg-muted/20 px-4 py-2.5">
+      <p class="flex items-center gap-2 text-sm text-muted-foreground">
+        <Zap class="size-4 shrink-0 text-primary" />
+        {{ t('energization.scopeLine') }}
+      </p>
+    </div>
+
     <PaneSkeleton v-if="pending" variant="row" :count="4" />
+
     <template v-else-if="energization">
-      <Panel :title="t('energization.title')">
-        <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-dim">
-          <span v-for="row in counts" :key="row.state">
-            <i
-              class="mr-[5px] inline-block h-[9px] w-[9px] rounded-[2px]"
-              :style="{ background: row.color }"
-              aria-hidden="true"
-            />
-            {{ t(`liveState.${row.state}`) }}
-            <b class="text-fg">{{ row.count }}</b>
-          </span>
-        </div>
+      <Card class="border-border/60 py-0 shadow-none">
+        <CardHeader class="border-b border-border/60 px-4 py-3">
+          <CardTitle class="text-sm font-medium">{{ t('energization.title') }}</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-3 px-4 py-4">
+          <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+            <span
+              v-for="row in counts"
+              :key="row.state"
+              class="inline-flex items-center gap-1.5"
+            >
+              <i
+                class="inline-block size-2.5 rounded-sm"
+                :style="{ background: row.color }"
+                aria-hidden="true"
+              />
+              {{ t(`liveState.${row.state}`) }}
+              <span class="font-medium tabular-nums text-foreground">{{ row.count }}</span>
+            </span>
+          </div>
 
-        <p v-if="compared === 0" class="mt-2 text-xs leading-relaxed text-dim">
-          {{ t('energization.noComparison') }}
-        </p>
-        <p v-else-if="mismatched === 0" class="mt-2 text-xs leading-relaxed text-st-open">
-          {{ t('energization.agrees', { n: compared, total: compared }) }}
-        </p>
-        <p v-else class="mt-2 text-xs leading-relaxed text-st-closed">
-          {{ t('energization.mismatch', { n: mismatched, total: compared }) }}
-        </p>
-      </Panel>
+          <p v-if="compared === 0" class="text-sm leading-relaxed text-muted-foreground">
+            {{ t('energization.noComparison') }}
+          </p>
+          <p v-else-if="mismatched === 0" class="text-sm leading-relaxed text-st-open">
+            {{ t('energization.agrees', { n: compared, total: compared }) }}
+          </p>
+          <p v-else class="text-sm leading-relaxed text-st-closed">
+            {{ t('energization.mismatch', { n: mismatched, total: compared }) }}
+          </p>
+        </CardContent>
+      </Card>
 
-      <Panel v-if="notable.length" :title="t('energization.notable')">
-        <div
-          v-for="island in notable"
-          :key="island.id"
-          class="mb-1 flex justify-between gap-2 rounded-[var(--radius)] border border-line px-2 py-1 text-sm last:mb-0"
-        >
-          <span>
-            {{ where(island) }}
-            <small class="mt-0.5 block text-dim">{{ t(`reason.${island.reason}`) }}</small>
-          </span>
-          <span class="text-2xs whitespace-nowrap" :style="{ color: LIVE_COLOR[island.state] }">
-            {{ t(`liveState.${island.state}`) }}
-          </span>
-        </div>
-      </Panel>
+      <Card v-if="notable.length" class="border-border/60 py-0 shadow-none">
+        <CardHeader class="border-b border-border/60 px-4 py-3">
+          <CardTitle class="text-sm font-medium">{{ t('energization.notable') }}</CardTitle>
+        </CardHeader>
+        <CardContent class="space-y-2 px-4 py-4">
+          <div
+            v-for="island in notable"
+            :key="island.id"
+            class="flex justify-between gap-3 rounded-md border border-border/60 px-3 py-2 text-sm"
+          >
+            <span>
+              {{ where(island) }}
+              <small class="mt-0.5 block text-xs text-muted-foreground">
+                {{ t(`reason.${island.reason}`) }}
+              </small>
+            </span>
+            <span
+              class="whitespace-nowrap text-xs font-medium"
+              :style="{ color: LIVE_COLOR[island.state] }"
+            >
+              {{ t(`liveState.${island.state}`) }}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </template>
+
     <Empty v-else :reason="t('pane.noEnergization')" />
   </div>
 </template>

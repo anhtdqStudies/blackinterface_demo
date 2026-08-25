@@ -76,8 +76,8 @@ function openTab(kind: 'sld' | 'measurements'): void {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3 rounded-lg border border-border/70 bg-card/40 p-3">
-    <p v-if="status" class="m-0 text-xs text-muted-foreground">{{ status }}</p>
+  <div class="flex flex-col gap-3">
+    <p v-if="status" class="m-0 animate-pulse text-sm text-muted-foreground">{{ status }}</p>
 
     <p v-if="unconfigured" class="m-0 text-sm leading-relaxed text-muted-foreground">
       {{ t('agent.answer.unconfigured') }}
@@ -85,7 +85,7 @@ function openTab(kind: 'sld' | 'measurements'): void {
 
     <p
       v-if="statement"
-      class="m-0 rounded-md bg-muted/50 px-3 py-2 text-sm leading-relaxed text-foreground"
+      class="m-0 rounded-xl border border-border/60 bg-muted/25 px-4 py-3 text-sm leading-relaxed text-foreground"
     >
       {{ statement }}
     </p>
@@ -119,7 +119,7 @@ function openTab(kind: 'sld' | 'measurements'): void {
     </div>
 
     <div v-if="prose" class="flex flex-col gap-2">
-      <p class="m-0 text-2xs tracking-wider text-sys-idle uppercase">
+      <p class="m-0 text-2xs tracking-wider text-muted-foreground uppercase">
         {{ t('chat.interpretation') }}
       </p>
       <MarkdownBody :source="prose" />

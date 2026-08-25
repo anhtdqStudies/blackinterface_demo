@@ -4,17 +4,16 @@
  *
  * Reads **its own `scope` prop**, not `workspace.scope` — a pinned pane must
  * not silently ignore its pin (ADR-0014 §3).
- *
- * Navigation: station/vl → bay list · bay → device list · device → detail.
  */
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Activity } from 'lucide-vue-next'
 import { ApiError, api, type BayDetail } from '@/api/client'
 import BayStateContent from '@/features/monitoring/BayStateContent.vue'
 import DeviceStateContent from '@/features/monitoring/DeviceStateContent.vue'
 import StationStateContent from '@/features/monitoring/StationStateContent.vue'
 import type { PaneProps } from '@/app/layout/panes'
-import { device as deviceScope, parentScope } from '@/scope'
+import { device as deviceScope, formatScope, parentScope } from '@/scope'
 import { useStructureStore } from '@/stores/structure'
 import { useWorkspaceStore } from '@/stores/workspace'
 import Empty from '@/ui/Empty.vue'
@@ -49,6 +48,8 @@ const deviceId = computed<string | null>(() => {
 const showStation = computed(() => props.scope.kind === 'station' || props.scope.kind === 'vl')
 
 const voltageFilter = computed(() => (props.scope.kind === 'vl' ? props.scope.id : null))
+
+const scopeLabel = computed(() => formatScope(props.scope))
 
 const bay = ref<BayDetail | null>(null)
 const loading = ref(false)
@@ -90,7 +91,17 @@ function retry(): void {
 </script>
 
 <template>
-  <div class="p-3">
+  <div class="w-full space-y-4">
+    <div
+      v-if="!showStation || structure.bays.length"
+      class="rounded-lg border border-border/60 bg-muted/20 px-4 py-2.5"
+    >
+      <p class="flex items-center gap-2 text-sm text-muted-foreground">
+        <Activity class="size-4 shrink-0 text-primary" />
+        {{ t('state.scopeLine', { scope: scopeLabel }) }}
+      </p>
+    </div>
+
     <StationStateContent
       v-if="showStation && structure.bays.length"
       :voltage-filter="voltageFilter"

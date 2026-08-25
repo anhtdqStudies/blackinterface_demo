@@ -4,13 +4,18 @@
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RefreshCw, Zap } from 'lucide-vue-next'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { setLocale, SUPPORTED, type Locale } from '@/i18n'
+import { cn } from '@/lib/utils'
 import { ENG_PATH, HOME_PATH, LOGIN_PATH } from '@/router'
 import { useLiveStore } from '@/stores/live'
 import { useSessionStore } from '@/stores/session'
 import { useStructureStore } from '@/stores/structure'
+import { Badge } from '@/ui/badge'
 import { Button } from '@/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/select'
+import { Separator } from '@/ui/separator'
 import StatusDot, { type SystemStatus } from '@/ui/StatusDot.vue'
 
 const { t, locale } = useI18n()
@@ -61,61 +66,89 @@ const metaLine = computed(() => {
   })
 })
 
-function switchLocale(next: string): void {
-  setLocale(next as Locale)
+function switchLocale(next: unknown): void {
+  if (typeof next === 'string') setLocale(next as Locale)
 }
 
 async function signOut(): Promise<void> {
   await session.signOut()
   await router.push(LOGIN_PATH)
 }
+
+const navLinkClass =
+  'rounded-md px-2.5 py-1.5 text-sm text-muted-foreground no-underline transition-colors hover:bg-muted hover:text-foreground'
 </script>
 
 <template>
   <header class="border-b border-border bg-background">
-    <div class="flex h-14 flex-wrap items-center gap-x-4 gap-y-2 px-4">
-      <RouterLink
-        :to="HOME_PATH"
-        class="text-lg font-semibold tracking-tight text-foreground no-underline"
-      >
-        {{ t('app.brand') }}
-      </RouterLink>
+    <div class="flex h-14 items-center gap-3 px-4">
+      <!-- Brand + station -->
+      <div class="flex min-w-0 items-center gap-2.5">
+        <RouterLink
+          :to="HOME_PATH"
+          class="flex shrink-0 items-center gap-2 text-foreground no-underline"
+        >
+          <span
+            class="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-primary"
+          >
+            <Zap class="size-3.5" />
+          </span>
+          <span class="hidden text-sm font-semibold tracking-tight sm:inline">
+            {{ t('app.brand') }}
+          </span>
+        </RouterLink>
 
-      <span v-if="structure.station" class="text-sm font-semibold text-foreground">
-        {{ structure.station.name }}
-      </span>
-      <span v-else-if="structure.loading" class="text-sm text-muted-foreground">
-        {{ t('app.loading') }}
-      </span>
+        <Separator orientation="vertical" class="hidden h-5 sm:block" />
 
-      <StatusDot :status="status" :label="statusLabel" :title="statusTitle" />
+        <Badge
+          v-if="structure.station"
+          variant="secondary"
+          class="max-w-[10rem] truncate font-normal sm:max-w-xs"
+        >
+          {{ structure.station.name }}
+        </Badge>
+        <span v-else-if="structure.loading" class="text-sm text-muted-foreground">
+          {{ t('app.loading') }}
+        </span>
+      </div>
 
-      <span v-if="metaLine" class="hidden text-xs text-muted-foreground lg:inline">
-        {{ metaLine }}
-      </span>
+      <!-- Link status + meta -->
+      <div class="hidden min-w-0 items-center gap-3 md:flex">
+        <span
+          class="inline-flex items-center rounded-full border border-border/60 bg-muted/40 px-2.5 py-1"
+        >
+          <StatusDot :status="status" :label="statusLabel" :title="statusTitle" />
+        </span>
+        <span v-if="metaLine" class="truncate text-xs text-muted-foreground" :title="metaLine">
+          {{ metaLine }}
+        </span>
+      </div>
 
-      <nav class="ml-auto flex flex-wrap items-center gap-2">
+      <!-- Actions -->
+      <nav class="ml-auto flex shrink-0 items-center gap-1.5">
         <RouterLink
           v-if="!onEng"
           :to="HOME_PATH"
-          class="text-sm text-muted-foreground no-underline hover:text-foreground"
+          :class="cn(navLinkClass, { 'bg-muted text-foreground': route.name === 'ops' })"
         >
           {{ t('nav.diagram') }}
         </RouterLink>
         <RouterLink
           v-if="session.can('model.connect')"
           :to="ENG_PATH"
-          class="text-sm text-muted-foreground no-underline hover:text-foreground"
+          :class="cn(navLinkClass, { 'bg-muted text-foreground': onEng })"
         >
           {{ t('nav.engineering') }}
         </RouterLink>
 
+        <Separator orientation="vertical" class="mx-1 hidden h-5 sm:block" />
+
         <span
-          class="text-xs text-muted-foreground"
+          class="hidden max-w-[8rem] truncate text-xs text-muted-foreground lg:inline"
           :title="`${session.user} · ${session.capabilities.size} ${t('session.capabilities')}`"
         >
           {{ session.displayName }}
-          <b class="font-semibold text-foreground">{{ session.roles.join(' + ') }}</b>
+          <span class="font-medium text-foreground">{{ session.roles.join(' + ') }}</span>
         </span>
 
         <Button
@@ -128,33 +161,37 @@ async function signOut(): Promise<void> {
           {{ t('session.signOut') }}
         </Button>
 
-        <select
-          :value="locale"
-          :aria-label="t('nav.language')"
-          class="h-8 rounded-md border border-input bg-muted px-2 text-xs text-muted-foreground"
-          @change="switchLocale(($event.target as HTMLSelectElement).value)"
-        >
-          <option v-for="code in SUPPORTED" :key="code" :value="code">
-            {{ code.toUpperCase() }}
-          </option>
-        </select>
+        <Select :model-value="locale" @update:model-value="switchLocale">
+          <SelectTrigger class="h-8 w-[4.25rem] text-xs" :aria-label="t('nav.language')">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent align="end">
+            <SelectItem v-for="code in SUPPORTED" :key="code" :value="code">
+              {{ code.toUpperCase() }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
 
         <Button
           v-if="session.can('model.connect')"
           variant="outline"
-          size="xs"
+          size="icon-xs"
           :disabled="structure.reloading"
+          :title="structure.reloading ? t('app.reloading') : t('app.reloadSource')"
           @click="structure.reload()"
         >
-          {{ structure.reloading ? t('app.reloading') : t('app.reloadSource') }}
+          <RefreshCw :class="structure.reloading ? 'animate-spin' : ''" />
         </Button>
       </nav>
     </div>
+
+    <!-- Mobile meta row -->
+    <div
+      v-if="metaLine"
+      class="flex items-center gap-2 border-t border-border/50 px-4 py-1.5 md:hidden"
+    >
+      <StatusDot :status="status" :label="statusLabel" :title="statusTitle" />
+      <span class="truncate text-2xs text-muted-foreground">{{ metaLine }}</span>
+    </div>
   </header>
 </template>
-
-<style scoped>
-nav a.router-link-active {
-  color: var(--foreground);
-}
-</style>

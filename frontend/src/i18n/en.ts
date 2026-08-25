@@ -18,6 +18,15 @@ export default {
     engineering: 'Engineering',
     language: 'Language',
   },
+  workspace: {
+    nav: 'Workspace navigation',
+    navCollapse: 'Collapse navigation rail',
+    navExpand: 'Expand navigation rail',
+    details: 'Scope details',
+    detailsTitle: 'Quick state',
+    detailsClose: 'Hide details',
+    detailsReopen: 'Show quick state beside diagram',
+  },
   session: {
     capabilities: 'capabilities',
     signOut: 'Sign out',
@@ -36,6 +45,8 @@ export default {
     measurements: 'Measurements',
     energization: 'Energisation',
     anomalies: 'Anomalies',
+    alarms: 'Incidents',
+    alarmList: 'Alarms',
     evidence: 'Evidence',
     chat: 'Ask',
     connections: 'Connections',
@@ -79,9 +90,65 @@ export default {
     backToStation: '← Back to station',
     backToBay: '← Back to bay {bay}',
   },
+  alarms: {
+    scopeLine: 'Scope in view: {scope}',
+    notAsked: 'The server has not been asked about this scope yet.',
+    noneInScope: 'No open incidents in {scope}.',
+    none: 'No open incidents.',
+    unknownYet: 'The alarm list has not been read yet — this is not "nothing is wrong".',
+    stationCounts: 'Station: {fault} faults · {status} status · {unknown} unclassified',
+    seed: 'Highest-severity alarm',
+    faults: 'Alarms in this cluster',
+    evidence: 'Supporting evidence',
+    flapping: 'Flapping',
+    flappingHint:
+      'This point keeps going in and out — collapsed to one entry, not many incidents.',
+    scopes: 'Scopes affected',
+    span: 'Spanned {ms} ms',
+    byOperator: 'Caused by {actor}',
+    notCause:
+      'These alarms share a moment and an electrical area — this is not yet a causal chain.',
+    guidance: 'Handling guidance',
+    noGuidance: 'No guidance exists for this kind of alarm.',
+    draft: 'DRAFT — not approved',
+    draftHint:
+      'Composed by the system and reviewed by nobody with operational authority. Reference only; it does not replace the station procedure.',
+    caution: 'Caution',
+    references: 'Sources',
+    klass: {
+      fault: 'Fault',
+      status: 'Status',
+      config: 'Configuration',
+      action: 'Operator action',
+      unknown: 'Unclassified',
+    },
+  },
+  alarmList: {
+    tabActive: 'Active',
+    tabHistory: 'Handled',
+    filters: 'Filters',
+    rowCount: '{count} rows',
+    time: 'Time',
+    severity: 'Sev',
+    klass: 'Class',
+    message: 'Message',
+    point: 'Point',
+    search: 'Search',
+    searchPlaceholder: 'message, point, severity…',
+    all: 'All',
+    includeStatus: 'Show switch positions',
+    noneInScope: 'No alarms in {scope}.',
+    noHistory: 'No handled incidents in {scope}.',
+    historyHint:
+      'Incidents land here after Done on the Incidents tab. Local workflow only — not OneATS acknowledgement.',
+    done: 'Done — handled',
+    dismissing: 'Saving…',
+    dismissedAt: 'Done at {time}',
+  },
   anomalies: {
     none: 'No runtime anomalies.',
     stationWide: 'Whole station — deliberately not narrowed to {scope}.',
+    scopeLine: 'Runtime anomalies — always whole station',
   },
   eng: {
     title: 'Engineering',
@@ -117,6 +184,7 @@ export default {
   },
   energization: {
     title: 'Energisation',
+    scopeLine: 'Energisation — always whole station',
     noComparison: "No bay could be compared against OneATS's IsLive.",
     agrees:
       'Agrees with OneATS on {n}/{total} bays — two independent calculations, same answer.',
@@ -187,6 +255,15 @@ export default {
     baysAtLevel: '{level} — {count} bays',
     bayOverview: 'Bay {bay}',
     scopeUnsupported: 'Pick the station, a bay, or a device to see switch state.',
+    scopeLine: 'Switch positions — scope: {scope}',
+  },
+  sld: {
+    fit: 'Fit view',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    fullscreen: 'Full screen',
+    exitFullscreen: 'Exit full screen',
+    hint: 'Scroll · drag to pan · f key',
   },
   liveState: {
     LIVE: 'LIVE',
@@ -215,6 +292,7 @@ export default {
   },
   measurement: {
     title: 'Measurements',
+    scopeLine: 'Measurements — scope: {scope}',
     columnQuantity: 'Quantity',
     columnValue: 'Value',
     unreadable: 'not readable (quality {quality})',
@@ -227,6 +305,7 @@ export default {
   },
   evidence: {
     title: 'Evidence',
+    scopeLine: 'Evidence coverage — scope: {scope}',
     clean: 'complete',
     noPoints: 'no points read',
     coverage: 'Coverage',
@@ -290,9 +369,7 @@ export default {
     chipHint: 'Questions without a name resolve against this scope. Click to widen.',
   },
   chat: {
-    empty:
-      'Ask about this station. Name a device or its designation — "how is 271?". ' +
-      'A question that names nothing is taken to be about the scope on screen.',
+    empty: 'Ask about the station…',
     placeholder: 'Ask about the station…',
     send: 'Ask',
     sending: 'Asking…',

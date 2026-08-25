@@ -1,0 +1,67 @@
+# Default alarm classification table (ADR-0027 section 1).
+#
+# Built from what was actually measured on DEMO_SAS v654, 2026-08-13:
+#   243 active alarms on a healthy station
+#     90  .PosSt / .PosSt1   switch positions   -> status
+#     41  .TimeFail          relay time sync    -> fault
+#     35  .SG1               setting group      -> config
+#    ~20  .FAC2xx            AC panel breakers  -> status
+#      4  .OilTmpTr .OilLevAlm .Vlin .PPVmax    -> fault
+#
+# First match wins, so order matters. Anything unmatched becomes `unknown` and
+# is SHOWN, not dropped - an unmatched alarm is a hole in this table, and a
+# silent hole never gets filled.
+#
+# Reproduce the distribution: python tools/probe_dataserver.py --alarms
+
+name: default
+description: >
+  Measured on DEMO_SAS v654 (2026-08-13). Suffix conventions follow the flattened
+  IEC 61850 naming ATS uses (D03.XCBR1.PosSt, not Pos.stVal).
+
+rules:
+  # ---------------------------------------------------------------- positions
+  # A breaker reporting CLOSED is the station working. It becomes evidence
+  # inside an incident, but it never raises one.
+  - suffixes: [PosSt, PosSt1, PosSt2]
+    klass: status
+    note: switch position, Dbpos 0=INTERMEDIATE 1=OPEN 2=CLOSED 3=BAD
+
+  # AC auxiliary panel breakers - 72 alarms on the AC object alone.
+  - suffixes: []
+    message_pattern: '\(Aux-AC\)'
+    klass: status
+    note: auxiliary AC panel breaker status
+
+  # ------------------------------------------------------------- configuration
+  - suffixes: [SG1, SG2, SG3, SG4]
+    klass: config
+    note: active protection setting group
+
+  - suffixes: [SubsCtlLev]
+    klass: config
+    note: substation control level (local/remote)
+
+  # -------------------------------------------------------------------- faults
+  - suffixes: [TimeFail]
+    klass: fault
+    note: relay lost time synchronisation - real, and there are 41 of them
+
+  - suffixes: [OilTmpTr, OilTmpAlm, OilLevAlm, OilLevTr]
+    klass: fault
+    note: transformer oil temperature / level
+
+  - suffixes: [FanSt]
+    klass: status
+    note: cooling fan group running - a state, not a fault
+
+  # Every Limit Alarm is a threshold that was crossed. OneATS already decided
+  # that; we do not second-guess it by re-reading the value.
+  - category: Limit Alarm
+    klass: fault
+    note: HiHi/Hi/Lo/LoLo or reasonability limit exceeded
+
+  - suffixes: []
+    message_pattern: 'TRIP|FAULT|FAIL|ALARM'
+    klass: fault
+    note: catch-all on message wording, last resort before unknown

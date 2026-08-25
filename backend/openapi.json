@@ -1,6 +1,185 @@
 {
   "components": {
     "schemas": {
+      "AlarmLiveOut": {
+        "description": "The `alarm` cadence: what is annunciated station-wide, right now.\n\nCarries the classified list with switch positions and configuration rows\nalready filtered out — station-wide that is 243 rows down to a handful. A\npane that wants a narrower scope, or wants the noise back, calls\n`/api/alarms`; this is the push that tells it something moved.",
+        "properties": {
+          "alarms": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlarmOut"
+            },
+            "title": "Alarms",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Counts",
+            "type": "object"
+          },
+          "has_snapshot": {
+            "default": false,
+            "title": "Has Snapshot",
+            "type": "boolean"
+          },
+          "revision": {
+            "default": 0,
+            "title": "Revision",
+            "type": "integer"
+          }
+        },
+        "title": "AlarmLiveOut",
+        "type": "object"
+      },
+      "AlarmOut": {
+        "description": "One alarm, already classified. Raw alarms do not cross this boundary.\n\n`klass` is what the UI filters on. A healthy station reports 243 active\nalarms of which 90 say a breaker is closed; shipping that list unclassified\nwould rebuild the wall of noise this product replaces (ADR-0027).",
+        "properties": {
+          "acknowledged": {
+            "default": false,
+            "title": "Acknowledged",
+            "type": "boolean"
+          },
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "category": {
+            "default": "",
+            "title": "Category",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "klass": {
+            "title": "Klass",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "point": {
+            "title": "Point",
+            "type": "string"
+          },
+          "severity": {
+            "default": 0,
+            "title": "Severity",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "t_active": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Active"
+          },
+          "t_change": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T Change"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "event_id",
+          "subject",
+          "point",
+          "klass",
+          "state"
+        ],
+        "title": "AlarmOut",
+        "type": "object"
+      },
+      "AlarmsOut": {
+        "description": "Active alarms for one scope, with the evidence behind the answer.",
+        "properties": {
+          "alarms": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlarmOut"
+            },
+            "title": "Alarms",
+            "type": "array"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Counts",
+            "type": "object"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/EvidenceRecord"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "kind",
+          "evidence"
+        ],
+        "title": "AlarmsOut",
+        "type": "object"
+      },
       "AnswerOut": {
         "description": "One turn of conversation, with everything behind it.\n\nThe same object arrives two ways: whole from `POST /api/ask`, and in pieces\nfrom `POST /api/ask/stream`. Same schema either way, so a client applies an\nanswer with one code path whichever it used — the reasoning behind\n`/api/live` and `/api/stream` (ADR-0012), for the same reason.\n\nProse and facts are separate fields on purpose (I3). `text` is what a\nlanguage model wrote and is labelled as interpretation; `summary`,\n`resolution` and `evidence` are computed and are what the interface may\nshow as fact.\n\nSince ADR-0021 the backend no longer sends a computed *sentence*: it sends\nthe computed *payload*, and the interface writes the sentence in the reader's\nlanguage. Same principle as before (the backend does not know whether the\nreader wants Vietnamese or English) with one fewer indirection, and the\nsafety property is unchanged — there is always something measured on screen\nthat does not depend on trusting the model's wording.",
         "properties": {
@@ -1268,6 +1447,140 @@
         "title": "HealthOut",
         "type": "object"
       },
+      "IncidentOut": {
+        "description": "A cluster of alarms that belong together in time and in the network.\n\n`seed` is the highest-severity fault in the cluster. It is deliberately not\ncalled a cause: grouping says these belong together, it does not say the\nfirst one produced the rest. Causality is `trace` (ADR-0024).",
+        "properties": {
+          "dismissed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dismissed At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "evidence": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlarmOut"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "faults": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AlarmOut"
+            },
+            "title": "Faults",
+            "type": "array"
+          },
+          "flapping_points": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Flapping Points",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "playbook": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlaybookOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scopes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          },
+          "seed": {
+            "$ref": "#/components/schemas/AlarmOut"
+          },
+          "severity": {
+            "default": 0,
+            "title": "Severity",
+            "type": "integer"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subject",
+          "seed"
+        ],
+        "title": "IncidentOut",
+        "type": "object"
+      },
+      "IncidentsOut": {
+        "description": "What is actually wrong in one scope, and what to do about it.",
+        "properties": {
+          "evidence": {
+            "$ref": "#/components/schemas/EvidenceRecord"
+          },
+          "incidents": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/IncidentOut"
+            },
+            "title": "Incidents",
+            "type": "array"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "scope": {
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "kind",
+          "evidence"
+        ],
+        "title": "IncidentsOut",
+        "type": "object"
+      },
       "Island": {
         "description": "A set of nodes that are one conductor, with one verdict for all of them.",
         "properties": {
@@ -1485,6 +1798,9 @@
       "LiveOut": {
         "description": "Everything that moves, in one document — the shape `/api/live` returns.\n\nThe stream sends these three as separate typed events at their own rates\n(ADR-0012); the poll endpoint hands over all three at once, because a\nclient that has just connected needs the whole present tense before it can\nrender anything. Same schemas either way, so there is still one code path\napplying each cadence.",
         "properties": {
+          "alarm": {
+            "$ref": "#/components/schemas/AlarmLiveOut"
+          },
           "link": {
             "$ref": "#/components/schemas/LinkOut"
           },
@@ -1498,7 +1814,8 @@
         "required": [
           "state",
           "measurement",
-          "link"
+          "link",
+          "alarm"
         ],
         "title": "LiveOut",
         "type": "object"
@@ -1640,6 +1957,73 @@
           "new_password"
         ],
         "title": "PasswordChangeIn",
+        "type": "object"
+      },
+      "PlaybookOut": {
+        "description": "Handling guidance for one kind of alarm.\n\n`status` is not decoration. Everything shipped today is `draft` — composed\nby an agent, reviewed by nobody with authority over this substation — and\nthe UI is required to show that next to the text (ADR-0027 §3).",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "references": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "References",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "approved"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "steps": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PlaybookStepOut"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "summary": {
+            "default": "",
+            "title": "Summary",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status"
+        ],
+        "title": "PlaybookOut",
+        "type": "object"
+      },
+      "PlaybookStepOut": {
+        "properties": {
+          "caution": {
+            "default": "",
+            "title": "Caution",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "PlaybookStepOut",
         "type": "object"
       },
       "Point": {
@@ -2889,6 +3273,61 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/alarms": {
+      "get": {
+        "description": "Active alarms for one scope, classified, with evidence.",
+        "operationId": "alarms_api_alarms_get",
+        "parameters": [
+          {
+            "description": "Scope ref, e.g. station, bay:D03",
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "station",
+              "description": "Scope ref, e.g. station, bay:D03",
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include switch-position and configuration alarms. Off by default: a healthy station annunciates 90 of them and they are evidence, not faults.",
+            "in": "query",
+            "name": "include_status",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Include switch-position and configuration alarms. Off by default: a healthy station annunciates 90 of them and they are evidence, not faults.",
+              "title": "Include Status",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlarmsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Alarms"
+      }
+    },
     "/api/ask": {
       "post": {
         "description": "Answer one question, whole.",
@@ -3324,6 +3763,156 @@
           }
         },
         "summary": "Health"
+      }
+    },
+    "/api/incidents": {
+      "get": {
+        "description": "Alarms grouped into incidents, each with its handling guidance.",
+        "operationId": "incidents_api_incidents_get",
+        "parameters": [
+          {
+            "description": "Scope ref, e.g. station, bay:D03",
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "station",
+              "description": "Scope ref, e.g. station, bay:D03",
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Clustering window. Default 200 ms, measured: a real cascade spanned 87 ms.",
+            "in": "query",
+            "name": "window_ms",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 60000,
+                  "minimum": 10,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clustering window. Default 200 ms, measured: a real cascade spanned 87 ms.",
+              "title": "Window Ms"
+            }
+          },
+          {
+            "description": "Open incidents need attention. Dismissed returns local history after an operator pressed Done — not OneATS acknowledgement.",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": "open",
+              "description": "Open incidents need attention. Dismissed returns local history after an operator pressed Done — not OneATS acknowledgement.",
+              "enum": [
+                "open",
+                "dismissed"
+              ],
+              "title": "Status",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Incidents"
+      }
+    },
+    "/api/incidents/{incident_id}/dismiss": {
+      "post": {
+        "description": "Mark one open incident as handled locally. Does not ack on OneATS (I1).",
+        "operationId": "dismiss_api_incidents__incident_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "incident_id",
+            "required": true,
+            "schema": {
+              "title": "Incident Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Scope ref the operator was viewing",
+            "in": "query",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "description": "Scope ref the operator was viewing",
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Clustering window — must match the open-incidents view.",
+            "in": "query",
+            "name": "window_ms",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 60000,
+                  "minimum": 10,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Clustering window — must match the open-incidents view.",
+              "title": "Window Ms"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss"
       }
     },
     "/api/issues": {
