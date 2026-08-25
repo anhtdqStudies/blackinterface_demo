@@ -170,6 +170,21 @@ class Bay(Frozen):
     source_ref: str | None = None
 
 
+class Transformer(Frozen):
+    """A power transformer coupling bays across voltage levels.
+
+    The pairing is evidence, not guesswork: each listed bay's display name
+    (`BAY/Name` in the DataServer) references the transformer's id, e.g. both
+    D01 (220kV) and E07 (110kV) are named "AT1 Incoming". Bays are ordered
+    highest voltage first.
+    """
+
+    id: str  # e.g. "AT1"
+    name: str
+    bay_ids: tuple[str, ...] = ()  # HV first
+    source_ref: str | None = None
+
+
 class StationGraph(Frozen):
     """The whole station as one immutable, deterministic object."""
 
@@ -182,6 +197,7 @@ class StationGraph(Frozen):
     bays: tuple[Bay, ...] = ()
     devices: tuple[Device, ...] = ()
     nodes: tuple[ConnectivityNode, ...] = ()
+    transformers: tuple[Transformer, ...] = ()
     issues: tuple[ValidationIssue, ...] = Field(default=())
 
     def device(self, device_id: str) -> Device | None:

@@ -1,0 +1,331 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===========================================================================
+ * THREE PALETTES — see docs/20-ui/tokens.md
+ *
+ * 1. CHROME  — shadcn semantic vars (--background, --primary, …). DESIGN.md.
+ * 2. STATION  — st-*  OneATS device/conductor colours. Never for link/errors.
+ * 3. SYSTEM   — sys-* software state. Never red/green (ADR-0014 §2).
+ * ======================================================================== */
+
+:root {
+  /* shadcn chrome — mapped from frontend/DESIGN.md */
+  --background: #010102;
+  --foreground: #f7f8f8;
+  --card: #0f1011;
+  --card-foreground: #f7f8f8;
+  --popover: #0f1011;
+  --popover-foreground: #f7f8f8;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --secondary: #141516;
+  --secondary-foreground: #f7f8f8;
+  --muted: #141516;
+  --muted-foreground: #8a8f98;
+  --accent: #18191a;
+  --accent-foreground: #f7f8f8;
+  --destructive: #ff5c8a;
+  --destructive-foreground: #ffffff;
+  --border: #23252a;
+  --input: #23252a;
+  --ring: #5e69d1;
+  --radius: 0.5rem;
+
+  /* Legacy chrome aliases — @deprecated, remove Phase 5 */
+  --color-bg: var(--background);
+  --color-panel: var(--card);
+  --color-panel-2: var(--muted);
+  --color-line: var(--border);
+  --color-fg: var(--foreground);
+  --color-dim: var(--muted-foreground);
+  --color-accent: var(--primary);
+}
+
+@theme inline {
+  /* shadcn semantic colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Legacy Tailwind aliases — @deprecated */
+  --color-bg: var(--background);
+  --color-panel: var(--card);
+  --color-panel-2: var(--muted);
+  --color-line: var(--border);
+  --color-fg: var(--foreground);
+  --color-dim: var(--muted-foreground);
+
+  /* Station — outside shadcn theme */
+  --color-st-closed: #e5484d;
+  --color-st-open: #24c07a;
+  --color-st-intermediate: #f5a524;
+  --color-st-undetermined: #8b8d98;
+  --color-st-live: #4aa3ff;
+  --color-st-dead: #24c07a;
+  --color-st-earthed: #b48ce8;
+
+  /* System — outside shadcn theme */
+  --color-sys-ok: #8b93a3;
+  --color-sys-warn: #f0b429;
+  --color-sys-down: #ff5c8a;
+  --color-sys-idle: #5c6474;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: 'Inter', ui-sans-serif, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 15px;
+  --text-xl: 18px;
+  --text-2xs: 11px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --font-heading: var(--font-sans);
+}
+
+/* Legacy :root aliases for pre-ADR views — @deprecated Phase 5 */
+:root {
+  --bg: var(--background);
+  --panel: var(--card);
+  --panel-2: var(--muted);
+  --line: var(--border);
+  --fg: var(--foreground);
+  --dim: var(--muted-foreground);
+  --accent: var(--primary);
+  --closed: var(--color-st-closed);
+  --open: var(--color-st-open);
+  --intermediate: var(--color-st-intermediate);
+  --undetermined: var(--color-st-undetermined);
+  --live: var(--color-st-live);
+  --dead: var(--color-st-dead);
+  --earthed: var(--color-st-earthed);
+  --mono: var(--font-mono);
+  --radius: 8px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    @apply bg-background text-foreground antialiased;
+    font: var(--text-base) / 1.5 var(--font-sans);
+  }
+
+  a {
+    @apply text-primary;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    @apply text-muted-foreground;
+  }
+}
+
+/* @deprecated — remove Phase 5 when all views use shadcn Button */
+button {
+  background: var(--muted);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 11px;
+  cursor: pointer;
+  font: inherit;
+}
+button:hover:not(:disabled) {
+  border-color: var(--primary);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+button.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+}
+
+/* @deprecated — DataTable uses shadcn Table after Phase 3 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+}
+td {
+  padding: 3px 0;
+  vertical-align: top;
+}
+td:first-child {
+  @apply text-muted-foreground;
+  width: 38%;
+  padding-right: 8px;
+}
+
+.dim {
+  @apply text-muted-foreground;
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  @apply text-muted-foreground italic;
+}
+
+/* Assistant markdown — chat transcript only */
+.chat-prose {
+  @apply text-sm leading-relaxed text-foreground;
+}
+
+.chat-prose > :first-child {
+  margin-top: 0;
+}
+
+.chat-prose > :last-child {
+  margin-bottom: 0;
+}
+
+.chat-prose p {
+  margin: 0.65em 0;
+}
+
+.chat-prose h1,
+.chat-prose h2,
+.chat-prose h3,
+.chat-prose h4 {
+  @apply font-semibold text-foreground;
+  margin: 1em 0 0.45em;
+  line-height: 1.35;
+}
+
+.chat-prose h1 {
+  font-size: var(--text-lg);
+}
+
+.chat-prose h2 {
+  font-size: var(--text-base);
+}
+
+.chat-prose h3,
+.chat-prose h4 {
+  font-size: var(--text-sm);
+}
+
+.chat-prose ul,
+.chat-prose ol {
+  margin: 0.5em 0;
+  padding-left: 1.35em;
+}
+
+.chat-prose li {
+  margin: 0.25em 0;
+}
+
+.chat-prose li > p {
+  margin: 0.15em 0;
+}
+
+.chat-prose blockquote {
+  @apply border-l-2 border-border text-muted-foreground;
+  margin: 0.65em 0;
+  padding-left: 0.85em;
+}
+
+.chat-prose pre {
+  @apply overflow-x-auto rounded-md border border-border bg-muted;
+  margin: 0.65em 0;
+  padding: 0.65em 0.85em;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+
+.chat-prose pre code {
+  @apply bg-transparent text-foreground;
+  padding: 0;
+  font-size: inherit;
+}
+
+.chat-prose :not(pre) > code {
+  @apply rounded-sm bg-muted px-1 py-0.5 text-foreground;
+  font-size: 0.92em;
+}
+
+.chat-prose a {
+  @apply text-primary underline-offset-2 hover:underline;
+}
+
+.chat-prose hr {
+  @apply border-border;
+  margin: 1em 0;
+}
+
+.chat-prose table {
+  @apply w-full border-collapse text-xs;
+  margin: 0.65em 0;
+}
+
+.chat-prose th,
+.chat-prose td {
+  @apply border border-border px-2 py-1 text-left align-top;
+}
+
+.chat-prose th {
+  @apply bg-muted font-medium text-foreground;
+}
+
+.chat-prose strong {
+  @apply font-semibold text-foreground;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

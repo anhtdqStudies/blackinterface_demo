@@ -11,21 +11,36 @@ from __future__ import annotations
 
 import importlib
 import pkgutil
+import re
 import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 
 import blackinterface
 
-LAYERS = ("domain", "integration", "diagram", "api", "agent", "store")
+LAYERS = ("domain", "integration", "diagram", "api", "agent", "store", "control")
 
-# AGENTS.md I6 — domain is the contract; it depends on nothing else.
+# AGENTS.md I6 — domain is the contract; it depends on nothing else. Not on a
+# sibling layer, and not on process-wide concerns either: a pure domain takes
+# its inputs as arguments, so it must not reach for config or a database.
 FORBIDDEN_TRANSITIVE: dict[str, tuple[str, ...]] = {
-    "domain": tuple(f"blackinterface.{layer}" for layer in LAYERS if layer != "domain"),
+    "domain": (
+        *(f"blackinterface.{layer}" for layer in LAYERS if layer != "domain"),
+        "blackinterface.config",
+        "blackinterface.logs",
+    ),
     # AGENTS.md I5 — agent reaches the rest of the system only through api.
-    "agent": ("blackinterface.integration", "blackinterface.diagram", "blackinterface.store"),
+    # AGENTS.md I1 / ADR-0011 — and never the write path, not even transitively.
+    # The agent prepares an operation; a person issues it.
+    "agent": (
+        "blackinterface.integration",
+        "blackinterface.diagram",
+        "blackinterface.store",
+        "blackinterface.control",
+    ),
 }
 
 # AGENTS.md I6 — only integration may speak OPC UA.
@@ -94,6 +109,36 @@ def test_every_layer_package_exists() -> None:
     found = {m.name for m in pkgutil.iter_modules(blackinterface.__path__)}
     missing = set(LAYERS) - found
     assert not missing, f"missing layer packages: {sorted(missing)}"
+
+
+#: `f"bay:{id}"` and friends. One module formats scope refs (AGENTS.md I8);
+#: everywhere else the format is an implementation detail it must not know.
+_KINDS = "station|vl|busbar|bay|device|point"
+_HAND_BUILT_SCOPE = re.compile(
+    rf"""["'](?:{_KINDS}):(?:\{{|%s)"""  # f"bay:{x}"  or  "bay:%s" % x
+    rf"""|["'](?:{_KINDS}):["']\s*\+"""  # "bay:" + x
+)
+
+_SCOPE_OWNER = "domain/scope.py"
+
+
+def test_nobody_hand_builds_a_scope_ref() -> None:
+    """A scope ref is produced by `domain/scope.py` or not at all.
+
+    Four layers agree on this vocabulary — URL, tool argument, pane key,
+    evidence subject (ADR-0010). Four layers agreeing by convention is three
+    chances to drift; the point of a single formatter is that there is nothing
+    to keep in sync.
+    """
+    root = Path(blackinterface.__file__).parent
+    offenders = [
+        f"{path.relative_to(root).as_posix()}:{i}: {line.strip()}"
+        for path in root.rglob("*.py")
+        if path.relative_to(root).as_posix() != _SCOPE_OWNER
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        if _HAND_BUILT_SCOPE.search(line)
+    ]
+    assert not offenders, "build scope refs through domain/scope.py (I8):\n" + "\n".join(offenders)
 
 
 def test_every_layer_documents_its_role() -> None:

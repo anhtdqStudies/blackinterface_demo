@@ -13,13 +13,19 @@
 |---|------|-------------|
 | 1 | `AGENTS.md` (file này) | **Luôn luôn** |
 | 2 | `docs/90-progress/status.md` | **Luôn luôn** — biết đang ở đâu, việc kế tiếp là gì |
+| 2b | `docs/90-progress/team.md` | **Luôn luôn từ 2026-08-10** — ai sở hữu file nào, ai đang làm gì ([ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md)). Sửa file của người khác = sai kể cả khi code đúng |
+| 2c | `docs/00-onboarding.md` | Người mới (không phải agent) vào dự án |
 | 3 | `docs/30-integration/oneats-dataserver.md` | Khi động tới OPC UA / DataServer / alarm |
 | 4 | `docs/20-domain/glossary.md` | Khi gặp thuật ngữ lạ (61850, CIM, EVN) |
 | 5 | `docs/10-architecture/overview.md` | Khi thêm module hoặc đổi ranh giới lớp |
 | 6 | `docs/10-architecture/adr/` | Khi định làm khác một quyết định đã chốt |
 | 7 | `docs/40-testing/` | Khi muốn tự tay chạy thử một module đã xong |
+| 8 | `document/@Station_UseCases 1.xlsx` | Khi làm bất kỳ module use case nào (A–F). Sheet `Use Case` = khung; `A01`/`A02`/`A04` = chi tiết, có **đích danh point** |
 
 Không đọc `document/UserManual/*.pdf` trừ khi thật sự cần — đã chắt lọc vào `docs/`.
+
+⚠ File use case là **ví dụ về loại việc người dùng muốn giải quyết**, không phải
+khuôn mẫu để code từng dòng — xem I8. Dùng nó làm **bộ đề kiểm tra độ phủ**.
 
 ---
 
@@ -39,17 +45,33 @@ Chi tiết: `docs/00-product/vision.md`
 
 ---
 
-## 2. Bảy luật bất biến (INVARIANTS)
+## 2. Tám luật bất biến (INVARIANTS)
 
 Vi phạm bất kỳ luật nào dưới đây = sai, kể cả khi code chạy được.
 Nếu bạn nghĩ cần phá luật, **dừng lại và hỏi người dùng**, đừng tự quyết.
 
-### I1. MVP là READ-ONLY. Cưỡng chế bằng cấu trúc, không bằng prompt.
-- Tool registry **không được chứa** bất kỳ tool ghi nào.
+### I1. Một đường ghi duy nhất, qua `control/`. Cưỡng chế bằng cấu trúc, không bằng prompt.
+*(Phát biểu lại 2026-08-05 theo ADR-0011; phát biểu lại lần hai 2026-08-07 theo
+[ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §2.)*
+
+- **Không module nào ngoài `control/` được chạm bề mặt ghi của OneATS.**
+- **`control/registry.py` RỖNG** cho tới khi có ADR riêng mở từng lệnh một.
+  Tới lúc này, trên thực tế hệ vẫn read-only — chỉ khác là chỗ để mở đã có sẵn.
+- **Agent KHÔNG BAO GIỜ có tool TỰ THỰC THI.** Tool ghi được phép nằm trong danh
+  mục, nhưng mọi tool chạm bề mặt ghi **bắt buộc** dừng ở khung duyệt và chỉ chạy
+  tiếp sau một chữ ký của người. Quyền **`control.sign` không bao giờ** nằm trong
+  tập quyền agent mượn được (agent mượn quyền người hỏi — ADR-0016 §5).
+  **Agent soạn phiếu, người ký.**
+  - Tool khai capability ngoài `READ_ONLY` mà thiếu `requires_approval=True` →
+    lỗi ngay lúc import, và `check.py` mục 3 bắt lại bằng `ast`.
+  - Đây **chặt hơn** phát biểu cũ («tool ghi không tồn tại»), không phải nới:
+    cũ là khẳng định về *danh mục* và sẽ phải nới vào ngày module C mở; mới là
+    khẳng định về *đường thi hành*, và đường thi hành thì test được.
+- `agent/` **không được import** `control/`.
 - Client OPC UA phải dùng account read-only, không Anonymous.
-- Không bao giờ gọi `*.PosCtl`, `SysCommon.Force/Unforce`, `OADataModel.Restart`,
+- Bề mặt ghi: `*.PosCtl`, `SysCommon.Force/Unforce`, `OADataModel.Restart`,
   `OATagging.Set*`, `OAAlarm.Ack*/Enable/Disable`.
-- Danh sách đầy đủ bề mặt ghi: `docs/30-integration/oneats-dataserver.md` §Bề mặt ghi.
+  Danh sách đầy đủ: `docs/30-integration/oneats-dataserver.md` §Bề mặt ghi.
 
 ### I2. Không khẳng định trạng thái khi quality không GOOD.
 Mọi phát biểu về trạng thái thiết bị **bắt buộc** kèm `(value, quality, timestamp/age)`.
@@ -61,10 +83,24 @@ Mọi phát biểu về trạng thái thiết bị **bắt buộc** kèm `(value
 LLM **không được** tự soạn phần evidence. Tool trả `(payload, EvidenceRecord)`.
 Prose của LLM nằm cạnh block evidence và được label rõ là *diễn giải*.
 
+*(Siết thêm 2026-08-07, [ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §4.)*
+Mọi con số xuất hiện trong prose của mô hình phải **truy được về `metadata` của
+một `ToolReturn`** trong chính lượt đó. Hai đường tách vật lý: `metadata` mang
+`EvidenceRecord` + payload đầy đủ và **mô hình không nhìn thấy**; `content` mang
+bản gọn cho mô hình. Tách bằng cấu trúc, không bằng kỷ luật.
+
 ### I4. LLM không nằm trên đường đi của tính đúng đắn.
 - Topology, layout, energization, chuỗi nhân quả sự cố → **backend deterministic**.
+  Đây là mệnh đề lõi (ADR-0005) và nó **không đổi**.
 - LLM chỉ: hiểu ý định, chọn tool, chọn view, diễn đạt kết quả.
-- Hệ phải test được end-to-end **không cần LLM**. UI phải dùng được khi LLM chết.
+- Domain API, facet, sơ đồ, SSE và **toàn bộ giao diện giám sát** phải chạy đúng
+  khi không có mô hình nào. Thứ giữ lời hứa này là **I5** (frontend gọi thẳng
+  Domain API), không phải một câu trả lời template.
+
+*(Thu hẹp 2026-08-07, [ADR-0021](docs/10-architecture/adr/0021-agent-harness.md) §3.)*
+Riêng **lượt hội thoại** thì cần mô hình: không cấu hình mô hình → tab hội thoại
+báo chưa cấu hình, **không** trả lời bằng template. Sàn `plan → read → template`
+đã bị xoá. Test tầng 1 vẫn chạy không cần key, bằng `TestModel`/`FunctionModel`.
 
 ### I5. Frontend gọi thẳng Domain API. BlackCore không phải proxy.
 ```
@@ -83,6 +119,21 @@ Point catalog phải freeze thành snapshot có hash, pin vào release, pin kèm
 `OADataModel.ModelVersion`. Runtime chỉ lấy *giá trị* live. NodeId không resolve được
 = **drift**, phải nổi lên UI như sự cố hệ thống, cấm im lặng fallback.
 
+### I8. Địa chỉ hoá bằng `scope × facet`, không bằng use case. (ADR-0010)
+30 use case trong `document/@Station_UseCases 1.xlsx` là **ví dụ về loại việc**,
+không phải khuôn mẫu để code từng dòng. A-01/A-02/A-03 là *cùng một hàm*, khác
+mỗi phạm vi.
+
+- **Scope** (`station`, `bay:D03`, `device:D03.XCBR1`, `point:…`) là một khái
+  niệm dùng chung cho: URL frontend · tham số tool của agent · khoá pane ·
+  `subject` của evidence. `domain/scope.py` là **nơi duy nhất** parse/format —
+  không nơi nào ghép chuỗi `f"bay:{id}"` bằng tay.
+- **LLM không bao giờ tự sinh scope ref.** Người dùng nói "271", resolver
+  deterministic đổi thành `device:D03.XCBR1`. Không phân giải được thì báo không
+  tìm thấy — **cấm đoán**.
+- **Thước đo kiểm tra được**: thêm use case mà phải thêm tool cho agent →
+  thiết kế đã sai. Thêm đúng cách là thêm một bộ lọc hoặc một scope.
+
 ---
 
 ## 3. Tech stack (đã chốt)
@@ -94,13 +145,20 @@ Point catalog phải freeze thành snapshot có hash, pin vào release, pin kèm
 | API | **FastAPI** + SSE | |
 | OPC UA | **asyncua** | client-server, KHÔNG phải PubSub |
 | Store | **SQLite** | config, release, topology, event store. **Không dùng MongoDB** |
-| Agent | **Pydantic AI** | |
-| LLM | OpenRouter (dev) → Ollama (trạm) | qua interface `LLMProvider`, đổi bằng config |
-| Frontend | **Nuxt build static (SPA)** | FastAPI serve tĩnh → 1 process, không cần Node runtime |
+| Agent | **Pydantic AI**, pin cứng (ADR-0021) | *thuê cơ chế, giữ chính sách*: vòng lặp / schema / validate / usage / approval là của nó; capability gating, witnessed scope, evidence là code của ta trong thân tool. Đảo quyết định ADR-0019 phương án A — lý do ghi ở ADR-0021 §Bối cảnh |
+| LLM | OpenRouter `qwen/qwen3.6-27b` (dev) → **vLLM** (trạm) | **dev đúng con sẽ deploy.** vLLM chứ không Ollama: prefix caching, guided decoding, tool-call parser (ADR-0021 §7). Pin provider trên OpenRouter. Chọn model + key ở `#/eng`, lưu mã hoá trong SQLite (ADR-0020 §5); `BI_LLM*` là dự phòng. **Không cấu hình = tab hội thoại báo chưa cấu hình**, giám sát vẫn chạy (I4, I5) |
+| Frontend | **Vite + Vue 3 + TypeScript** (ADR-0009) | build tĩnh → FastAPI serve → 1 process, không cần Node runtime |
+| UI kit | **shadcn-vue** + Tailwind v4 + reka-ui (ADR-0014) | cài theo đường **Vite**, KHÔNG dùng Nuxt. MCP: `npx shadcn-vue@latest mcp init --client claude` |
+| i18n | **vue-i18n** — `vi` mặc định + `en` | ngôn ngữ UI ≠ ngôn ngữ câu trả lời của LLM |
+| Type API | **sinh từ OpenAPI** (`openapi-typescript`) | backend đổi field → frontend lỗi biên dịch |
 | Đóng gói | embedded CPython + Inno Setup → Windows Service | |
 
 **Không được thêm** vào stack mà không có ADR: MongoDB, Postgres, Docker, Redis,
-Node runtime ở production, message broker.
+Node runtime ở production, message broker, **Nuxt** (ADR-0009 đã bác, ADR-0014 xác nhận lại),
+**LangChain / LangGraph** (ADR-0021 phương án B).
+
+**Air-gapped**: Pydantic AI phải **pin cứng** trong `uv.lock` và **vendor wheel**
+cho lần cài offline. Xác định bản ở trạm có thể không bao giờ nâng (ADR-0021 §8).
 
 ---
 
@@ -108,39 +166,136 @@ Node runtime ở production, message broker.
 
 ```
 backend/src/blackinterface/
+  config.py      # MỌI setting BI_* ở đây. Không nơi nào khác đọc os.environ
+  errors.py      # bộ lỗi đóng; mọi lỗi API là một trong số này
+  logs.py        # structlog; gọi configure() một lần lúc khởi động
   domain/        # L4 Neutral Station Model — contract hợp nhất, immutable
     models.py        Bay/Device/Busbar/ConnectivityNode/PointSample/ValidationIssue
-    observation.py   StationObs — đầu vào trung tính cho mọi importer
+    observation.py   StationObs — đầu vào trung tính cho mọi importer; nền của
+                     realtime, TÁCH LÀM HAI HỌ: state_points/apply_state_samples
+                     (rời rạc, dựng lại graph) và measurement_points/
+                     apply_measurement_samples (tương tự, chỉ dán nhãn). Hai
+                     danh sách rời nhau — ADR-0012 luật 1 (thuần)
     bay_types.py     suy loại ngăn từ thành phần LN
     templates.py     loader + registry cho templates/*.yaml
     templates/       6 bay template (ADR-0008)
     topology.py      observation + template -> StationGraph  (thuần, không I/O)
+    energization.py  StationGraph -> vùng mang điện; gieo mầm từ thanh cái,
+                     đối chiếu với <bay>.IsLive của OneATS (thuần, không I/O)
+    scope.py         ScopeRef — NƠI DUY NHẤT parse/format scope ref (I8)
+    measurement.py   danh mục measurand + Reading + deadband theo TỪNG đại lượng.
+                     Không in đơn vị nào chưa đo được thang (thuần)
+    evidence.py      EvidenceRecord/Coverage/PointQ/Limit + EvidenceBuilder;
+                     builder tự suy ra `limits`, facet chỉ khai báo sự kiện
   integration/   # L5 importers + adapters — CHỈ ĐÂY được biết NodeId
     dump.py          đọc dump JSON -> StationObs (offline, dùng cho test/demo)
-    opcua/discovery.py  browse DataServer live -> StationObs
+    opcua/discovery.py  browse DataServer live -> StationObs (hiếm: cấu trúc)
+    opcua/monitor.py    subscription có giám sát -> lô PointSample (liên tục)
+    opcua/values.py     DataValue -> PointSample, dùng chung cho cả hai trên
   diagram/       # L6 graph → layout → ViewModel → SVG
     layout.py        StationGraph -> DiagramView (toạ độ, deterministic)
   api/           # L3 Typed Domain API (FastAPI, HTTP/SSE)
-    source.py        StationStore: fixture | opcua, cấu hình qua BI_*
-    app.py           endpoint + serve frontend/dev
-  agent/         # L2 BlackCore (Pydantic AI: intent, tools, planner, evidence)
-  store/         # SQLite: release, snapshot, event store
-frontend/
-  dev/index.html # viewer 1 file, không cần Node — xem §4.1
+    app.py           CHỈ lắp ráp: lifespan, middleware, include_router, static.
+                     Thứ tự include_router = thứ tự path trong openapi.json
+    deps.py          state của process (settings/db/store); router lấy qua
+                     get_store() — test đổi bằng deps.use()
+    schemas.py       MỌI response model. Tên = tên schema trong openapi.json
+    mappers.py       domain -> schema, hàm thuần, không đọc state toàn cục
+    routers/         health · projects · station · live · summary · diagram ·
+                     agent · conversations · assistant · auth · me · issues
+    conversations.py StoredConversations: nối protocol của agent/session.py với
+                     store/conversations.py. agent/ không import được store/
+    summary.py       facet `summary`: một scope -> câu trả lời + EvidenceRecord.
+                     Khuôn mẫu cho mọi facet sau
+    source.py        StationStore: model nào đang hiện hành và đổi lúc nào
+    reader.py        SourceReader: đọc nguồn -> StationObs (import lazy asyncua)
+    watch.py         MonitorSupervisor: vòng đời subscription, sync() idempotent
+    broadcast.py     Cadence(state|measurement|link) + revision mỗi nhịp +
+                     Listener giữ MỘT chỗ CHO MỖI nhịp (ADR-0012)
+    throttle.py      giảm nhịp `measurement`, có sườn xuống nên số đo cuối của
+                     một chùm không bao giờ mất
+    errors.py        exception -> JSON {"error": {code, message, detail}}
+  agent/         # L2 BlackCore — Pydantic AI (ADR-0021)
+    core.py          một lượt hội thoại; MỘT generator phục vụ cả hai endpoint.
+                     Dịch event Pydantic AI -> khung SSE (turn/tool/evidence/
+                     token/answer). KHÔNG còn sàn template: không có mô hình thì
+                     tab hội thoại nói CHƯA CẤU HÌNH (I4 sau ADR-0021 §3)
+    harness.py       dựng Agent theo TỪNG NGƯỜI HỎI (danh mục tool lọc theo
+                     quyền trước khi mô hình nhìn thấy); SYSTEM prompt;
+                     UsageLimits đọc từ config; model_for() + pin provider
+    digest.py        payload -> bản gọn cho mô hình. Bỏ evidence (I3), bỏ
+                     source_ref (I6), làm tròn số. Đo 2026-08-07: 20.064 -> 715
+                     token cho `station`. KHÔNG có nó thì context window vỡ
+    resolve.py       "271" -> device:D03.XCBR1; nhiều kết quả thì HỎI LẠI, cấm đoán
+    provider.py      LLMChoice (lựa chọn đến từ đâu) + probe() (nút Thử kết nối).
+                     Client HTTP tự viết đã bỏ — Pydantic AI làm
+    session.py       lịch sử hội thoại; protocol + bản trong-tiến-trình. agent/
+                     KHÔNG import được store/, bản SQLite do api/ tiêm vào
+                     (ADR-0022). `history()` chỉ trả VĂN XUÔI — không tool call,
+                     không số đo: một trạm đổi trạng thái trong lúc người ta nói
+                     về nó, và số của bốn lượt trước đọc y hệt số của bây giờ
+    tools/           mỗi tool trả (payload, EvidenceRecord). Capability trong
+                     READ_ONLY -> chạy thẳng; capability ghi -> BẮT BUỘC
+                     requires_approval=True, dừng ở khung duyệt (I1, ADR-0021 §2).
+                     check.py mục 3 đọc bằng ast, không tin `register()` lúc chạy
+  control/       # đường ghi DUY NHẤT (I1, ADR-0011) — hình dạng đã có, cửa đóng
+    registry.py      lệnh được phép — `COMMANDS = {}`, check.py parse bằng ast
+    guard.py         tiền điều kiện; đồng thời là hiện thực C-01 (đọc thuần).
+                     Mặc định LÀ TỪ CHỐI: không đánh giá được ≠ đã thông qua
+    audit.py         AuditEntry + AuditSink (chỉ append, không sửa/xoá)
+  store/         # SQLite (ADR-0006)
+    db.py            connection, WAL, migration tiến-một-chiều
+    meta.py          repository app_meta — mẫu cho các repository sau
+    projects.py      repository projects + snapshot (StationObs JSON, opaque)
+    assistant.py     model nào + key (mã hoá). DB THẮNG env (ADR-0020 §5)
+    conversations.py transcript hội thoại. **Chỉ lời**: câu hỏi, văn xuôi, scope
+                     đã chốt. KHÔNG evidence, KHÔNG số đo (ADR-0022 §2)
+    secrets.py       Fernet, khoá dẫn xuất từ BI_SECRET_KEY. Docstring nói rõ
+                     nó KHÔNG chống được gì — đọc trước khi tin chữ "mã hoá"
+    migrations/      NNN_name.sql, đánh số liên tục từ 001
+backend/openapi.json  # HỢP ĐỒNG API. Sinh ra, được check.py gác
+frontend/        # L1 — Vite + Vue 3 + TS (ADR-0009) + shadcn-vue (ADR-0014)
+  components.json      # cấu hình shadcn-vue CLI (`npx shadcn-vue@latest add …`)
+  src/styles.css       # Tailwind v4 cấu hình BẰNG CSS (@theme) — không có file JS
+  src/api/schema.d.ts  # SINH từ openapi.json. ĐỪNG SỬA TAY
+  src/scope.ts         # parse/format ScopeRef, khớp domain/scope.py (I8).
+                       # check.py so hai bộ ScopeKind, lệch là đỏ
+  src/router.ts        # `/ops/:scope` là địa chỉ chính; scope sai -> redirect
+  src/i18n/            # vi (mặc định) + en. Nhãn của MỌI code từ backend ở đây
+  src/lib/utils.ts     # cn() cho shadcn-vue
+  src/ui/              # design system; hai bảng màu tách bạch (ADR-0014 §2)
+  src/features/        # theo bề mặt: station · monitoring · engineer ·
+                       # assistant (ô hỏi đáp, ADR-0019) · shared
+  src/stores/          # tách theo VÒNG ĐỜI: structure · live · measurements ·
+                       # workspace · summary · projects · chat.
+                       # stream.ts giữ EventSource DUY NHẤT và phân nhánh theo
+                       # event.type — store giữ dữ liệu, không giữ socket.
+                       # chat.ts giữ hội thoại; stream của nó là fetch+POST,
+                       # không phải EventSource (ADR-0019 §7)
+
+**Frontend UI (bắt buộc):** Tailwind v4 + shadcn-vue đã cài — chrome (nút, form,
+pane, bảng) **chỉ** qua `@/ui/*` + utility token; thiếu component thì `shadcn-vue add`.
+Cấm tự viết styled `<button>`/hex trong `features/`. `DESIGN.md` = theme spec, không
+phải danh sách component để code tay. Chi tiết: `frontend/README.md`, `docs/20-ui/tokens.md`.
 tools/           # script vận hành/kiểm chứng — chạy được độc lập
 docs/            # xem §0
 document/        # tài liệu gốc ATS (manual PDF, output service SLD) — CHỈ ĐỌC
 ```
 
-### 4.1 Frontend hiện tại là bản dev, không phải bản chốt
+### 4.1 Hợp đồng giữa backend và frontend là máy giữ, không phải người nhớ
 
-`frontend/dev/index.html` là **một file HTML tĩnh**, FastAPI serve trực tiếp,
-không build, không Node. Nó tồn tại để **nhìn thấy kết quả ngay** trong lúc dựng
-từng module.
+```
+FastAPI app  ──export_openapi.py──>  backend/openapi.json
+                                          │ openapi-typescript
+                                          ▼
+                                  frontend/src/api/schema.d.ts
+```
 
-Bản chính thức vẫn là **Nuxt static SPA** như §3. Khi dựng Nuxt, đây là bản tham
-chiếu về mặt hành vi — đừng xoá cho tới lúc đó, và đừng để nó phình thành
-ứng dụng thật.
+Đổi endpoint mà quên xuất lại → `tools/check.py` đỏ.
+Frontend dùng sai tên field → lỗi biên dịch, không phải `undefined` lúc chạy.
+
+Không có frontend dự phòng: chưa `npm run build` thì API chạy nhưng không có
+giao diện. Cố ý — một frontend cũ còn sót lại nguy hiểm hơn là không có gì.
 
 Chiều phụ thuộc **một chiều**: `api → domain ← integration`, `agent → api`,
 `diagram → domain`. `domain` không import bất cứ lớp nào khác.
@@ -156,11 +311,20 @@ Chiều phụ thuộc **một chiều**: `api → domain ← integration`, `agen
    để xác nhận các "sự thật đã đo" còn đúng
 
 ### 5.2 Kết thúc mỗi phiên (BẮT BUỘC)
-Cập nhật `docs/90-progress/status.md`:
+*(Đổi 2026-08-10 theo [ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md) §6 —
+trước đây là «cập nhật `status.md`».)*
+
+Viết **một file mới** trong `docs/90-progress/log/`, tên `YYYY-MM-DD-<slug>.md`:
 - việc đã xong (kèm đường dẫn file)
 - việc đang dở + đang vướng ở đâu
+- đo được gì (kèm **cách đo lại** — §5.4)
 - việc kế tiếp
-Không cập nhật = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
+
+**Không sửa `status.md`** — đó là file của chủ dự án, tổng hợp mỗi tuần một lần.
+Một luật buộc ba người ghi vào cùng một file là một luật tự phá: nó conflict mỗi
+ngày rồi bị bỏ qua. Khuôn mẫu: `docs/90-progress/log/README.md`.
+
+Không ghi log = phiên sau mất trí nhớ. Đây là chi phí lớn nhất của dự án này.
 
 ### 5.3 Khi ra quyết định kiến trúc
 Viết ADR mới trong `docs/10-architecture/adr/NNNN-<slug>.md` theo mẫu có sẵn.
@@ -175,7 +339,30 @@ ADR là **immutable** — muốn đổi thì viết ADR mới với `Supersedes:
   Manual có chỗ sai/lệch so với hệ chạy thật (đã gặp: manual mô tả alarm theo
   OPC UA A&C, thực tế OneATS dùng interface riêng).
 
-### 5.5 Không tin dữ liệu extract SLD
+### 5.5 Nguồn sự thật về TOPOLOGY: script Lua trong model export
+
+`document/DEMO_SAS-MODELExplorer.xlsx` → dòng `CheckLiveState`, cột `R` chứa
+**mã Lua tính IsLive của chính OneATS**. Đây là bằng chứng độc lập duy nhất về
+đấu nối thật — DataServer không có connectivity, extract SLD thì sai.
+
+```lua
+-- E01L = (((C11L and 171-1C) or (C12L and 171-2C)) and 171C and 171-7C)
+--        or (C19L and 171-9C)
+```
+
+Vế thứ hai không có máy cắt: **`-9` cấp điện thẳng cho đường dây, bỏ qua cả máy
+cắt lẫn `-7`.** Đây là thứ đã bắt được lỗi thật trong template v1.
+
+Đọc lại bằng:
+```bash
+python -c "import zipfile,xml.etree.ElementTree as ET; ..."   # xem git log commit template v2
+```
+Test khoá lại: `backend/tests/unit/test_topology_ground_truth.py`.
+
+**Lua KHÔNG nói gì về dao tiếp địa** (tiếp địa đóng khi có điện là sự cố, sim
+không mô hình hoá). Vị trí tiếp địa hiện đọc từ bản vẽ Grid Designer → câu hỏi Q6.
+
+### 5.6 Không tin dữ liệu extract SLD
 `document/SLD_serviceOut/` là output computer-vision, **có lỗi đã xác nhận**:
 số hiệu EVN sai (D03 ghi 179, thực tế 271), sót nguyên ngăn J01 22kV,
 20–26% thiếu tên, 36–40% thiếu connections.
@@ -186,20 +373,31 @@ DataServer là chân lý. SLD chỉ dùng để đối chiếu.
 ## 6. Công cụ kiểm tra
 
 ```bash
+# --- một lệnh gác tất cả (chạy từ gốc repo) ---
+python tools/check.py
+
+# --- backend ---
 cd backend
-uv sync                      # cài môi trường
-uv run ruff check .          # lint
-uv run ruff format --check . # format
-uv run mypy src              # type check
-uv run pytest                # test (không cần DataServer)
-uv run pytest -m live        # test cần DataServer đang chạy
+uv sync
+uv run ruff check . && uv run ruff format --check .
+uv run mypy src
+uv run pytest                # 418 test, không cần DataServer (2026-08-10)
+uv run pytest -m live        # cần DataServer đang chạy
+uv run python ../tools/export_openapi.py   # sau MỌI thay đổi endpoint
 
-# chạy thử có giao diện:
-uv run uvicorn blackinterface.api.app:app --port 8080   # rồi mở http://127.0.0.1:8080
+# --- frontend ---
+cd frontend
+npm install
+npm run check                # api:types + typecheck + lint + format
+npm run build                # -> dist/, FastAPI sẽ serve
+npm run dev                  # http://localhost:5173, proxy /api sang :8080
 
-# từ gốc repo:
-python tools/check.py             # chạy tất cả ở trên + kiểm tra cấu trúc docs
-python tools/verify_dataserver.py # xác minh lại "sự thật đã đo" trên DataServer live
+# --- chạy thử có giao diện ---
+cd backend && uv run uvicorn blackinterface.api.app:app --port 8080
+# rồi mở http://127.0.0.1:8080   (phải npm run build trước)
+
+# --- công cụ OneATS ---
+python tools/verify_dataserver.py    # xác minh lại "sự thật đã đo" trên hệ live
 python tools/probe_dataserver.py --dump --slim --depth 4 \
   --out backend/tests/fixtures/sas_tree.json   # tạo lại fixture
 ```
@@ -225,7 +423,26 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 | `node.get_children()` trả danh sách sạch | **Không.** OneATS lộ cùng một con qua nhiều reference type → trùng lặp. Phải dedupe theo NodeId (`_children()` trong `discovery.py`). Không dedupe → số thiết bị gấp 4. |
 | `DataValue.StatusCode_` | Chỉ đúng với asyncua 1.x. Trong venv là asyncua **2.0.1**, field tên `StatusCode`. `tools/` chạy bằng python hệ thống nên có thể lệch version — chạy tools qua `uv run` nếu cần chắc. |
 | `DBB`/`EBB` là thanh cái | **Sai.** Đó là **bảo vệ so lệch thanh cái**. Thanh cái thật ở `/SAS/Subs/BB11..BB29`. |
+| `-9` (XSWI9) là dao chọn thanh cái như `-1`/`-2` | **Sai ở ngăn đường dây/MBA.** `-9` nối thanh cái vòng thẳng vào phía **đường dây**, bỏ qua máy cắt. Ở ngăn nối vòng (D12/E04) thì `-9` lại nằm sau máy cắt. Cùng số hiệu LN, khác vị trí điện — xem §5.5. |
+| Màu: đỏ = có điện | **Sai.** OneATS: **thiết bị** đỏ=đóng/xanh lá=mở; **dây dẫn** xanh dương=có điện/xanh lá=không điện. |
+| Dùng màu của sơ đồ để báo trạng thái phần mềm (mất kết nối, đang tải) | **Sai và đã từng gây lỗi thật.** Header cũ tô "mất kết nối" bằng `--closed` (đỏ) và "trực tuyến" bằng `--open` (xanh lá) — đúng hai màu đang có nghĩa "máy cắt đóng" và "dao mở" trên sơ đồ bên cạnh. **Hai bảng màu tách bạch** (ADR-0014 §2, `styles.css`): `st-*` cho trạm, `sys-*` cho phần mềm, và `sys-*` **không bao giờ dùng đỏ hoặc xanh lá**. "Trực tuyến" là màu trung tính. |
+| Vẽ `-1` và `-2` trên cùng một đường thẳng đứng | **Sai và nguy hiểm.** Đường đó chạm cả hai thanh cái tại cùng một điểm → hình luôn trông như có đường dẫn xuyên qua cả hai, bất kể dao ở đâu. Mỗi dao nối thanh cái phải có **làn x riêng** + **chấm nối**; cắt ngang không chấm = không nối. `test_no_conductor_runs_through_another_devices_busbar_connection` khoá điều này. |
+| Mỗi cấp điện áp một hình riêng | SLD thật vẽ **cả trạm trong một hình**, cấp cao nhất trên cùng và **lật ngược** để hai nhóm thanh cái quay vào nhau. `layout_station()`; `/api/diagram`. |
 | `uv sync` báo `os error 396` / `Access is denied` | OneDrive giữ file trong `.venv`. Đã set `link-mode = "copy"`; nếu vẫn lỗi thì **chạy lại lần 2**. `tools/check.py` tự retry 1 lần. |
+| Path `Objects/Root/EVN/RLDC/PROJECT/SAS` là cố định | **Sai.** Path chứa **tên project** — đổi project trong DataServer là path đổi. `discovery.py` auto-dò root theo *nội dung* (node có con dạng `\d+kV`), nhưng `tools/probe_dataserver.py` và `verify_dataserver.py` vẫn hardcode path DEMO. |
+| "DataServer không có bằng chứng ghép ngăn MBA / tên ngăn chữ" | **Sai** (đính chính 2026-08-05). `<bay>/BAY/Name` mang tên hiển thị ("Ben Cat", "AT1 Incoming"), và `/SAS/AT1` (ngang cấp điện áp, có `YPTR`/`YLTC`) là chính MBA. Ghép ngăn 220↔110: id nhóm MBA xuất hiện trong `BAY/Name` của cả hai ngăn. Cuộn 3 (22kV, J01) có `BAY/Name` rỗng nhưng ghép được qua số máy cắt EVN (TT 44/2014/TT-BCT): `<mã cấp áp>3<số MBA>` → 231/131/431 đều là AT1. Xem `topology.pair_transformers()`. |
+| Dùng `<bay>.IsLive` làm nguồn để tô màu mang điện | **Đừng.** OneATS **suy** nó ra *từ* `Subs.BB*.IsLive` bằng Lua `CheckLiveState`. Lấy nó làm mầm thì kết quả của ta chỉ là chép lại của họ và mất luôn khả năng phát hiện template sai. Gieo mầm **chỉ từ thanh cái**, tự giải, rồi dùng `<bay>.IsLive` để **đối chiếu** (`domain/energization.py`). Hiện 7/7 khớp trên DEMO_SAS. |
+| Không đọc được vị trí dao → coi như mở | **Sai và nguy hiểm.** `UNDETERMINED`/`INTERMEDIATE` không nối đảo, nhưng phải **lan nghi ngờ**: đoạn bên kia thành `UNKNOWN` (xám), không bao giờ `DEAD`. Thiếu dữ liệu không bao giờ được suy ra "hết điện" — đó là câu khiến người ta chạm tay vào. |
+| Node `EARTH` gộp vào phân hoạch đảo được | **Không.** Mọi đoạn đang tiếp địa sẽ dính thành một đảo khổng lồ và phán quyết nhảy từ ngăn này sang ngăn khác. Earth đứng ngoài union-find; dao tiếp địa đóng chỉ *đánh dấu* đảo là `EARTHED`. |
+| Muốn cập nhật liên tục thì duyệt lại cây | **Không.** Duyệt ~6000 node để biết một dao vừa mở là vô lý. Cấu trúc gần như đứng yên lúc vận hành, chỉ *vị trí* chạy → `discovery` duyệt một lần, `monitor` subscribe đúng các điểm đã có địa chỉ (DEMO_SAS: 97). Danh sách theo dõi **sinh từ chính observation** (`watch_points`), không có registry song song. |
+| `PointSample.source_ref` là NodeId của logical node | **Sai** (đã sửa 2026-08-05). Phải là NodeId của **biến** sinh ra giá trị (`...XCBR1.PosSt`), không phải của LN cha. `dump.py` vốn đã đúng; `discovery.py` thì không — vừa hỏng truy vết, vừa khiến subscribe sai node. |
+| Mất kết nối thì xoá sơ đồ / coi là mất điện | **Sai và nguy hiểm.** Rớt link là tin về *ta*, không phải về trạm. Giữ nguyên giá trị cuối, đặt `connected=false`, nói rõ trên header. Trạm rỗng trông y hệt trạm cắt hết điện. |
+| Vá `StationGraph` tại chỗ cho nhanh | Không cần. Đo 2026-08-05: `build_station` 0.71 ms + `solve_energization` 0.21 ms. Dựng lại toàn bộ mỗi lô ~1 ms và **bảo đảm** kết quả giống hệt duyệt mới — sửa tại chỗ không hứa được điều đó. |
+| Cho số đo đi chung đường với vị trí đóng cắt | **Sai.** Số đo tương tự đổi liên tục và **không** đổi topology. Chung đường thì `build_station` + `solve_energization` chạy lại mỗi khi phụ tải nhích 0,1 MW, và một bão số đo có thể hoãn việc xử lý một máy cắt vừa nhảy. Hai họ hàm rời nhau trong `observation.py`, `StationStore` định tuyến theo `source_ref`, `test_realtime.py` khoá lại việc hai danh sách không giao nhau (ADR-0012 luật 1). |
+| In đơn vị theo suy đoán (kV, MW) cho số đo | **Sai.** DataServer **không** công bố `EngineeringUnits` trên bất kỳ measurand nào (đo 2026-08-06). Biết đại lượng, **không** biết thang: `Vlin` = 221.08 có thể là V hoặc kV. In "221.08 V" cạnh thanh cái 220 kV còn tệ hơn không in gì. Chỉ `Hz`, hệ số công suất, nấc MBA là miễn. Số nào chưa xác minh thang → `Unit.UNKNOWN` + `LimitCode.UNIT_UNVERIFIED` trong bằng chứng. Câu hỏi mở Q7. |
+| Một ngưỡng deadband toàn cục cho mọi số đo | **Sai.** 0,5 % của 50 Hz là 0,25 Hz — dao động rất lớn; 0,5 % của phụ tải là nhiễu. Deadband khai theo **từng đại lượng** trong `domain/measurement.py`; `BI_MEASUREMENT_DEADBAND_PCT` chỉ là đặt đè. Nấc MBA **không** deadband: nó rời rạc như vị trí dao. |
+| Throttle chỉ cần chặn sườn lên | **Sai.** Bỏ hết trong cửa sổ thì số đo *cuối* của một chùm không bao giờ tới, client đứng ở một số cũ mà không có gì báo là cũ. `api/throttle.py` có sườn xuống. |
+| Số của DEMO_SAS dùng để kiểm chứng công thức điện được | **Không.** Simulator sinh ngẫu nhiên từng điểm: đo cùng lúc `D03.MMXU1.Hz = 51.33` và `BB21.Hz = 49.71` — bất khả thi trong một trạm đồng bộ. Dùng nó để kiểm chứng **đường dẫn dữ liệu**, không phải vật lý. |
 
 ---
 
@@ -239,6 +456,16 @@ Test fail thì nói rõ là fail, kèm output. Không giấu, không hedging.
 
 ## 9. Trạng thái repo
 
-- **Chưa init git** (repo nằm trong OneDrive — xem `docs/90-progress/status.md`).
-  Đừng tự chạy `git init` nếu người dùng chưa yêu cầu.
+- **Có git** (khởi tạo 2026-08-04). Branch mặc định `master`.
+  Làm việc trên branch riêng, đừng commit thẳng lên `master` nếu không được yêu cầu.
+- ⚠ **Chưa có remote** (2026-08-10). Toàn bộ dự án tồn tại trên đúng một ổ cứng,
+  trong OneDrive. Đây là rủi ro đang mở, ghi ở `docs/90-progress/risks.md`.
+- **Từ 2026-08-10 repo có ba người** ([ADR-0023](docs/10-architecture/adr/0023-team-delivery-architecture.md)):
+  - `CODEOWNERS` là bản máy đọc được của bảng sở hữu; `docs/90-progress/team.md`
+    là bản người đọc. **Sửa file của người khác = sai kể cả khi code đúng.**
+  - Số migration **cấp trước**: Dev A `006`, `008`… · Dev B `007`, `009`…
+  - `backend/openapi.json` **không bao giờ merge tay** — `git checkout --theirs`
+    rồi chạy lại `tools/export_openapi.py`.
+  - `api/schemas.py`, `api/app.py`: **chỉ thêm vào cuối**.
 - `document/` là tài liệu gốc, **chỉ đọc**, không sửa không xoá.
+- Repo nằm trong OneDrive → xem bẫy về `.venv` ở §7.

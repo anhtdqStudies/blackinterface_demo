@@ -1,6 +1,6 @@
 {
  "meta": {
-  "captured_at": "2026-08-04T07:24:13.026024+00:00",
+  "captured_at": "2026-08-06T02:35:34.834944+00:00",
   "endpoint": "opc.tcp://127.0.0.1:48050",
   "ModelName": "DEMO_SAS",
   "ModelVersion": "654"
@@ -15,7 +15,7 @@
    "value": 0,
    "vtype": "9",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.457759+00:00"
+   "src_ts": "2026-08-05T03:14:22.249548+00:00"
   },
   {
    "nodeid": "ns=2;s=SAS_110KV",
@@ -47,7 +47,7 @@
    "value": "Lai Uyen",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.458761+00:00"
+   "src_ts": "2026-08-05T03:14:22.251135+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.BCU",
@@ -65,7 +65,7 @@
    "value": "171_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.460760+00:00"
+   "src_ts": "2026-08-05T03:14:22.253235+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.F67",
@@ -83,7 +83,7 @@
    "value": "171_SEL351_F67",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.462758+00:00"
+   "src_ts": "2026-08-05T03:14:22.254149+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.F87L",
@@ -101,7 +101,7 @@
    "value": "171_SEL311L_F87L",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.463796+00:00"
+   "src_ts": "2026-08-05T03:14:22.255232+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.IsLive",
@@ -112,7 +112,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.374756+00:00"
+   "src_ts": "2026-08-05T07:34:52.429517+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.MMXU1",
@@ -120,6 +120,72 @@
    "class": "Object",
    "path": "/SAS/110kV/E01/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.37685775756836,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/Hz",
+   "depth": 3,
+   "value": 51.93838882446289,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.972424+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/Vlin",
+   "depth": 3,
+   "value": 114.50188446044922,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.970720+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.956618070602417,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/totVAr",
+   "depth": 3,
+   "value": 85.35777282714844,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E01.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/110kV/E01/MMXU1/totW",
+   "depth": 3,
+   "value": 15.70146656036377,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.966702+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.MSQI1",
@@ -162,7 +228,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI1",
@@ -180,7 +246,7 @@
    "value": "171-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI1.PosSt",
@@ -191,7 +257,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI1.SName",
@@ -202,7 +268,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI11",
@@ -220,7 +286,7 @@
    "value": "171-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI11.PosSt",
@@ -231,7 +297,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI11.SName",
@@ -242,7 +308,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.464798+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI2",
@@ -260,7 +326,7 @@
    "value": "171-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI2.PosSt",
@@ -271,7 +337,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI2.SName",
@@ -282,7 +348,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI7",
@@ -300,7 +366,7 @@
    "value": "171-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI7.PosSt",
@@ -311,7 +377,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI7.SName",
@@ -322,7 +388,7 @@
    "value": "-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI71",
@@ -351,7 +417,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI71.SName",
@@ -362,7 +428,7 @@
    "value": "-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI72",
@@ -380,7 +446,7 @@
    "value": "171-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI72.PosSt",
@@ -391,7 +457,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI72.SName",
@@ -402,7 +468,7 @@
    "value": "-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.256226+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI9",
@@ -420,7 +486,7 @@
    "value": "171-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.257227+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI9.PosSt",
@@ -431,7 +497,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E01.XSWI9.SName",
@@ -442,7 +508,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.465797+00:00"
+   "src_ts": "2026-08-05T03:14:22.257227+00:00"
   },
   {
    "nodeid": "ns=2;s=E02",
@@ -467,7 +533,7 @@
    "value": "Lai Uyen",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.466796+00:00"
+   "src_ts": "2026-08-05T03:14:22.257827+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.BCU",
@@ -485,7 +551,7 @@
    "value": "172_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.468795+00:00"
+   "src_ts": "2026-08-05T03:14:22.259907+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.F67",
@@ -503,7 +569,7 @@
    "value": "172_SEL351_F67",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.469796+00:00"
+   "src_ts": "2026-08-05T03:14:22.260910+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.F87L",
@@ -521,7 +587,7 @@
    "value": "172_SEL311L_F87L",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.471795+00:00"
+   "src_ts": "2026-08-05T03:14:22.261902+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.IsLive",
@@ -532,7 +598,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.380401+00:00"
+   "src_ts": "2026-08-05T07:34:52.432793+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.MMXU1",
@@ -540,6 +606,72 @@
    "class": "Object",
    "path": "/SAS/110kV/E02/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.919189453125,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.971218+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/Hz",
+   "depth": 3,
+   "value": 49.6702995300293,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/Vlin",
+   "depth": 3,
+   "value": 114.9502182006836,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.8082941174507141,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/totVAr",
+   "depth": 3,
+   "value": 64.305419921875,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E02.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/110kV/E02/MMXU1/totW",
+   "depth": 3,
+   "value": 14.533551216125488,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.964204+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.MSQI1",
@@ -571,7 +703,7 @@
    "value": "172",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XCBR1.PosSt",
@@ -582,7 +714,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI1",
@@ -600,7 +732,7 @@
    "value": "172-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI1.PosSt",
@@ -611,7 +743,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI1.SName",
@@ -622,7 +754,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI11",
@@ -640,7 +772,7 @@
    "value": "172-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI11.PosSt",
@@ -651,7 +783,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI11.SName",
@@ -662,7 +794,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI2",
@@ -680,7 +812,7 @@
    "value": "172-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI2.PosSt",
@@ -691,7 +823,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI2.SName",
@@ -702,7 +834,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.472796+00:00"
+   "src_ts": "2026-08-05T03:14:22.262867+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI7",
@@ -720,7 +852,7 @@
    "value": "172-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI7.PosSt",
@@ -731,7 +863,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI7.SName",
@@ -742,7 +874,7 @@
    "value": "-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI71",
@@ -760,7 +892,7 @@
    "value": "172-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI71.PosSt",
@@ -771,7 +903,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI71.SName",
@@ -782,7 +914,7 @@
    "value": "-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI72",
@@ -800,7 +932,7 @@
    "value": "172-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI72.PosSt",
@@ -811,7 +943,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI72.SName",
@@ -822,7 +954,7 @@
    "value": "-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI9",
@@ -840,7 +972,7 @@
    "value": "172-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI9.PosSt",
@@ -851,7 +983,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E02.XSWI9.SName",
@@ -862,7 +994,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.473824+00:00"
+   "src_ts": "2026-08-05T03:14:22.263917+00:00"
   },
   {
    "nodeid": "ns=2;s=E04",
@@ -887,7 +1019,7 @@
    "value": "Bus Tranfer",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.474823+00:00"
+   "src_ts": "2026-08-05T03:14:22.264906+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.BCU",
@@ -905,7 +1037,7 @@
    "value": "100_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.476828+00:00"
+   "src_ts": "2026-08-05T03:14:22.265825+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.F21",
@@ -923,7 +1055,7 @@
    "value": "100_SEL421_F21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.478828+00:00"
+   "src_ts": "2026-08-05T03:14:22.267409+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.F67",
@@ -941,7 +1073,7 @@
    "value": "100_SEL351_F67",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.479828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.IsLive",
@@ -952,7 +1084,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.373784+00:00"
+   "src_ts": "2026-08-05T07:34:52.422006+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.MMXU1",
@@ -960,6 +1092,72 @@
    "class": "Object",
    "path": "/SAS/110kV/E04/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/Amax",
+   "depth": 3,
+   "value": 51.20207977294922,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.973436+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/Hz",
+   "depth": 3,
+   "value": 51.63230895996094,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.966702+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/Vlin",
+   "depth": 3,
+   "value": 113.82699584960938,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.974346+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.8125889301300049,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.969709+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/totVAr",
+   "depth": 3,
+   "value": 116.16271209716797,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.966702+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E04.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/110kV/E04/MMXU1/totW",
+   "depth": 3,
+   "value": 21.641712188720703,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.972424+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.MSQI1",
@@ -991,7 +1189,7 @@
    "value": "100",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XCBR1.PosSt",
@@ -1002,7 +1200,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI1",
@@ -1020,7 +1218,7 @@
    "value": "100-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI1.PosSt",
@@ -1031,7 +1229,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI1.SName",
@@ -1042,7 +1240,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI11",
@@ -1060,7 +1258,7 @@
    "value": "100-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI11.PosSt",
@@ -1071,7 +1269,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI11.SName",
@@ -1082,7 +1280,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.480828+00:00"
+   "src_ts": "2026-08-05T03:14:22.269492+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI2",
@@ -1100,7 +1298,7 @@
    "value": "100-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI2.PosSt",
@@ -1111,7 +1309,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI2.SName",
@@ -1122,7 +1320,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI9",
@@ -1140,7 +1338,7 @@
    "value": "100-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI9.PosSt",
@@ -1151,7 +1349,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI9.SName",
@@ -1162,7 +1360,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI91",
@@ -1180,7 +1378,7 @@
    "value": "100-95",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI91.PosSt",
@@ -1191,7 +1389,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI91.SName",
@@ -1202,7 +1400,7 @@
    "value": "-95",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI92",
@@ -1220,7 +1418,7 @@
    "value": "100-94",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI92.PosSt",
@@ -1231,7 +1429,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E04.XSWI92.SName",
@@ -1242,7 +1440,7 @@
    "value": "-94",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.481828+00:00"
+   "src_ts": "2026-08-05T03:14:22.270494+00:00"
   },
   {
    "nodeid": "ns=2;s=E05",
@@ -1267,7 +1465,7 @@
    "value": "Bus Coupler",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.482828+00:00"
+   "src_ts": "2026-08-05T03:14:22.271489+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.BCU",
@@ -1285,7 +1483,7 @@
    "value": "112_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.484336+00:00"
+   "src_ts": "2026-08-05T03:14:22.272497+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.F21",
@@ -1303,7 +1501,7 @@
    "value": "112_SEL421_F21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.486341+00:00"
+   "src_ts": "2026-08-05T03:14:22.274493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.IsLive",
@@ -1314,7 +1512,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.380401+00:00"
+   "src_ts": "2026-08-05T07:34:52.426517+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.MMXU1",
@@ -1322,6 +1520,72 @@
    "class": "Object",
    "path": "/SAS/110kV/E05/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.97568893432617,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.971218+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/Hz",
+   "depth": 3,
+   "value": 51.14714431762695,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.974846+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/Vlin",
+   "depth": 3,
+   "value": 113.86042022705078,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.974346+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.9606207609176636,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.974846+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/totVAr",
+   "depth": 3,
+   "value": 120.71986389160156,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.964204+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E05.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/110kV/E05/MMXU1/totW",
+   "depth": 3,
+   "value": 25.414024353027344,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.971218+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.MSQI1",
@@ -1353,7 +1617,7 @@
    "value": "112",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XCBR1.PosSt",
@@ -1364,7 +1628,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI1",
@@ -1382,7 +1646,7 @@
    "value": "112-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI1.PosSt",
@@ -1393,7 +1657,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI1.SName",
@@ -1404,7 +1668,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI11",
@@ -1422,7 +1686,7 @@
    "value": "112-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI11.PosSt",
@@ -1433,7 +1697,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI11.SName",
@@ -1444,7 +1708,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI12",
@@ -1462,7 +1726,7 @@
    "value": "112-14",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI12.PosSt",
@@ -1473,7 +1737,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI12.SName",
@@ -1484,7 +1748,7 @@
    "value": "-14",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.487340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI2",
@@ -1502,7 +1766,7 @@
    "value": "112-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI2.PosSt",
@@ -1513,7 +1777,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI2.SName",
@@ -1524,7 +1788,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI21",
@@ -1542,7 +1806,7 @@
    "value": "112-25",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI21.PosSt",
@@ -1553,7 +1817,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI21.SName",
@@ -1564,7 +1828,7 @@
    "value": "-25",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI22",
@@ -1582,7 +1846,7 @@
    "value": "112-24",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI22.PosSt",
@@ -1593,7 +1857,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E05.XSWI22.SName",
@@ -1604,7 +1868,7 @@
    "value": "-24",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.488340+00:00"
+   "src_ts": "2026-08-05T03:14:22.275493+00:00"
   },
   {
    "nodeid": "ns=2;s=E07",
@@ -1647,7 +1911,7 @@
    "value": "131_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.490340+00:00"
+   "src_ts": "2026-08-05T03:14:22.278928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.F67",
@@ -1665,7 +1929,7 @@
    "value": "131_SEL351_F67",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.491340+00:00"
+   "src_ts": "2026-08-05T03:14:22.279928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.IsLive",
@@ -1676,7 +1940,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.373784+00:00"
+   "src_ts": "2026-08-05T07:34:52.427517+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.MMXU1",
@@ -1684,6 +1948,72 @@
    "class": "Object",
    "path": "/SAS/110kV/E07/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.63880920410156,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.974846+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/Hz",
+   "depth": 3,
+   "value": 49.56209182739258,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.970219+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/Vlin",
+   "depth": 3,
+   "value": 114.47064971923828,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.970219+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.9178536534309387,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/totVAr",
+   "depth": 3,
+   "value": 107.48406982421875,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967202+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=E07.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/110kV/E07/MMXU1/totW",
+   "depth": 3,
+   "value": 97.92593383789062,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.968701+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.MSQI1",
@@ -1715,7 +2045,7 @@
    "value": "131",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XCBR1.PosSt",
@@ -1726,7 +2056,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI1",
@@ -1744,7 +2074,7 @@
    "value": "131-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI1.PosSt",
@@ -1755,7 +2085,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI1.SName",
@@ -1766,7 +2096,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI11",
@@ -1784,7 +2114,7 @@
    "value": "131-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.492844+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI11.PosSt",
@@ -1795,7 +2125,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI11.SName",
@@ -1806,7 +2136,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI2",
@@ -1824,7 +2154,7 @@
    "value": "131-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI2.PosSt",
@@ -1835,7 +2165,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI2.SName",
@@ -1846,7 +2176,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI3",
@@ -1864,7 +2194,7 @@
    "value": "131-3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI3.PosSt",
@@ -1875,7 +2205,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI3.SName",
@@ -1886,7 +2216,7 @@
    "value": "-3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI31",
@@ -1904,7 +2234,7 @@
    "value": "131-35",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI31.PosSt",
@@ -1915,7 +2245,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI31.SName",
@@ -1926,7 +2256,7 @@
    "value": "-35",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI32",
@@ -1944,7 +2274,7 @@
    "value": "131-38",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI32.PosSt",
@@ -1955,7 +2285,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI32.SName",
@@ -1966,7 +2296,7 @@
    "value": "-38",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.280928+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI9",
@@ -1984,7 +2314,7 @@
    "value": "131-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.281927+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI9.PosSt",
@@ -1995,7 +2325,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=E07.XSWI9.SName",
@@ -2006,7 +2336,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.493849+00:00"
+   "src_ts": "2026-08-05T03:14:22.281927+00:00"
   },
   {
    "nodeid": "ns=2;s=EBB",
@@ -2031,7 +2361,7 @@
    "value": "EBB",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.496851+00:00"
+   "src_ts": "2026-08-05T03:14:22.283926+00:00"
   },
   {
    "nodeid": "ns=2;s=EBB.F50BF",
@@ -2056,7 +2386,7 @@
    "value": "EBB_SEL487B_87B1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.497852+00:00"
+   "src_ts": "2026-08-05T03:14:22.284929+00:00"
   },
   {
    "nodeid": "ns=2;s=EBB.F87B2",
@@ -2074,7 +2404,7 @@
    "value": "EBB_SEL487B_87B2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.499852+00:00"
+   "src_ts": "2026-08-05T03:14:22.285928+00:00"
   },
   {
    "nodeid": "ns=2;s=EBB.F87B3",
@@ -2092,7 +2422,7 @@
    "value": "EBB_SEL487B_87B3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.501852+00:00"
+   "src_ts": "2026-08-05T03:14:22.288438+00:00"
   },
   {
    "nodeid": "ns=2;s=EBB.PosSt",
@@ -2185,7 +2515,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.375754+00:00"
+   "src_ts": "2026-08-05T07:34:52.425516+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.MMXU1",
@@ -2193,6 +2523,72 @@
    "class": "Object",
    "path": "/SAS/220kV/D01/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.11573791503906,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967202+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/Hz",
+   "depth": 3,
+   "value": 49.84095764160156,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/Vlin",
+   "depth": 3,
+   "value": 221.2716064453125,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967202+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.8363609313964844,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/totVAr",
+   "depth": 3,
+   "value": 109.20896911621094,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.964704+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D01.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/220kV/D01/MMXU1/totW",
+   "depth": 3,
+   "value": 116.05562591552734,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.MSQI1",
@@ -2235,7 +2631,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:10.588119+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI1",
@@ -2264,7 +2660,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T07:34:47.700367+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI1.SName",
@@ -2275,7 +2671,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI11",
@@ -2304,7 +2700,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI11.SName",
@@ -2315,7 +2711,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI2",
@@ -2344,7 +2740,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI2.SName",
@@ -2355,7 +2751,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.508881+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI3",
@@ -2384,7 +2780,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI3.SName",
@@ -2395,7 +2791,7 @@
    "value": "-3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI31",
@@ -2424,7 +2820,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI31.SName",
@@ -2435,7 +2831,7 @@
    "value": "-35",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI32",
@@ -2464,7 +2860,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI32.SName",
@@ -2475,7 +2871,7 @@
    "value": "-38",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+   "src_ts": "2026-08-05T03:14:22.294519+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI9",
@@ -2504,7 +2900,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D01.XSWI9.SName",
@@ -2515,7 +2911,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.509882+00:00"
+   "src_ts": "2026-08-05T03:14:22.295539+00:00"
   },
   {
    "nodeid": "ns=2;s=D03",
@@ -2558,7 +2954,7 @@
    "value": "271_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.512881+00:00"
+   "src_ts": "2026-08-05T03:14:22.297535+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.F21",
@@ -2576,7 +2972,7 @@
    "value": "271_SEL421_F21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.514386+00:00"
+   "src_ts": "2026-08-05T03:14:22.300096+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.F87L",
@@ -2594,7 +2990,7 @@
    "value": "271_SEL311L_F87L",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.517389+00:00"
+   "src_ts": "2026-08-05T03:14:22.302100+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.IsLive",
@@ -2605,7 +3001,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:37.196222+00:00"
+   "src_ts": "2026-08-05T03:14:27.938511+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.MMXU1",
@@ -2613,6 +3009,72 @@
    "class": "Object",
    "path": "/SAS/220kV/D03/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.416473388671875,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.969709+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/Hz",
+   "depth": 3,
+   "value": 50.698795318603516,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.964204+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/Vlin",
+   "depth": 3,
+   "value": 221.61306762695312,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.968701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.9550421237945557,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.968701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/totVAr",
+   "depth": 3,
+   "value": 62.9571647644043,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.968701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D03.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/220kV/D03/MMXU1/totW",
+   "depth": 3,
+   "value": 65.21783447265625,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.968701+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.MSQI1",
@@ -2655,7 +3117,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI1",
@@ -2673,7 +3135,7 @@
    "value": "271-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI1.PosSt",
@@ -2684,7 +3146,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI1.SName",
@@ -2695,7 +3157,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI11",
@@ -2713,7 +3175,7 @@
    "value": "271-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI11.PosSt",
@@ -2724,7 +3186,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI11.SName",
@@ -2735,7 +3197,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.519389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI2",
@@ -2753,7 +3215,7 @@
    "value": "271-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI2.PosSt",
@@ -2764,7 +3226,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI2.SName",
@@ -2775,7 +3237,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI7",
@@ -2793,7 +3255,7 @@
    "value": "271-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI7.PosSt",
@@ -2804,7 +3266,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI7.SName",
@@ -2815,7 +3277,7 @@
    "value": "-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI71",
@@ -2833,7 +3295,7 @@
    "value": "271-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI71.PosSt",
@@ -2844,7 +3306,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI71.SName",
@@ -2855,7 +3317,7 @@
    "value": "-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI72",
@@ -2873,7 +3335,7 @@
    "value": "271-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI72.PosSt",
@@ -2884,7 +3346,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI72.SName",
@@ -2895,7 +3357,7 @@
    "value": "-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.303103+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI9",
@@ -2913,7 +3375,7 @@
    "value": "271-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.304095+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI9.PosSt",
@@ -2924,7 +3386,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D03.XSWI9.SName",
@@ -2935,7 +3397,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.520389+00:00"
+   "src_ts": "2026-08-05T03:14:22.304095+00:00"
   },
   {
    "nodeid": "ns=2;s=D04",
@@ -2978,7 +3440,7 @@
    "value": "272_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.523895+00:00"
+   "src_ts": "2026-08-05T03:14:22.306063+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.F21",
@@ -2996,7 +3458,7 @@
    "value": "272_SEL421_F21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.525899+00:00"
+   "src_ts": "2026-08-05T03:14:22.308573+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.F87L",
@@ -3014,7 +3476,7 @@
    "value": "272_SEL311L_F87L",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.526898+00:00"
+   "src_ts": "2026-08-05T03:14:22.309620+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.IsLive",
@@ -3025,7 +3487,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:37.220746+00:00"
+   "src_ts": "2026-08-05T03:14:27.938511+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.MMXU1",
@@ -3033,6 +3495,72 @@
    "class": "Object",
    "path": "/SAS/220kV/D04/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.371055603027344,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967701+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/Hz",
+   "depth": 3,
+   "value": 51.101905822753906,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.970720+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/Vlin",
+   "depth": 3,
+   "value": 219.8567657470703,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.970219+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.9530055522918701,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.963705+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/totVAr",
+   "depth": 3,
+   "value": 12.649088859558105,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.971218+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D04.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/220kV/D04/MMXU1/totW",
+   "depth": 3,
+   "value": 119.52838897705078,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:25.967202+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.MSQI1",
@@ -3064,7 +3592,7 @@
    "value": "272",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XCBR1.PosSt",
@@ -3075,7 +3603,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI1",
@@ -3093,7 +3621,7 @@
    "value": "272-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI1.PosSt",
@@ -3104,7 +3632,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI1.SName",
@@ -3115,7 +3643,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI11",
@@ -3133,7 +3661,7 @@
    "value": "272-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI11.PosSt",
@@ -3144,7 +3672,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI11.SName",
@@ -3155,7 +3683,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.527898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI2",
@@ -3173,7 +3701,7 @@
    "value": "272-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI2.PosSt",
@@ -3184,7 +3712,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI2.SName",
@@ -3195,7 +3723,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.310663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI7",
@@ -3213,7 +3741,7 @@
    "value": "272-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI7.PosSt",
@@ -3224,7 +3752,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI7.SName",
@@ -3235,7 +3763,7 @@
    "value": "-7",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI71",
@@ -3253,7 +3781,7 @@
    "value": "272-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI71.PosSt",
@@ -3264,7 +3792,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI71.SName",
@@ -3275,7 +3803,7 @@
    "value": "-75",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI72",
@@ -3293,7 +3821,7 @@
    "value": "272-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI72.PosSt",
@@ -3304,7 +3832,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI72.SName",
@@ -3315,7 +3843,7 @@
    "value": "-76",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI9",
@@ -3333,7 +3861,7 @@
    "value": "272-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI9.PosSt",
@@ -3344,7 +3872,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D04.XSWI9.SName",
@@ -3355,7 +3883,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.528898+00:00"
+   "src_ts": "2026-08-05T03:14:22.311663+00:00"
   },
   {
    "nodeid": "ns=2;s=D12",
@@ -3380,7 +3908,7 @@
    "value": "Bus Tranfer",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.529899+00:00"
+   "src_ts": "2026-08-05T03:14:22.312654+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.BCU",
@@ -3398,7 +3926,7 @@
    "value": "200_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.531898+00:00"
+   "src_ts": "2026-08-05T03:14:22.313659+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.F211",
@@ -3416,7 +3944,7 @@
    "value": "200_SEL421_F21_1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.536407+00:00"
+   "src_ts": "2026-08-05T03:14:22.316284+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.F212",
@@ -3434,7 +3962,7 @@
    "value": "200_SEL421_F21_2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.538407+00:00"
+   "src_ts": "2026-08-05T03:14:22.317879+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.IsLive",
@@ -3450,6 +3978,72 @@
    "class": "Object",
    "path": "/SAS/220kV/D12/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/Amax",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T03:14:22.544908+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/Hz",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T07:34:48.001926+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/Vlin",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T03:14:22.544908+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T07:34:48.001926+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/totVAr",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T07:34:48.001926+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D12.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/220kV/D12/MMXU1/totW",
+   "depth": 3,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T07:34:48.001926+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.MSQI1",
@@ -3481,7 +4075,7 @@
    "value": "200",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XCBR1.PosSt",
@@ -3492,7 +4086,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI1",
@@ -3510,7 +4104,7 @@
    "value": "200-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI1.PosSt",
@@ -3521,7 +4115,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI1.SName",
@@ -3532,7 +4126,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI11",
@@ -3550,7 +4144,7 @@
    "value": "200-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI11.PosSt",
@@ -3561,7 +4155,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI11.SName",
@@ -3572,7 +4166,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI2",
@@ -3590,7 +4184,7 @@
    "value": "200-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI2.PosSt",
@@ -3601,7 +4195,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI2.SName",
@@ -3612,7 +4206,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.539407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI9",
@@ -3630,7 +4224,7 @@
    "value": "200-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI9.PosSt",
@@ -3641,7 +4235,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI9.SName",
@@ -3652,7 +4246,7 @@
    "value": "-9",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI91",
@@ -3670,7 +4264,7 @@
    "value": "200-95",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI91.PosSt",
@@ -3681,7 +4275,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI91.SName",
@@ -3692,7 +4286,7 @@
    "value": "-95",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI92",
@@ -3710,7 +4304,7 @@
    "value": "200-94",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI92.PosSt",
@@ -3721,7 +4315,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D12.XSWI92.SName",
@@ -3732,7 +4326,7 @@
    "value": "-94",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.318881+00:00"
   },
   {
    "nodeid": "ns=2;s=D17",
@@ -3757,7 +4351,7 @@
    "value": "Bus Coupler",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.540407+00:00"
+   "src_ts": "2026-08-05T03:14:22.319961+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.BCU",
@@ -3775,7 +4369,7 @@
    "value": "212_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.542909+00:00"
+   "src_ts": "2026-08-05T03:14:22.321952+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.F21",
@@ -3793,7 +4387,7 @@
    "value": "212_SEL421_F21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.545915+00:00"
+   "src_ts": "2026-08-05T03:14:22.323880+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.IsLive",
@@ -3804,7 +4398,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:37.215745+00:00"
+   "src_ts": "2026-08-05T03:14:27.937497+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.MMXU1",
@@ -3812,6 +4406,72 @@
    "class": "Object",
    "path": "/SAS/220kV/D17/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/Amax",
+   "depth": 3,
+   "value": 52.34076690673828,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.984923+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/Hz",
+   "depth": 3,
+   "value": 51.87068176269531,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.984923+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/Vlin",
+   "depth": 3,
+   "value": 221.05372619628906,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.981302+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.928763747215271,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.977406+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/totVAr",
+   "depth": 3,
+   "value": 42.44908905029297,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.977406+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=D17.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/220kV/D17/MMXU1/totW",
+   "depth": 3,
+   "value": 118.0206298828125,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.980502+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.MSQI1",
@@ -3843,7 +4503,7 @@
    "value": "212",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XCBR1.PosSt",
@@ -3854,7 +4514,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI1",
@@ -3872,7 +4532,7 @@
    "value": "212-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI1.PosSt",
@@ -3883,7 +4543,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI1.SName",
@@ -3894,7 +4554,7 @@
    "value": "-1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI11",
@@ -3912,7 +4572,7 @@
    "value": "212-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI11.PosSt",
@@ -3923,7 +4583,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI11.SName",
@@ -3934,7 +4594,7 @@
    "value": "-15",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI12",
@@ -3952,7 +4612,7 @@
    "value": "212-14",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI12.PosSt",
@@ -3963,7 +4623,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI12.SName",
@@ -3974,7 +4634,7 @@
    "value": "-14",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI2",
@@ -3992,7 +4652,7 @@
    "value": "212-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI2.PosSt",
@@ -4003,7 +4663,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI2.SName",
@@ -4014,7 +4674,7 @@
    "value": "-2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI21",
@@ -4032,7 +4692,7 @@
    "value": "212-25",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI21.PosSt",
@@ -4043,7 +4703,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI21.SName",
@@ -4054,7 +4714,7 @@
    "value": "-25",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI22",
@@ -4072,7 +4732,7 @@
    "value": "212-24",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI22.PosSt",
@@ -4083,7 +4743,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=D17.XSWI22.SName",
@@ -4094,7 +4754,7 @@
    "value": "-24",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.547915+00:00"
+   "src_ts": "2026-08-05T03:14:22.324879+00:00"
   },
   {
    "nodeid": "ns=2;s=DBB",
@@ -4119,7 +4779,7 @@
    "value": "",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.548915+00:00"
+   "src_ts": "2026-08-05T03:14:22.325880+00:00"
   },
   {
    "nodeid": "ns=2;s=DBB.F50BF",
@@ -4144,7 +4804,7 @@
    "value": "DBB_SEL487B_87B1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.551915+00:00"
+   "src_ts": "2026-08-05T03:14:22.327384+00:00"
   },
   {
    "nodeid": "ns=2;s=DBB.F87B2",
@@ -4162,7 +4822,7 @@
    "value": "DBB_SEL487B_87B2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.554420+00:00"
+   "src_ts": "2026-08-05T03:14:22.329388+00:00"
   },
   {
    "nodeid": "ns=2;s=DBB.F87B3",
@@ -4180,7 +4840,7 @@
    "value": "DBB_SEL487B_87B3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.556423+00:00"
+   "src_ts": "2026-08-05T03:14:22.331391+00:00"
   },
   {
    "nodeid": "ns=2;s=DBB.Pos",
@@ -4226,7 +4886,7 @@
    "value": "",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.557422+00:00"
+   "src_ts": "2026-08-05T03:14:22.332392+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.BCU",
@@ -4244,7 +4904,7 @@
    "value": "431_SEL451_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.559423+00:00"
+   "src_ts": "2026-08-05T03:14:22.333392+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.IsLive",
@@ -4255,7 +4915,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.378194+00:00"
+   "src_ts": "2026-08-05T07:34:52.428520+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.MMXU1",
@@ -4263,6 +4923,72 @@
    "class": "Object",
    "path": "/SAS/22kV/J01/MMXU1",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.Amax",
+   "name": "Amax",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/Amax",
+   "depth": 3,
+   "value": 53.7256965637207,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.976406+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/Hz",
+   "depth": 3,
+   "value": 49.38672637939453,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.982117+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.Vlin",
+   "name": "Vlin",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/Vlin",
+   "depth": 3,
+   "value": 21.439769744873047,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.986924+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.totPF",
+   "name": "totPF",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/totPF",
+   "depth": 3,
+   "value": 0.8917526006698608,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.978112+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.totVAr",
+   "name": "totVAr",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/totVAr",
+   "depth": 3,
+   "value": 45.201168060302734,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.978112+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=J01.MMXU1.totW",
+   "name": "totW",
+   "class": "Variable",
+   "path": "/SAS/22kV/J01/MMXU1/totW",
+   "depth": 3,
+   "value": 139.9034423828125,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.987892+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.MSQI1",
@@ -4294,7 +5020,7 @@
    "value": "431",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.559423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XCBR1.PosSt",
@@ -4305,7 +5031,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI3",
@@ -4323,7 +5049,7 @@
    "value": "431-3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI3.PosSt",
@@ -4334,7 +5060,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI3.SName",
@@ -4345,7 +5071,7 @@
    "value": "-3",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI31",
@@ -4363,7 +5089,7 @@
    "value": "431-35",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI31.PosSt",
@@ -4374,7 +5100,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI31.SName",
@@ -4385,7 +5111,7 @@
    "value": "-35",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI32",
@@ -4403,7 +5129,7 @@
    "value": "431-38",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI32.PosSt",
@@ -4414,7 +5140,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.629187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=J01.XSWI32.SName",
@@ -4425,7 +5151,7 @@
    "value": "-38",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.560423+00:00"
+   "src_ts": "2026-08-05T03:14:22.334391+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1",
@@ -4478,7 +5204,7 @@
    "value": "AT1_SEL2414_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.561423+00:00"
+   "src_ts": "2026-08-05T03:14:22.336392+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.F50",
@@ -4517,7 +5243,7 @@
    "value": "AT1_SEL751_F50",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.562925+00:00"
+   "src_ts": "2026-08-05T03:14:22.336392+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.F50.PRO",
@@ -4563,7 +5289,7 @@
    "value": "AT1_SEL487E_87T1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.564929+00:00"
+   "src_ts": "2026-08-05T03:14:22.338899+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.F87T1.PRO",
@@ -4609,7 +5335,7 @@
    "value": "AT1_SEL487E_F87T2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.566932+00:00"
+   "src_ts": "2026-08-05T03:14:22.340902+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.F87T2.PRO",
@@ -4655,7 +5381,7 @@
    "value": "AT1 - REGDA",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.567932+00:00"
+   "src_ts": "2026-08-05T03:14:22.340902+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.F90.ST",
@@ -4670,6 +5396,17 @@
    "class": "Object",
    "path": "/SAS/AT1/F90/YLTC",
    "depth": 2
+  },
+  {
+   "nodeid": "ns=2;s=AT1.F90.YLTC.TapPos",
+   "name": "TapPos",
+   "class": "Variable",
+   "path": "/SAS/AT1/F90/YLTC/TapPos",
+   "depth": 3,
+   "value": 0,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-05T03:14:22.388631+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.FAN1",
@@ -4687,7 +5424,7 @@
    "value": "AT1_FAN1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.567932+00:00"
+   "src_ts": "2026-08-05T03:14:22.340902+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.FAN2",
@@ -4705,7 +5442,7 @@
    "value": "AT1_FAN2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+   "src_ts": "2026-08-05T03:14:22.340902+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.IO1",
@@ -4737,7 +5474,7 @@
    "value": "AT1_SEL2440_IO1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+   "src_ts": "2026-08-05T03:14:22.341903+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.YLTC",
@@ -4755,7 +5492,18 @@
    "value": "AT1_OLTC",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.568932+00:00"
+   "src_ts": "2026-08-05T03:14:22.341903+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=AT1.YLTC.TapPos",
+   "name": "TapPos",
+   "class": "Variable",
+   "path": "/SAS/AT1/YLTC/TapPos",
+   "depth": 2,
+   "value": 10,
+   "vtype": "6",
+   "quality": "Good",
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=AT1.YPTR",
@@ -4815,7 +5563,7 @@
    "value": "AC_SEL2440_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.570932+00:00"
+   "src_ts": "2026-08-05T03:14:22.342903+00:00"
   },
   {
    "nodeid": "ns=2;s=AC.IO1",
@@ -4833,7 +5581,7 @@
    "value": "AC_SEL2440_IO1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.570932+00:00"
+   "src_ts": "2026-08-05T03:14:22.343902+00:00"
   },
   {
    "nodeid": "ns=2;s=AC.IO2",
@@ -4851,7 +5599,7 @@
    "value": "AC_SEL2440_IO2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.571932+00:00"
+   "src_ts": "2026-08-05T03:14:22.343902+00:00"
   },
   {
    "nodeid": "ns=2;s=AC.MMXU1",
@@ -4918,7 +5666,7 @@
    "value": "DC_SEL2440_IO1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.576439+00:00"
+   "src_ts": "2026-08-05T03:14:22.348410+00:00"
   },
   {
    "nodeid": "ns=2;s=DC.IO2",
@@ -4936,7 +5684,7 @@
    "value": "DC_SEL2440_IO2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.577440+00:00"
+   "src_ts": "2026-08-05T03:14:22.348410+00:00"
   },
   {
    "nodeid": "ns=2;s=DC.IO3",
@@ -4954,7 +5702,7 @@
    "value": "DC_SEL2440_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.577440+00:00"
+   "src_ts": "2026-08-05T03:14:22.349413+00:00"
   },
   {
    "nodeid": "ns=2;s=DC.MMXU1",
@@ -5014,7 +5762,7 @@
    "value": "_SEL2440_BCU",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.580441+00:00"
+   "src_ts": "2026-08-05T03:14:22.351412+00:00"
   },
   {
    "nodeid": "ns=2;s=IO.BCU2",
@@ -5032,7 +5780,7 @@
    "value": "_SEL2440_IO1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
   },
   {
    "nodeid": "ns=2;s=IO.Name",
@@ -5085,7 +5833,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:47.701362+00:00"
   },
   {
    "nodeid": "ns=2;s=C11L",
@@ -5096,7 +5844,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:47.701362+00:00"
   },
   {
    "nodeid": "ns=2;s=C12L",
@@ -5107,7 +5855,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:47.701872+00:00"
   },
   {
    "nodeid": "ns=2;s=C19L",
@@ -5118,7 +5866,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:47.701872+00:00"
   },
   {
    "nodeid": "ns=2;s=C21L",
@@ -5129,7 +5877,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.794960+00:00"
+   "src_ts": "2026-08-05T03:14:22.542904+00:00"
   },
   {
    "nodeid": "ns=2;s=C22L",
@@ -5140,7 +5888,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.911683+00:00"
+   "src_ts": "2026-08-05T03:14:22.670976+00:00"
   },
   {
    "nodeid": "ns=2;s=C29L",
@@ -5151,7 +5899,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.105591+00:00"
+   "src_ts": "2026-08-05T03:14:22.875692+00:00"
   },
   {
    "nodeid": "ns=2;s=CheckLiveState",
@@ -5169,7 +5917,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
   },
   {
    "nodeid": "ns=2;s=D03L",
@@ -5180,7 +5928,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
   },
   {
    "nodeid": "ns=2;s=D04L",
@@ -5191,7 +5939,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
   },
   {
    "nodeid": "ns=2;s=D12L",
@@ -5202,7 +5950,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.105591+00:00"
+   "src_ts": "2026-08-05T03:14:22.875692+00:00"
   },
   {
    "nodeid": "ns=2;s=D17L",
@@ -5213,7 +5961,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.901169+00:00"
+   "src_ts": "2026-08-05T03:14:22.662467+00:00"
   },
   {
    "nodeid": "ns=2;s=E01L",
@@ -5224,7 +5972,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.336643+00:00"
+   "src_ts": "2026-08-05T07:34:47.701872+00:00"
   },
   {
    "nodeid": "ns=2;s=E02L",
@@ -5235,7 +5983,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.381141+00:00"
+   "src_ts": "2026-08-05T07:34:47.751173+00:00"
   },
   {
    "nodeid": "ns=2;s=E04L",
@@ -5246,7 +5994,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.416309+00:00"
+   "src_ts": "2026-08-05T07:34:47.783746+00:00"
   },
   {
    "nodeid": "ns=2;s=E05L",
@@ -5257,7 +6005,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.474946+00:00"
+   "src_ts": "2026-08-05T07:34:47.846389+00:00"
   },
   {
    "nodeid": "ns=2;s=E07L",
@@ -5268,7 +6016,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.562965+00:00"
+   "src_ts": "2026-08-05T07:34:47.927968+00:00"
   },
   {
    "nodeid": "ns=2;s=J01L",
@@ -5279,7 +6027,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:39.582785+00:00"
+   "src_ts": "2026-08-05T07:34:47.968319+00:00"
   },
   {
    "nodeid": "ns=2;s=SendToFEP",
@@ -5303,6 +6051,17 @@
    "depth": 1
   },
   {
+   "nodeid": "ns=2;s=Subs.BB11.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB11/Hz",
+   "depth": 2,
+   "value": 49.851070404052734,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.983116+00:00"
+  },
+  {
    "nodeid": "ns=2;s=Subs.BB11.IsLive",
    "name": "IsLive",
    "class": "Variable",
@@ -5311,7 +6070,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.381910+00:00"
+   "src_ts": "2026-08-05T07:34:52.432793+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB11.Name",
@@ -5322,7 +6081,18 @@
    "value": "BB11",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB11.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB11/PPVmax",
+   "depth": 2,
+   "value": 109.09746551513672,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.985420+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB110_BusCoupled",
@@ -5333,7 +6103,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.136120+00:00"
+   "src_ts": "2026-08-05T03:14:22.905822+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB12",
@@ -5341,6 +6111,17 @@
    "class": "Object",
    "path": "/SAS/Subs/BB12",
    "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB12.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB12/Hz",
+   "depth": 2,
+   "value": 50.226436614990234,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.987892+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB12.IsLive",
@@ -5351,7 +6132,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.383921+00:00"
+   "src_ts": "2026-08-05T07:34:52.435794+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB12.Name",
@@ -5362,7 +6143,18 @@
    "value": "BB12",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB12.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB12/PPVmax",
+   "depth": 2,
+   "value": 110.04948425292969,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.987892+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB19",
@@ -5370,6 +6162,17 @@
    "class": "Object",
    "path": "/SAS/Subs/BB19",
    "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19/Hz",
+   "depth": 2,
+   "value": 49.50518035888672,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.986924+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB19.IsLive",
@@ -5380,7 +6183,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T04:53:43.382922+00:00"
+   "src_ts": "2026-08-05T07:34:52.422006+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB19.Name",
@@ -5391,7 +6194,18 @@
    "value": "BB19",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB19.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB19/PPVmax",
+   "depth": 2,
+   "value": 109.34248352050781,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.975905+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB19_CBPosSt",
@@ -5402,7 +6216,7 @@
    "value": 2,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB19_DS9PosStEx",
@@ -5413,7 +6227,7 @@
    "value": 1,
    "vtype": "2",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.137120+00:00"
+   "src_ts": "2026-08-05T03:14:22.907324+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB21",
@@ -5421,6 +6235,17 @@
    "class": "Object",
    "path": "/SAS/Subs/BB21",
    "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB21.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB21/Hz",
+   "depth": 2,
+   "value": 49.98758316040039,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.977406+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB21.IsLive",
@@ -5431,7 +6256,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:37.225747+00:00"
+   "src_ts": "2026-08-05T03:14:27.945506+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB21.Name",
@@ -5442,7 +6267,18 @@
    "value": "BB21",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.352414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB21.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB21/PPVmax",
+   "depth": 2,
+   "value": 220.17166137695312,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.987892+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB22",
@@ -5450,6 +6286,17 @@
    "class": "Object",
    "path": "/SAS/Subs/BB22",
    "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB22.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB22/Hz",
+   "depth": 2,
+   "value": 50.3682746887207,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.987892+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB22.IsLive",
@@ -5460,7 +6307,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:37.222747+00:00"
+   "src_ts": "2026-08-05T03:14:27.942511+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB22.Name",
@@ -5471,7 +6318,18 @@
    "value": "BB22",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB22.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB22/PPVmax",
+   "depth": 2,
+   "value": 219.20999145507812,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-06T02:35:30.984421+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB220_BusCoupled",
@@ -5482,7 +6340,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.120103+00:00"
+   "src_ts": "2026-08-05T03:14:22.891313+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB29",
@@ -5490,6 +6348,17 @@
    "class": "Object",
    "path": "/SAS/Subs/BB29",
    "depth": 1
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29.Hz",
+   "name": "Hz",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29/Hz",
+   "depth": 2,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T07:34:48.001926+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB29.IsLive",
@@ -5508,7 +6377,18 @@
    "value": "BB29",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
+  },
+  {
+   "nodeid": "ns=2;s=Subs.BB29.PPVmax",
+   "name": "PPVmax",
+   "class": "Variable",
+   "path": "/SAS/Subs/BB29/PPVmax",
+   "depth": 2,
+   "value": 0.0,
+   "vtype": "10",
+   "quality": "Good",
+   "src_ts": "2026-08-05T03:14:22.543905+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB29_CBPosSt",
@@ -5519,7 +6399,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.628187+00:00"
+   "src_ts": "2026-08-05T03:14:22.393634+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BB29_DS9PosStEx",
@@ -5530,7 +6410,7 @@
    "value": 0,
    "vtype": "2",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:32.098079+00:00"
+   "src_ts": "2026-08-05T03:14:22.868689+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.BeingCtl",
@@ -5541,7 +6421,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+   "src_ts": "2026-08-05T03:14:22.240004+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.Bit10",
@@ -5552,7 +6432,7 @@
    "value": "",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.Bit8",
@@ -5563,7 +6443,7 @@
    "value": "",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.COM",
@@ -5581,7 +6461,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+   "src_ts": "2026-08-05T03:14:22.240004+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.ColorSelect",
@@ -5614,7 +6494,7 @@
    "value": 1,
    "vtype": "6",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+   "src_ts": "2026-08-05T03:14:22.240004+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.ForceEnaSt",
@@ -5625,7 +6505,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.446741+00:00"
+   "src_ts": "2026-08-05T03:14:22.240004+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.SNMP",
@@ -5650,7 +6530,7 @@
    "value": "SCADA ET1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.581439+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.SNMP.SCAET2",
@@ -5668,7 +6548,7 @@
    "value": "SCADA ET1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.SNMP.SERET1",
@@ -5686,7 +6566,7 @@
    "value": "SERVER ET1",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.SNMP.SERET2",
@@ -5704,7 +6584,7 @@
    "value": "SERVER ET2",
    "vtype": "12",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs.System",
@@ -5722,7 +6602,7 @@
    "value": false,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   },
   {
    "nodeid": "ns=2;s=Subs._true",
@@ -5733,7 +6613,7 @@
    "value": true,
    "vtype": "1",
    "quality": "Good",
-   "src_ts": "2026-08-03T02:07:31.582942+00:00"
+   "src_ts": "2026-08-05T03:14:22.353414+00:00"
   }
  ]
 }

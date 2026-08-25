@@ -1,0 +1,32 @@
+# DRAFT - soan boi agent, CHUA duoc nguoi co tham quyen van hanh duyet.
+id: breaker-trip
+title: Máy cắt tác động ngoài thao tác
+status: draft
+message_pattern: 'CB .*(TRIP|FAULT)'
+
+summary: >
+  Một máy cắt đổi sang vị trí mở mà không đi kèm thao tác của người vận hành.
+  Phân biệt với thao tác chủ động là ở chỗ alarm không mang tên người thực hiện.
+
+steps:
+  - text: >
+      Xác nhận vị trí máy cắt và các dao cách ly của ngăn. Vị trí
+      INTERMEDIATE hoặc quality không GOOD thì chưa kết luận được là đã mở.
+    caution: >
+      Không đọc "không đọc được vị trí" thành "đã mở". Đó là giả định khiến người
+      ta chạm tay vào thiết bị còn điện.
+  - text: >
+      Xem các bảo vệ của ngăn đã tác động chưa, và bản ghi sự kiện của rơ le
+      trong cửa sổ vài trăm mili giây trước thời điểm máy cắt mở.
+  - text: >
+      Khoanh vùng mất điện trên sơ đồ: những đoạn nào mất nguồn sau khi máy cắt
+      này mở.
+  - text: >
+      Kiểm tra các ngăn kề cùng thanh cái xem có alarm điện áp đi kèm không — nếu
+      có, chúng đã nằm trong cùng sự cố này.
+  - text: >
+      Chưa đóng lại khi chưa xác định được nguyên nhân tác động.
+
+references:
+  - "Alarm gốc: <ngăn>.XCBR1.PosSt, Discrete Alarm"
+  - "CHƯA có quy trình vận hành của trạm cho tình huống này"

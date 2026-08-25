@@ -8,6 +8,7 @@
 | `10-architecture/` | Kiến trúc 6 lớp, ranh giới, luồng dữ liệu | Thêm module, đổi ranh giới lớp |
 | `10-architecture/adr/` | Decision records — **immutable** | Trước khi làm khác một quyết định đã chốt |
 | `20-domain/` | Từ điển thuật ngữ, bay template | Gặp thuật ngữ lạ (61850/CIM/EVN) |
+| `20-ui/` | Danh mục màn hình, pane, luồng người dùng | Thêm/sửa bất kỳ màn hình nào |
 | `30-integration/` | **Sự thật đã đo** về OneATS | Động tới OPC UA / DataServer / alarm |
 | `90-progress/` | Trạng thái, việc kế tiếp, câu hỏi mở | **Đầu và cuối mỗi phiên** |
 

@@ -10,6 +10,8 @@ keep going with an explicitly marked placeholder. Never guess silently (I7).
 
 from __future__ import annotations
 
+import re
+
 from blackinterface.domain.bay_types import infer_bay_type
 from blackinterface.domain.models import (
     Bay,
@@ -22,6 +24,7 @@ from blackinterface.domain.models import (
     Severity,
     StationGraph,
     Terminal,
+    Transformer,
     ValidationIssue,
 )
 from blackinterface.domain.observation import BayObs, StationObs
@@ -164,10 +167,14 @@ class _Builder:
         if template is not None:
             device_ids = self.add_devices(bay, template, issues)
 
+        # The `BAY` logical node's Name is the display name an operator knows
+        # the bay by ("Ben Cat", "AT1 Incoming"). Measured on DEMO_SAS
+        # (2026-08-05): /SAS/220kV/D01/BAY/Name = "AT1 Incoming".
+        display = next((ln.name for ln in bay.logical_nodes if ln.ln == "BAY" and ln.name), None)
         self.bays.append(
             Bay(
                 id=bay.id,
-                name=bay.name or bay.id,
+                name=display or bay.name or bay.id,
                 voltage_level=bay.voltage_level,
                 bay_type=bay_type,
                 template_id=template.id if template else None,
@@ -205,7 +212,10 @@ class _Builder:
 
         device_ids: list[str] = []
         for slot in template.slots:
-            found = observed.get(slot.ln)
+            # The device id stays the template's spelling whichever the source
+            # used, so `device:D03.XSWI11` addresses the same apparatus in every
+            # project (I8) — only the observation is looked up by alias.
+            found = next((observed[name] for name in slot.names if name in observed), None)
             if found is None:
                 if slot.required:
                     issues.append(
@@ -262,6 +272,66 @@ class _Builder:
             )
         return tuple(device_ids)
 
+    # ----------------------------------------------------------- transformers
+    def pair_transformers(self) -> list[Transformer]:
+        """Couple bays across voltage levels through their transformer.
+
+        Two evidence sources, both measured on DEMO_SAS — no guessing (I3):
+
+        1. The bay's display name carries the transformer group's id:
+           `/SAS/220kV/D01/BAY/Name` = `/SAS/110kV/E07/BAY/Name` = "AT1 Incoming".
+        2. The bay's breaker number follows the EVN designation rule
+           (Thông tư 44/2014/TT-BCT): a transformer bay's breaker is
+           `<voltage digit>3<transformer ordinal>` — AT1 owns 231 (220kV),
+           131 (110kV) and 431 (22kV). This is what pairs the tertiary bay
+           J01, whose `BAY/Name` is empty.
+
+        A group matched at fewer than two voltage levels stays unpaired and is
+        reported — never silently drawn.
+        """
+        breaker_names: dict[str, list[str]] = {}
+        for device in self.devices:
+            if device.ln.startswith("XCBR"):
+                breaker_names.setdefault(device.bay_id, []).append(device.name)
+
+        result: list[Transformer] = []
+        for obs in self.obs.transformers:
+            token = re.compile(rf"\b{re.escape(obs.id)}\b", re.IGNORECASE)
+            designation = _breaker_designation(obs.id)
+            matched = [
+                b
+                for b in self.bays
+                if token.search(b.name)
+                or (
+                    designation is not None
+                    and any(designation.match(name) for name in breaker_names.get(b.id, ()))
+                )
+            ]
+            windings = sorted(matched, key=lambda b: _kilovolts(b.voltage_level), reverse=True)
+            if len({b.voltage_level for b in windings}) < 2:
+                self.issues.append(
+                    ValidationIssue(
+                        severity=Severity.WARNING,
+                        code="transformer_unpaired",
+                        subject=obs.id,
+                        message=(
+                            f"The source has transformer {obs.id}, but its id appears in "
+                            f"{len(windings)} bay name(s) — need one bay per voltage level "
+                            f"to draw the coupling. Not drawn."
+                        ),
+                    )
+                )
+                continue
+            result.append(
+                Transformer(
+                    id=obs.id,
+                    name=obs.name or obs.id,
+                    bay_ids=tuple(b.id for b in windings),
+                    source_ref=obs.source_ref,
+                )
+            )
+        return result
+
     # ----------------------------------------------------------------- build
     def build(self) -> StationGraph:
         for bay in sorted(self.obs.bays, key=lambda b: (b.voltage_level, b.id)):
@@ -286,6 +356,7 @@ class _Builder:
                 )
             )
 
+        transformers = self.pair_transformers()
         voltage_levels = tuple(sorted({b.voltage_level for b in self.bays if b.voltage_level}))
         return StationGraph(
             name=self.obs.name,
@@ -297,8 +368,31 @@ class _Builder:
             bays=tuple(self.bays),
             devices=tuple(self.devices),
             nodes=tuple(sorted(self.nodes.values(), key=lambda n: n.id)),
+            transformers=tuple(transformers),
             issues=tuple(self.issues),
         )
+
+
+def _breaker_designation(transformer_id: str) -> re.Pattern[str] | None:
+    """EVN breaker number of a transformer bay: `<voltage digit>3<ordinal>`.
+
+    "AT1" -> `^\\d31$`, matching 231/131/431 and nothing else (couplers are
+    x12, lines x7x). A transformer id without a single trailing digit gives
+    no designation — better unpaired than wrongly paired.
+    """
+    match = re.search(r"(\d+)$", transformer_id)
+    if match is None or len(match.group(1)) != 1:
+        return None
+    return re.compile(rf"^\d3{match.group(1)}$")
+
+
+_KV_RE = re.compile(r"([\d.]+)")
+
+
+def _kilovolts(voltage_level: str) -> float:
+    """`"220kV"` -> 220.0. Unparseable levels sort last."""
+    match = _KV_RE.search(voltage_level)
+    return float(match.group(1)) if match else 0.0
 
 
 def _decode_busbar_id(busbar_id: str) -> tuple[str, int]:

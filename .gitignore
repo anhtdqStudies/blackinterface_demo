@@ -23,8 +23,12 @@ frontend/dist/
 *.sqlite
 *.sqlite3
 *.db
+# WAL mode creates sidecar files next to the database
 *.db-wal
 *.db-shm
+*.sqlite-wal
+*.sqlite-shm
+/data/
 # ad-hoc dumps at the repo root; the committed test fixture lives in
 # backend/tests/fixtures/ and is deliberately NOT ignored
 /sas_tree.json

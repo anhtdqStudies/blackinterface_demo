@@ -1,0 +1,58 @@
+# Ai phải duyệt thay đổi ở đâu — bản máy đọc được của ADR-0023 §1 và §3.
+# Bảng người đọc: docs/90-progress/team.md
+#
+# ⚠ THAY BA TÊN DƯỚI ĐÂY bằng username thật trên GitHub/GitLab nội bộ ATS
+#    trước khi bật CODEOWNERS. Chưa thay thì file này không có tác dụng.
+#
+#   @chu-du-an   chủ dự án
+#   @dev-a       tool & use case   (M2 Domain API)
+#   @dev-b       mô hình trạm      (M1)
+#
+# Luật của GitHub/GitLab: dòng SAU thắng dòng trước. Nên các mục độc quyền
+# nằm ở cuối file.
+
+# ── Mặc định ────────────────────────────────────────────────────────────────
+*                                       @chu-du-an
+
+# ── M1 · Mô hình trạm — Dev B ───────────────────────────────────────────────
+/backend/src/blackinterface/integration/ @dev-b
+/backend/src/blackinterface/domain/      @dev-b
+/backend/src/blackinterface/diagram/     @dev-b
+/backend/src/blackinterface/store/projects.py @dev-b
+/backend/src/blackinterface/store/releases.py @dev-b
+/tools/probe_dataserver.py               @dev-b
+/tools/verify_dataserver.py              @dev-b
+
+# ── M2 · Domain API — Dev A ─────────────────────────────────────────────────
+/backend/src/blackinterface/api/         @dev-a
+/backend/src/blackinterface/store/       @dev-a
+/backend/src/blackinterface/store/events.py @dev-a
+/backend/src/blackinterface/agent/tools/ @dev-a
+
+# ── M5 · Vỏ — chủ dự án, không ai khác chạm ─────────────────────────────────
+/frontend/                               @chu-du-an
+
+# ── M3 · BlackCore — nhân do chủ dự án giữ, tool ở trên là của Dev A ────────
+/backend/src/blackinterface/agent/core.py     @chu-du-an
+/backend/src/blackinterface/agent/harness.py  @chu-du-an
+/backend/src/blackinterface/agent/digest.py   @chu-du-an
+/backend/src/blackinterface/agent/session.py  @chu-du-an
+/backend/src/blackinterface/agent/provider.py @chu-du-an
+/backend/src/blackinterface/config.py         @chu-du-an
+
+# ── Nơi các invariant sống — CHỈ chủ dự án (ADR-0023 §3) ────────────────────
+# check.py bắt được vi phạm cú pháp; nó không bắt được ý định.
+/AGENTS.md                               @chu-du-an
+/CLAUDE.md                               @chu-du-an
+/CODEOWNERS                              @chu-du-an
+/docs/10-architecture/adr/               @chu-du-an
+/tools/check.py                          @chu-du-an
+/backend/src/blackinterface/domain/scope.py @chu-du-an
+/backend/src/blackinterface/control/     @chu-du-an
+/docs/90-progress/status.md              @chu-du-an
+/docs/90-progress/team.md                @chu-du-an
+/docs/90-progress/questions.md           @chu-du-an
+/docs/90-progress/risks.md               @chu-du-an
+
+# ── Nhật ký: mỗi PR một file mới, không cần duyệt của ai ────────────────────
+/docs/90-progress/log/

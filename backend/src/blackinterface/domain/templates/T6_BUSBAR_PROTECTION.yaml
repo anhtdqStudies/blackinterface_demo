@@ -11,5 +11,13 @@ observed_on: [DBB, EBB]   # DEMO_SAS v654, measured 2026-08-04
 # The busbars themselves are separate objects at /SAS/Subs/BB* — they have
 # IsLive, Hz and PPV*. Measured 2026-08-04; this corrects the earlier draft in
 # docs/20-domain/bay-templates.md which assumed DBB/EBB *were* the busbars.
+#
+# T220PHOCAO spells that isolator image as switching LNs: /S220kV/DBB_Busbar/
+# DBB/XSWI103, XSWI104 … XSWI210 — `<busbar><bay>`, so XSWI103 is bay D03's -1
+# seen from busbar 1. Measured 2026-08-10: each carries `PosSt` and `Tagging`
+# and NOTHING else, no `Name` — they are copies of another bay's isolator, not
+# apparatus of their own, and must not be drawn. Having no slots here is
+# therefore right, and the `slot_unmapped` warning DBB/EBB then raise is the
+# correct report: those positions really are absent from the graph.
 nodes: []
 slots: []

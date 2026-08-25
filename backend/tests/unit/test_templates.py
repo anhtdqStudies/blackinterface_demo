@@ -78,3 +78,27 @@ def test_external_nodes_are_leaves() -> None:
     for template in default_registry().templates:
         external = [n for n in template.nodes if n.kind is NodeKind.EXTERNAL]
         assert len(external) <= 1, template.id
+
+
+def test_a_slot_answers_to_both_project_spellings() -> None:
+    """T220PHOCAO's `XSWI15` is DEMO_SAS's `XSWI11` — one slot, two names."""
+    line = default_registry().by_id("T1_LINE")
+    assert line is not None
+    for demo, phocao in (("XSWI11", "XSWI15"), ("XSWI71", "XSWI75"), ("XSWI72", "XSWI76")):
+        assert line.slot_for(phocao) is line.slot_for(demo), phocao
+        assert line.slot_for(demo) is not None
+
+
+def test_no_ln_is_claimed_by_two_slots() -> None:
+    """Otherwise which position a device lands in depends on file order."""
+    for template in default_registry().templates:
+        names = [name for slot in template.slots for name in slot.names]
+        assert len(names) == len(set(names)), template.id
+
+
+def test_an_alias_never_collides_across_the_library() -> None:
+    """An alias that is another template's canonical LN would be a false match."""
+    for template in default_registry().templates:
+        canonical = {slot.ln for slot in template.slots}
+        aliases = {name for slot in template.slots for name in slot.aliases}
+        assert canonical.isdisjoint(aliases), template.id

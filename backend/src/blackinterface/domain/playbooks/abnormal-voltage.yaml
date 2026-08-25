@@ -1,0 +1,34 @@
+# DRAFT - soan boi agent, CHUA duoc nguoi co tham quyen van hanh duyet.
+id: abnormal-voltage
+title: Điện áp bất thường
+status: draft
+category: Limit Alarm
+message_pattern: 'ABNORMAL VOL'
+
+summary: >
+  Một điểm đo điện áp vượt ngưỡng do DataServer đặt. Khi alarm này xuất hiện đồng
+  loạt trên nhiều ngăn và thanh cái trong vài chục mili giây, gần như chắc chắn
+  nguyên nhân nằm ở thao tác đóng cắt hoặc sự cố phía trên, không phải ở từng
+  điểm đo.
+
+steps:
+  - text: >
+      Xem toàn bộ sự cố này gồm những điểm nào. Nhiều điểm cùng lúc thì tìm
+      nguyên nhân chung, đừng xử lý từng điểm một.
+  - text: >
+      Đối chiếu với các máy cắt và dao vừa đổi trạng thái trong cùng cửa sổ thời
+      gian — chúng nằm trong phần bằng chứng của sự cố.
+  - text: >
+      Xác định vùng mang điện bị ảnh hưởng trên sơ đồ, khoanh phạm vi mất áp hoặc
+      quá áp.
+  - text: >
+      Nếu điểm đo dao động liên tục quanh ngưỡng (được đánh dấu *đang dao động*)
+      thì xử lý như vấn đề ngưỡng đặt hoặc chất lượng đo, không phải như một sự
+      cố mới mỗi lần nó vượt.
+    caution: >
+      DataServer KHÔNG công bố đơn vị đo. Không đọc con số như kV hay V khi thang
+      đo chưa được xác minh — xem câu hỏi Q7.
+
+references:
+  - "Alarm gốc: <đối tượng>.MMXU1.Vlin hoặc Subs.BB*.PPVmax, severity 650"
+  - "CHƯA có quy trình vận hành của trạm cho tình huống này"

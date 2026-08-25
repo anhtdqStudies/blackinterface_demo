@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import re
 import struct
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -27,7 +28,14 @@ from typing import Any
 from asyncua import Client, ua
 
 DEFAULT_URL = "opc.tcp://127.0.0.1:48050"
+#: Fast path only — DEMO_SAS. The path embeds the project name, so any other
+#: project is found by `find_station(...)` instead.
 SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
+#: `220kV`, and `S220kV` as T220PHOCAO spells it. Mirrors
+#: backend/src/blackinterface/integration/naming.py — this tool must keep
+#: running without the backend package importable.
+VOLTAGE_LEVEL_RE = re.compile(r"^[A-Za-z]*\d+(?:\.\d+)?kV$")
+MAX_ROOT_SEARCH_DEPTH = 6
 DBPOS = {0: "INTERMEDIATE", 1: "OPEN", 2: "CLOSED", 3: "BAD"}
 
 
@@ -89,6 +97,42 @@ def decode_alarm(body: bytes) -> dict[str, Any]:
 
 
 # --------------------------------------------------------------- browse
+async def find_station(client: Client) -> tuple[Any, str]:
+    """The station node and its name, whatever project is loaded.
+
+    Same rule as `integration/opcua/discovery._find_station_root`: the station
+    is whichever node has a voltage-level child. Try the DEMO_SAS path first,
+    then breadth-first search - the tree above a station is only a handful of
+    grouping nodes deep.
+    """
+    try:
+        node = await client.nodes.objects.get_child(SAS_PATH)
+        return node, (await node.read_browse_name()).Name
+    except Exception:
+        pass
+
+    queue: list[tuple[Any, int]] = [(client.nodes.objects, 0)]
+    while queue:
+        node, depth = queue.pop(0)
+        objects = []
+        for child in {c.nodeid.to_string(): c for c in await node.get_children()}.values():
+            bn = await child.read_browse_name()
+            if bn.NamespaceIndex == 0:
+                continue
+            if VOLTAGE_LEVEL_RE.match(bn.Name):
+                return node, (await node.read_browse_name()).Name
+            if await child.read_node_class() == ua.NodeClass.Object:
+                objects.append(child)
+        if depth < MAX_ROOT_SEARCH_DEPTH:
+            queue.extend((c, depth + 1) for c in objects)
+
+    raise LookupError(
+        "no station found: no node within depth "
+        f"{MAX_ROOT_SEARCH_DEPTH} of Objects has a voltage-level child "
+        "(a name like '220kV' or 'S220kV'). Is a project loaded?"
+    )
+
+
 async def walk(node: Any, depth: int, maxdepth: int, path: str,
                seen: dict[str, dict[str, Any]], read_values: bool) -> None:
     if depth > maxdepth:
@@ -165,22 +209,43 @@ async def show_overview(client: Client) -> None:
 
 # Data attributes the topology importer actually reads. --slim keeps only these
 # (plus their parents), which turns a ~2 MB dump into a ~100 KB test fixture.
-SLIM_DA = {"PosSt", "Name", "SName", "IsLive"}
+#
+# Two groups, because they behave differently once the fixture is running:
+# positions and IsLive are discrete and rebuild the electrical graph; the
+# measurands below are analog and only relabel it (ADR-0012). The list mirrors
+# domain/measurement.py — a data attribute added there must be added here too,
+# or the fixture stops being able to exercise it.
+SLIM_DA = {
+    # structure and position
+    "PosSt",
+    "Name",
+    "SName",
+    "IsLive",
+    # measurands: bay MMXU1
+    "totW",
+    "totVAr",
+    "totPF",
+    "Vlin",
+    "Amax",
+    "Hz",
+    # measurands: busbar (Subs/BBxx) — note the lowercase m, measured 2026-08-06
+    "PPVmax",
+    # measurands: transformer tap changer (ATx/YLTC)
+    "TapPos",
+}
 
 
 def slim_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Keep bays, logical nodes, busbars and the four data attributes we read."""
-    keep = []
-    for rec in records:
-        parts = rec["path"].split("/")
-        depth = len(parts) - 2  # /SAS/x -> 1
-        if depth <= 2:  # voltage levels, bays, Subs/<busbar>
-            keep.append(rec)
-        elif depth == 3 and (rec["class"] == "Object" or parts[-1] in SLIM_DA):
-            keep.append(rec)
-        elif depth == 4 and parts[-1] in SLIM_DA:
-            keep.append(rec)
-    return keep
+    """Keep the structure, and only the data attributes the importer reads.
+
+    Deliberately not depth-based: T220PHOCAO wraps each bay in a group, which
+    pushes every logical node one level down and made the old depth windows
+    keep the wrong rows. Objects *are* the structure at any depth, so keeping
+    all of them is both simpler and shape-independent.
+    """
+    return [
+        rec for rec in records if rec["class"] == "Object" or rec["path"].rsplit("/", 1)[1] in SLIM_DA
+    ]
 
 
 async def read_meta(client: Client) -> dict[str, Any]:
@@ -196,10 +261,10 @@ async def read_meta(client: Client) -> dict[str, Any]:
 
 
 async def dump(client: Client, out: Path, maxdepth: int, slim: bool, url: str) -> None:
-    sas = await client.nodes.objects.get_child(SAS_PATH)
+    sas, station = await find_station(client)
     seen: dict[str, dict[str, Any]] = {}
-    print(f"walking /SAS (maxdepth={maxdepth}) - this takes a few minutes ...")
-    await walk(sas, 0, maxdepth, "/SAS", seen, read_values=True)
+    print(f"walking /{station} (maxdepth={maxdepth}) - this takes a few minutes ...")
+    await walk(sas, 0, maxdepth, f"/{station}", seen, read_values=True)
     records = list(seen.values())
     total = len(records)
     if slim:
@@ -213,7 +278,7 @@ async def dump(client: Client, out: Path, maxdepth: int, slim: bool, url: str) -
 
 async def show_alarms(client: Client, limit: int) -> None:
     alarm = await client.nodes.objects.get_child(["2:OAAlarm"])
-    sas = await client.nodes.objects.get_child(SAS_PATH)
+    sas, _ = await find_station(client)
     res = await alarm.call_method(
         "2:GetActiveAlarm", ua.Variant([sas.nodeid], ua.VariantType.NodeId)
     )

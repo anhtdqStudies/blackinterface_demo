@@ -8,15 +8,32 @@ import pytest
 from fastapi.testclient import TestClient
 
 from blackinterface.api import app as app_module
-from blackinterface.api.source import Settings, StationStore
+from blackinterface.api import deps
+from blackinterface.api.source import StationStore
+from blackinterface.config import Settings
+from blackinterface.domain.observation import StationObs
+from blackinterface.errors import SourceUnavailableError
+from blackinterface.integration.dump import load_dump
+from blackinterface.store.db import Database
 from tests.conftest import SAS_TREE
 
 
 @pytest.fixture(scope="module")
-def client() -> Iterator[TestClient]:
+def client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient]:
     if not SAS_TREE.exists():
         pytest.skip(f"fixture missing: {SAS_TREE}")
-    app_module.store = StationStore(Settings(source="fixture", fixture=SAS_TREE))
+    data_dir = tmp_path_factory.mktemp("data")
+    database = Database(data_dir / "test.sqlite")
+    deps.use(
+        StationStore(
+            # realtime off: the project tests below use made-up DataServer URLs, and
+            # a subscription would be the one thing in this module actually dialling
+            # the network. Realtime wiring has its own tests in test_realtime.py.
+            Settings(source="fixture", fixture=SAS_TREE, data_dir=data_dir, realtime=False),
+            database,
+        ),
+        database,
+    )
     with TestClient(app_module.app) as test_client:
         yield test_client
 
@@ -33,6 +50,14 @@ def test_station_summary(client: TestClient) -> None:
     assert body["device_count"] == 80
     assert body["coverage"]["position_good"] == 80
     assert set(body["voltage_levels"]) == {"220kV", "110kV", "22kV"}
+    for issue in body["issues"]:
+        assert issue["group"] in {"A", "B", "C"}
+
+
+def test_issues_list_matches_station(client: TestClient) -> None:
+    station_issues = client.get("/api/station").json()["issues"]
+    listed = client.get("/api/issues").json()["issues"]
+    assert listed == station_issues
 
 
 def test_bays_listing_is_complete(client: TestClient) -> None:
@@ -67,8 +92,40 @@ def test_unknown_voltage_level_is_404(client: TestClient) -> None:
     assert client.get("/api/diagram/999kV").status_code == 404
 
 
+def test_energization_endpoint_can_be_joined_onto_the_diagram(
+    client: TestClient,
+) -> None:
+    """The contract the drawing depends on: every rail and conductor names a
+    node, and every named node has a verdict. A missing join shows up as an
+    uncoloured conductor, which is precisely the thing an operator must not see.
+    """
+    energized = client.get("/api/energization").json()
+    diagram = client.get("/api/diagram").json()
+    states = energized["node_state"]
+
+    assert energized["summary"]["mismatched"] == 0
+    assert energized["summary"]["compared"] >= 7
+
+    for rail in diagram["rails"]:
+        assert rail["node_id"] in states, rail["busbar_id"]
+    for edge in diagram["edges"]:
+        assert edge["node_id"] in states, edge["id"]
+    for junction in diagram["junctions"]:
+        assert junction["node_id"] in states, junction["id"]
+
+
+def test_energization_reports_the_unreadable_busbar_as_unknown(
+    client: TestClient,
+) -> None:
+    """BB29 has no usable IsLive, so it must not be coloured dead (I2)."""
+    body = client.get("/api/energization").json()
+    assert body["node_state"]["NODE.BB29"] == "UNKNOWN"
+
+
 def test_no_write_endpoint_exists(client: TestClient) -> None:
-    """AGENTS.md I1 enforced structurally: /api/reload is the only POST."""
+    """AGENTS.md I1 enforced structurally: every non-GET endpoint is on this
+    allowlist, and each one writes only to the local SQLite store — nothing
+    here has a path to OneATS's write surface (that is tools/check.py's job)."""
     paths = client.get("/openapi.json").json()["paths"]
     writes = {
         f"{method.upper()} {path}"
@@ -76,4 +133,175 @@ def test_no_write_endpoint_exists(client: TestClient) -> None:
         for method in ops
         if method.lower() in {"post", "put", "patch", "delete"}
     }
-    assert writes == {"POST /api/reload"}
+    assert writes == {
+        "POST /api/reload",
+        "POST /api/projects",
+        "POST /api/projects/{project_id}/open",
+        "POST /api/projects/{project_id}/refresh",
+        "DELETE /api/projects/{project_id}",
+        # Accounts and sessions (ADR-0017). These write to `users`, `user_roles`
+        # and `sessions` — rows about who is *looking* at the station, which is
+        # as far from a OneATS command as a write in this system gets.
+        "POST /api/login",
+        "POST /api/logout",
+        "POST /api/password",
+        # Asking a question (ADR-0019). POST because the question is arbitrary
+        # text and belongs in a body rather than in an access log, not because
+        # anything is written: the agent's whole tool registry is read-only, and
+        # `agent/` cannot import `control/` or `integration/` to make it
+        # otherwise (tools/check.py section 2, test_agent.py).
+        "POST /api/ask",
+        "POST /api/ask/stream",
+        # Choosing the language model and storing its key. Writes one row of
+        # this installation's own SQLite; it reaches no OneATS surface, and the
+        # assistant it configures still holds only read-only tools (I1).
+        "PUT /api/assistant/config",
+        # A real call to the model endpoint. Outbound, and writes only the
+        # `verified_at` stamp recording that the call happened.
+        "POST /api/assistant/test",
+        # Forgetting one of one's own conversations (ADR-0022). Deletes rows in
+        # this installation's SQLite and nothing else: a transcript holds
+        # questions and prose, never a reading, so there is no station state to
+        # lose here and no path from it to OneATS.
+        "DELETE /api/conversations/{conversation_id}",
+        # Local operator workflow: mark an incident as handled (Module B).
+        # Writes `incident_dismissals` in SQLite only — not OAAlarm.Ack* (I1).
+        "POST /api/incidents/{incident_id}/dismiss",
+    }
+
+
+def test_errors_share_one_shape(client: TestClient) -> None:
+    """One error body for everything, so the generated TS types cover it."""
+    body = client.get("/api/bays/NOPE").json()
+    assert set(body) == {"error"}
+    assert body["error"]["code"] == "not_found"
+    assert body["error"]["detail"] == {"bay_id": "NOPE"}
+
+
+# ------------------------------------------------------------------- projects
+# The "DataServer" in these tests is the committed fixture: `_observe_opcua`
+# is patched on the store instance, so the whole create -> snapshot -> open ->
+# refresh -> delete flow runs offline, exactly like every other unit test.
+
+
+def _serve_fixture(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def observe(url: str) -> StationObs:
+        return load_dump(SAS_TREE).model_copy(update={"source": url})
+
+    monkeypatch.setattr(deps.get_store(), "_observe_opcua", observe)
+
+
+def _serve_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
+    async def observe(url: str) -> StationObs:
+        raise SourceUnavailableError(f"cannot read the OneATS DataServer at {url}", url=url)
+
+    monkeypatch.setattr(deps.get_store(), "_observe_opcua", observe)
+
+
+def test_create_project_connects_and_snapshots(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _serve_fixture(monkeypatch)
+    body = client.post(
+        "/api/projects", json={"name": "Trạm A", "opcua_url": "opc.tcp://10.0.0.5:48050"}
+    ).json()
+    assert body["ok"] is True and body["error"] is None
+    assert body["project"]["active"] is True
+    assert body["project"]["has_snapshot"] is True
+    assert body["project"]["model_version"]
+
+    health = client.get("/api/health").json()
+    assert health["project_name"] == "Trạm A"
+    assert health["source"] == "project:Trạm A"
+    assert client.get("/api/station").json()["device_count"] == 80
+
+
+def test_open_project_renders_from_snapshot_without_the_dataserver(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The whole point of the snapshot: reopening must not need the source."""
+    _serve_nothing(monkeypatch)
+    project = next(p for p in client.get("/api/projects").json() if p["name"] == "Trạm A")
+    body = client.post(f"/api/projects/{project['id']}/open").json()
+    assert body["ok"] is True
+    assert client.get("/api/station").json()["source"].startswith("snapshot:")
+
+
+def test_refresh_reads_live_and_replaces_the_snapshot(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _serve_fixture(monkeypatch)
+    project = next(p for p in client.get("/api/projects").json() if p["name"] == "Trạm A")
+    body = client.post(f"/api/projects/{project['id']}/refresh").json()
+    assert body["ok"] is True
+    assert body["project"]["snapshot_saved_at"] >= project["snapshot_saved_at"]
+    assert not client.get("/api/station").json()["source"].startswith("snapshot:")
+
+
+def test_create_project_keeps_the_row_when_the_source_is_down(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A wrong URL or a dead server is fixable — do not throw the project away."""
+    _serve_nothing(monkeypatch)
+    body = client.post(
+        "/api/projects", json={"name": "Trạm B", "opcua_url": "opc.tcp://10.9.9.9:48050"}
+    ).json()
+    assert body["ok"] is False
+    assert "cannot read" in body["error"]
+    assert body["project"]["has_snapshot"] is False
+
+    _serve_fixture(monkeypatch)
+    retry = client.post(f"/api/projects/{body['project']['id']}/refresh").json()
+    assert retry["ok"] is True
+    assert retry["project"]["has_snapshot"] is True
+
+
+def test_project_input_is_validated(client: TestClient) -> None:
+    no_name = client.post("/api/projects", json={"name": "  ", "opcua_url": "opc.tcp://x:1"})
+    assert no_name.status_code == 400
+    assert no_name.json()["error"]["code"] == "invalid_input"
+
+    bad_scheme = client.post("/api/projects", json={"name": "X", "opcua_url": "http://not-opc:80"})
+    assert bad_scheme.status_code == 400
+
+
+def test_duplicate_project_name_is_a_conflict(client: TestClient) -> None:
+    response = client.post(
+        "/api/projects", json={"name": "Trạm A", "opcua_url": "opc.tcp://elsewhere:48050"}
+    )
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "conflict"
+
+
+def test_open_unknown_project_is_404(client: TestClient) -> None:
+    assert client.post("/api/projects/99999/open").status_code == 404
+
+
+def test_deleting_the_active_project_unloads_the_model(client: TestClient) -> None:
+    listed = {p["name"]: p for p in client.get("/api/projects").json()}
+    active = next(p for p in listed.values() if p["active"])
+    remaining = client.delete(f"/api/projects/{active['id']}").json()
+    assert active["name"] not in {p["name"] for p in remaining}
+    assert client.get("/api/health").json()["loaded"] is False
+    assert client.get("/api/station").status_code == 503
+    # Clean the other test project too, so this module leaves no state behind.
+    for project in remaining:
+        client.delete(f"/api/projects/{project['id']}")
+
+
+def test_not_loaded_reports_503_with_a_reason() -> None:
+    """A broken source must not look like an empty station."""
+    original = deps.get_store()
+    try:
+        deps.use(
+            StationStore(
+                Settings(source="fixture", fixture=SAS_TREE.parent / "does-not-exist.json")
+            )
+        )
+        with TestClient(app_module.app, raise_server_exceptions=False) as broken:
+            response = broken.get("/api/station")
+        assert response.status_code == 503
+        assert response.json()["error"]["code"] == "model_not_loaded"
+        assert "does-not-exist.json" in broken.get("/api/health").json()["load_error"]
+    finally:
+        deps.use(original)

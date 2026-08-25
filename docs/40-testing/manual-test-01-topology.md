@@ -14,9 +14,11 @@
 ## 0. Chuẩn bị (1 lần)
 
 ```bash
-cd backend
-uv sync
+cd backend  && uv sync
+cd frontend && npm install && npm run build
 ```
+
+**Phải build frontend**, nếu không API chạy nhưng không có giao diện (ADR-0009).
 
 Nếu gặp `os error 396` hoặc `Access is denied` — đó là OneDrive giữ file `.venv`.
 Chạy lại lệnh, lần thứ hai luôn được. Xem `AGENTS.md` §7.
@@ -34,6 +36,8 @@ Mở `http://127.0.0.1:8080`
 
 Mặc định app đọc **fixture** (`backend/tests/fixtures/sas_tree.json`) — chạy được
 khi không có DataServer. Để nối hệ thật, xem §6.
+
+Khi đang sửa frontend thì dùng `npm run dev` ở cổng 5173 thay vì build lại mỗi lần.
 
 ---
 
@@ -64,8 +68,9 @@ nhiều ngày vẽ và gán point thủ công.
 
 ### TC-02 — Suy loại ngăn không cần SLD
 
-**Làm**: bấm lần lượt tab `220kV`, `110kV`, `22kV`. Nhìn nhãn dưới mỗi cột và
-danh sách ngăn ở panel phải.
+**Làm**: sơ đồ vẽ **cả trạm trong một hình** — 220kV trên cùng, rồi 110kV, rồi
+22kV. Bấm lần lượt tab `220kV`, `110kV`, `22kV` để nhảy tới từng dải và đổi
+danh sách ngăn ở panel phải. Nhìn nhãn cạnh mỗi cột.
 
 **Phải thấy đúng 13 ngăn này**:
 
@@ -97,40 +102,48 @@ hoàn toàn**. Ở đây nó có mặt. Đó là lý do ADR-0002 loại SLD kh�
 
 ### TC-03 — Sơ đồ một sợi khớp thực tế
 
-**Làm**: ở tab `220kV`, nhìn cột `D03`.
+**Làm**: nhìn cột `D03` ở dải 220kV (dải trên cùng, **lật ngược**: thanh cái
+chính nằm dưới, đường dây đi lên trên).
 
-**Phải thấy** (trạng thái đo lúc 2026-08-04, nếu chạy live thì có thể khác):
+**Phải thấy** (trạng thái đo lúc 2026-08-04, nếu chạy live thì có thể khác).
+Dưới đây vẽ theo chiều chưa lật cho dễ đọc:
 
 ```
-BB29 ────────────────  (thanh cái vòng, xám nét đứt — xem TC-05)
+BB21 ═══●═══════════   ● = chấm nối · xanh dương = có điện
         │
-      -9  MỞ (xanh)
-BB21 ────┼────────────  (đỏ = có điện)
-        │
-      -1  ĐÓNG (đỏ)
-BB22 ────┼────────────
-        │
-      -2  MỞ (xanh)
-        │
-  -15 ⏚  MỞ
-        │
-      271  ĐÓNG (máy cắt, ô vuông đặc đỏ)
-        │
-      -7  ĐÓNG
-        │
-  -75 ⏚   ⏚ -76   (cả hai MỞ)
-        │
-      ○ Line
+BB22 ═══╪═══●═══════   -1 cắt ngang BB22 mà KHÔNG có chấm → không nối
+       -1   │          ĐÓNG (đỏ)
+        │  -2          MỞ (xanh lá)
+        └─┬─┘
+   -15 ⏚  │  MỞ
+        [271]          ĐÓNG (máy cắt, ô vuông đặc đỏ)
+   -75 ⏚  │  MỞ
+         -7            ĐÓNG
+          │  ⏚ -76     MỞ
+BB29 ══●══╪═════════   xám nét đứt — xem TC-05
+      -9  │            MỞ
+          ↓ Line       đuôi cắt ngang BB29, không có chấm
 ```
 
-**Kiểm tra 3 điều**:
+**Kiểm tra 5 điều**:
 
-1. **Đúng điện**: `-1` đóng và `-2` mở → ngăn đang bám **thanh cái 1**, không phải
+1. **Hai thanh cái phải tách bạch được bằng mắt.** `-1` và `-2` nằm trên **hai
+   đường thẳng đứng riêng**. Chỗ nào có **chấm tròn** là có nối; dây cắt ngang
+   thanh cái mà không có chấm là **không** nối. Trước 2026-08-04 cả hai vẽ chung
+   một đường nên hình luôn trông như nối cả hai thanh cái bất kể dao ở đâu.
+2. **Đúng điện**: `-1` đóng và `-2` mở → ngăn đang bám **thanh cái 1**, không phải
    thanh cái 2. Đây là trạng thái **runtime**, không phải hình vẽ cố định.
-2. **Đúng tên**: nhãn phải là số hiệu EVN thật (`271`, `-1`, `-75`), không phải
+3. **Đúng tên**: nhãn phải là số hiệu EVN thật (`271`, `-1`, `-75`), không phải
    `XCBR1`, `XSWI1`.
-3. **Đúng cấu trúc**: 3 dao chọn thanh cái ở trên máy cắt, dao đường dây `-7` ở
-   dưới, 2 tiếp địa `-75/-76` ở phía đường dây, 1 tiếp địa `-15` phía thanh cái.
+4. **`-9` phải nằm ở phía ĐƯỜNG DÂY**, sau `-7`, cạnh thanh cái vòng BB29 —
+   không nằm cạnh `-1`/`-2`. Đây là điểm sửa lỗi ngày 2026-08-04: thanh cái vòng
+   cấp điện thẳng cho đường dây, bỏ qua máy cắt (xem `AGENTS.md` §5.5).
+5. **Bảng màu theo OneATS**: thiết bị đỏ=đóng / xanh lá=mở; thanh cái
+   **xanh dương=có điện** / xanh lá=không điện. Đừng nhầm hai loại xanh lá.
+
+**Ngăn máy biến áp** (D01, E07) kết thúc bằng **hai vòng tròn** = cuộn dây, không
+phải mũi tên. Không có dây nối D01 với E07: DataServer không nói ngăn nào ghép
+với ngăn nào, nên vẽ đường đó là bịa ra một đường dẫn điện (I3).
 
 **Đối chiếu ngoài hệ thống**: mở OneATS Grid Viewer (hoặc HMI hiện có) cùng lúc,
 so từng vị trí dao của D03. Phải khớp 100%. **Đây là phép kiểm quan trọng nhất
@@ -183,7 +196,8 @@ Tương tự, ngăn `D12` có `IsLive` lỗi. Kiểm tra panel của D12 hiển 
 
 ### TC-06 — Thiếu dữ liệu thì phải nói ra
 
-**Làm**: mở panel phải, kéo xuống mục **"Cảnh báo dựng model"**.
+**Làm**: mở panel phải, kéo xuống mục **"Cảnh báo dựng model"** (hoặc tab
+**Cảnh báo** trên thanh trên cùng để xem đầy đủ, tách theo mức độ).
 
 **Phải thấy đúng 1 cảnh báo**:
 
@@ -220,7 +234,7 @@ Test `test_no_write_endpoint_exists` sẽ fail nếu ai đó thêm vào.
 
 ```bash
 cd backend
-uv run pytest          # 96 test, không cần DataServer
+uv run pytest          # 107 test, không cần DataServer
 uv run pytest -m live  # 2 test, cần DataServer đang chạy
 ```
 
@@ -252,6 +266,7 @@ python tools/check.py
 
 | Triệu chứng | Nguyên nhân thường gặp |
 |---|---|
+| Mở `/` ra 404 | Chưa `npm run build`. Không có frontend dự phòng (ADR-0009) |
 | Trang trắng, header báo "Không tải được model" | Fixture chưa có → xem §6 để tạo lại |
 | `bay_type = UNKNOWN` | Trạm dùng quy ước LN khác. Xem `domain/bay_types.py`, cần template mới |
 | Cảnh báo `slot_unmapped` | Ngăn có dao cách ly mà template không đặt → **graph thiếu thiết bị**, phải sửa template |

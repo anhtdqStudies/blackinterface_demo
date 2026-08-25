@@ -4,12 +4,13 @@ READ-ONLY (AGENTS.md I1). This module browses and reads. It never calls a
 OneATS write surface, and the client it builds is never handed outward.
 
 Strategy: targeted browse rather than a full dump. We walk
-`/SAS/<voltage level>/<bay>/<logical node>` and batch-read only the data
+`<station>/<voltage level>/<bay>/<logical node>` and batch-read only the data
 attributes topology needs (`PosSt`, `Name`, `SName`, `IsLive`). On DEMO_SAS
 that is ~500 values instead of ~6000 nodes.
 
-Measured shape, 2026-08-04, DEMO_SAS v654 — see
-docs/30-integration/oneats-dataserver.md.
+How each of those four levels may be spelled differs between projects and lives
+in `integration/naming.py` — measured on DEMO_SAS v654 (2026-08-04) and
+T220PHOCAO v1052 (2026-08-10). See docs/30-integration/oneats-dataserver.md.
 """
 
 from __future__ import annotations
@@ -20,11 +21,29 @@ from typing import Any
 
 from asyncua import Client, ua
 
-from blackinterface.domain.models import PointSample, Quality
-from blackinterface.domain.observation import BayObs, BusbarObs, LogicalNodeObs, StationObs
+from blackinterface.domain.measurement import (
+    BAY_MEASURANDS,
+    BUSBAR_MEASURANDS,
+    TRANSFORMER_MEASURANDS,
+    wanted_das,
+)
+from blackinterface.domain.observation import (
+    BayObs,
+    BusbarObs,
+    LogicalNodeObs,
+    MeasurandObs,
+    StationObs,
+    TransformerObs,
+)
+from blackinterface.integration.naming import bay_within, strip_bay_prefix, voltage_level
+from blackinterface.integration.opcua.values import to_sample
 
-SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
-VOLTAGE_LEVEL_RE = re.compile(r"^\d+kV$")
+#: The DEMO_SAS station root. The path embeds the project name ("PROJECT"),
+#: so it is only a fast path — other projects are found by `_find_station_root`.
+KNOWN_SAS_PATH = ["2:Root", "2:EVN", "2:RLDC", "2:PROJECT", "2:SAS"]
+#: Objects(0) -> Root -> EVN -> <region> -> <project> -> <station>(5). One spare.
+#: T220PHOCAO's station sits at 4 (`Root/EVN/NPT_PTC1/T220PCA`, no `SAS` level).
+MAX_ROOT_SEARCH_DEPTH = 6
 BUSBAR_RE = re.compile(r"^BB\d{2}$")
 
 POSITION_DA = "PosSt"
@@ -32,34 +51,22 @@ NAME_DA = "Name"
 SHORT_NAME_DA = "SName"
 LIVE_DA = "IsLive"
 
-WANTED_BAY_DA = (POSITION_DA, NAME_DA, SHORT_NAME_DA)
-WANTED_BUSBAR_DA = (NAME_DA, LIVE_DA)
+#: A station-level group is a power transformer when it carries one of these
+#: logical nodes. Measured on DEMO_SAS (2026-08-05): /SAS/AT1/YPTR, .../YLTC.
+TRANSFORMER_LNS = ("YPTR", "YLTC")
+
+WANTED_BAY_DA = frozenset({POSITION_DA, NAME_DA, SHORT_NAME_DA})
+WANTED_BUSBAR_DA = frozenset({NAME_DA, LIVE_DA}) | wanted_das(BUSBAR_MEASURANDS)
 
 
-def _quality(status: Any) -> Quality:
-    if status is None:
-        return Quality.MISSING
-    name = getattr(status, "name", str(status)).lower()
-    if name.startswith("good"):
-        return Quality.GOOD
-    if name.startswith("uncertain"):
-        return Quality.UNCERTAIN
-    return Quality.BAD
+def _wanted_under(ln_name: str) -> frozenset[str]:
+    """Data attributes to read under one logical node of a bay.
 
-
-def _sample(value: ua.DataValue | None, source_ref: str | None) -> PointSample:
-    if value is None:
-        return PointSample(source_ref=source_ref)
-    raw = value.Value.Value if value.Value is not None else None
-    quality = _quality(value.StatusCode)
-    if raw is None and quality is Quality.GOOD:
-        quality = Quality.BAD
-    return PointSample(
-        value=raw if isinstance(raw, bool | int | float | str) else None,
-        quality=quality,
-        source_timestamp=value.SourceTimestamp,
-        source_ref=source_ref,
-    )
+    Structure first, then whatever the measurement catalog asks for under this
+    particular LN — so `MMXU1` yields six analog values and `XSWI1` yields
+    none, from one loop that knows neither name.
+    """
+    return WANTED_BAY_DA | wanted_das(BAY_MEASURANDS, ln_name)
 
 
 async def _children(node: Any) -> list[Any]:
@@ -75,12 +82,26 @@ async def _children(node: Any) -> list[Any]:
     return list(seen.values())
 
 
-async def _read_batch(client: Client, nodes: list[Any]) -> list[ua.DataValue]:
-    """Read many nodes in one service call, with status code and timestamp."""
+Key = tuple[str, ...]
+
+
+async def _read_batch(
+    client: Client, nodes: list[Any], keys: list[Key]
+) -> tuple[dict[Key, ua.DataValue], dict[Key, str]]:
+    """Read many nodes in one service call, keeping each one's NodeId.
+
+    The NodeId travels on into `PointSample.source_ref`, and it must be the
+    NodeId of the *variable* that produced the value — not of its parent
+    logical node. That is what makes the sample traceable, and it is also the
+    address the realtime subscription later monitors (see opcua/monitor.py).
+    """
     if not nodes:
-        return []
+        return {}, {}
     values: list[ua.DataValue] = await client.read_attributes(nodes, ua.AttributeIds.Value)
-    return values
+    return (
+        dict(zip(keys, values, strict=True)),
+        {key: node.nodeid.to_string() for key, node in zip(keys, nodes, strict=True)},
+    )
 
 
 async def discover_station(
@@ -105,9 +126,10 @@ async def discover_station(
     async with client:
         name = await _read_model_attribute(client, "ModelName") or "UNKNOWN"
         model_version = await _read_model_attribute(client, "ModelVersion")
-        sas = await client.nodes.objects.get_child(SAS_PATH)
+        sas = await _find_station_root(client)
         bays = await _discover_bays(client, sas)
         busbars = await _discover_busbars(client, sas)
+        transformers = await _discover_transformers(client, sas)
 
     return StationObs(
         name=name,
@@ -116,6 +138,45 @@ async def discover_station(
         source=url,
         bays=tuple(bays),
         busbars=tuple(busbars),
+        transformers=tuple(transformers),
+    )
+
+
+async def _find_station_root(client: Client) -> Any:
+    """Locate the node whose children are voltage levels (`220kV`, `S110kV`…).
+
+    On DEMO_SAS that is `Objects/Root/EVN/RLDC/PROJECT/SAS`; on T220PHOCAO it is
+    `Objects/Root/EVN/NPT_PTC1/T220PCA`, one level shallower and with no `SAS`
+    node at all. The path embeds the project, so it changes with every project
+    loaded into the DataServer. Try the known path first (fast), then
+    breadth-first search the ns=2 object tree. The tree above the station is
+    narrow — a handful of grouping nodes — so the search touches few nodes
+    before it either finds a voltage level or exhausts the depth budget.
+    """
+    try:
+        return await client.nodes.objects.get_child(KNOWN_SAS_PATH)
+    except Exception:
+        pass
+
+    queue: list[tuple[Any, int]] = [(client.nodes.objects, 0)]
+    while queue:
+        node, depth = queue.pop(0)
+        object_children = []
+        for child in await _children(node):
+            browse_name = await child.read_browse_name()
+            if browse_name.NamespaceIndex == 0:
+                continue  # Server, Types… — the standard namespace, never ours
+            if voltage_level(browse_name.Name):
+                return node
+            if await child.read_node_class() == ua.NodeClass.Object:
+                object_children.append(child)
+        if depth < MAX_ROOT_SEARCH_DEPTH:
+            queue.extend((child, depth + 1) for child in object_children)
+
+    raise LookupError(
+        "no station root found: no node within depth "
+        f"{MAX_ROOT_SEARCH_DEPTH} of Objects has a voltage-level child "
+        "(a name like '220kV' or 'S220kV'). Is a project loaded in this DataServer?"
     )
 
 
@@ -127,18 +188,45 @@ async def _read_model_attribute(client: Client, attribute: str) -> str | None:
         return None
 
 
+async def _bays_under(level: Any) -> list[tuple[str, Any, tuple[str, ...]]]:
+    """Every bay under one voltage level, however this project nests them.
+
+    Yields the bay's id, the node whose children are its logical nodes, and the
+    names of the IEDs standing *beside* it rather than below. Only the nested
+    shape has those, and `domain/bay_types.py` needs them: a busbar protection
+    object is recognised by its `F87B*` relays, which T220PHOCAO keeps as
+    siblings (`DBB` + `DBBF87B1`) where DEMO_SAS keeps them as children.
+    """
+    result: list[tuple[str, Any, tuple[str, ...]]] = []
+    for group in await _children(level):
+        if await group.read_node_class() != ua.NodeClass.Object:
+            continue
+        group_name = (await group.read_browse_name()).Name
+        objects: dict[str, Any] = {}
+        for child in await _children(group):
+            if await child.read_node_class() == ua.NodeClass.Object:
+                objects[(await child.read_browse_name()).Name] = child
+
+        inner = bay_within(group_name, frozenset(objects))
+        if inner is None:
+            result.append((group_name, group, ()))
+            continue
+        beside = tuple(sorted(strip_bay_prefix(inner, name) for name in objects if name != inner))
+        result.append((inner, objects[inner], beside))
+    return result
+
+
 async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
     """Two passes: browse the tree, then read every value in one batch."""
-    layout: list[tuple[str, str, Any, dict[str, Any]]] = []  # vl, bay, bay node, ln nodes
+    layout: list[tuple[str, str, Any, dict[str, Any], tuple[str, ...]]] = []
     read_nodes: list[Any] = []
-    read_keys: list[tuple[str, ...]] = []
+    read_keys: list[Key] = []
 
     for level in await _children(sas):
-        level_name = (await level.read_browse_name()).Name
-        if not VOLTAGE_LEVEL_RE.match(level_name):
+        level_name = voltage_level((await level.read_browse_name()).Name)
+        if level_name is None:
             continue
-        for bay in await _children(level):
-            bay_name = (await bay.read_browse_name()).Name
+        for bay_name, bay, beside in await _bays_under(level):
             logical_nodes: dict[str, Any] = {}
             for child in await _children(bay):
                 child_name = (await child.read_browse_name()).Name
@@ -150,28 +238,30 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                 if node_class != ua.NodeClass.Object:
                     continue
                 logical_nodes[child_name] = child
+                wanted = _wanted_under(child_name)
                 for attribute in await _children(child):
                     attribute_name = (await attribute.read_browse_name()).Name
-                    if attribute_name in WANTED_BAY_DA:
+                    if attribute_name in wanted:
                         read_nodes.append(attribute)
                         read_keys.append((bay_name, child_name, attribute_name))
-            layout.append((level_name, bay_name, bay, logical_nodes))
+            layout.append((level_name, bay_name, bay, logical_nodes, beside))
 
-    values = dict(zip(read_keys, await _read_batch(client, read_nodes), strict=True))
+    values, refs = await _read_batch(client, read_nodes, read_keys)
 
     result = []
-    for level_name, bay_name, bay_node, logical_nodes in layout:
-        observations = []
+    for level_name, bay_name, bay_node, logical_nodes, beside in layout:
+        observations = [LogicalNodeObs(ln=name) for name in beside if name not in logical_nodes]
         for ln_name, ln_node in sorted(logical_nodes.items()):
-            position = values.get((bay_name, ln_name, POSITION_DA))
-            name = values.get((bay_name, ln_name, NAME_DA))
-            short = values.get((bay_name, ln_name, SHORT_NAME_DA))
+            position_key = (bay_name, ln_name, POSITION_DA)
             observations.append(
                 LogicalNodeObs(
                     ln=ln_name,
-                    name=_scalar(name),
-                    short_name=_scalar(short),
-                    position=_sample(position, ln_node.nodeid.to_string()),
+                    name=_scalar(values.get((bay_name, ln_name, NAME_DA))),
+                    short_name=_scalar(values.get((bay_name, ln_name, SHORT_NAME_DA))),
+                    position=to_sample(values.get(position_key), refs.get(position_key)),
+                    measurands=_measurands(
+                        values, refs, (bay_name, ln_name), wanted_das(BAY_MEASURANDS, ln_name)
+                    ),
                     source_ref=ln_node.nodeid.to_string(),
                 )
             )
@@ -180,12 +270,108 @@ async def _discover_bays(client: Client, sas: Any) -> list[BayObs]:
                 id=bay_name,
                 name=bay_name,
                 voltage_level=level_name,
-                logical_nodes=tuple(observations),
-                is_live=_sample(values.get((bay_name, LIVE_DA)), None),
+                logical_nodes=tuple(sorted(observations, key=lambda ln: ln.ln)),
+                is_live=to_sample(values.get((bay_name, LIVE_DA)), refs.get((bay_name, LIVE_DA))),
                 source_ref=bay_node.nodeid.to_string(),
             )
         )
     return result
+
+
+async def _transformer_lns(group: Any) -> dict[str, Any] | None:
+    """The logical nodes of a power transformer, or `None` if this is not one.
+
+    DEMO_SAS hangs `YPTR`/`YLTC` directly off `/SAS/AT1`. T220PHOCAO puts a
+    device between them (`/T220PCA/AT1/DT1/YPTR`) and stands the transformer's
+    relays beside it, so one level of descent is tried before giving up. The
+    test is the logical nodes themselves, not the name — `ACQUY`, `COMM` and
+    `Program` are station-level groups too, and only this rejects them.
+    """
+    children = {(await c.read_browse_name()).Name: c for c in await _children(group)}
+    if any(ln in children for ln in TRANSFORMER_LNS):
+        return children
+    for child in children.values():
+        if await child.read_node_class() != ua.NodeClass.Object:
+            continue
+        inner = {(await c.read_browse_name()).Name: c for c in await _children(child)}
+        if any(ln in inner for ln in TRANSFORMER_LNS):
+            return inner
+    return None
+
+
+async def _discover_transformers(client: Client, sas: Any) -> list[TransformerObs]:
+    """Station-level siblings of the voltage levels that carry YPTR/YLTC.
+
+    `YLTC` also holds the tap changer's write surfaces (`TapChg`, `MasCtl`,
+    `EmerCtl`, `ParCtl` are Methods — browsed 2026-08-06). We read `TapPos` and
+    nothing else; invoking any of those methods is forbidden outside `control/`
+    and `tools/check.py` enforces it (AGENTS.md I1).
+    """
+    layout: list[tuple[str, Any, dict[str, Any]]] = []  # id, node, measuring LNs
+    read_nodes: list[Any] = []
+    read_keys: list[Key] = []
+
+    for child in await _children(sas):
+        name = (await child.read_browse_name()).Name
+        if voltage_level(name) or name == "Subs":
+            continue
+        if await child.read_node_class() != ua.NodeClass.Object:
+            continue
+        grandchildren = await _transformer_lns(child)
+        if grandchildren is None:
+            continue
+        measuring: dict[str, Any] = {}
+        for ln_name, ln_node in sorted(grandchildren.items()):
+            wanted = wanted_das(TRANSFORMER_MEASURANDS, ln_name)
+            if not wanted:
+                continue
+            measuring[ln_name] = ln_node
+            for attribute in await _children(ln_node):
+                attribute_name = (await attribute.read_browse_name()).Name
+                if attribute_name in wanted:
+                    read_nodes.append(attribute)
+                    read_keys.append((name, ln_name, attribute_name))
+        layout.append((name, child, measuring))
+
+    values, refs = await _read_batch(client, read_nodes, read_keys)
+    return [
+        TransformerObs(
+            id=name,
+            name=name,
+            logical_nodes=tuple(
+                LogicalNodeObs(
+                    ln=ln_name,
+                    measurands=_measurands(
+                        values, refs, (name, ln_name), wanted_das(TRANSFORMER_MEASURANDS, ln_name)
+                    ),
+                    source_ref=ln_node.nodeid.to_string(),
+                )
+                for ln_name, ln_node in sorted(measuring.items())
+            ),
+            source_ref=node.nodeid.to_string(),
+        )
+        for name, node, measuring in layout
+    ]
+
+
+def _measurands(
+    values: dict[Key, ua.DataValue],
+    refs: dict[Key, str],
+    owner: Key,
+    wanted: frozenset[str],
+) -> tuple[MeasurandObs, ...]:
+    """The analog attributes the catalog asked for, in a stable order.
+
+    An attribute the server did not return is left out rather than recorded as
+    an empty reading: "never read" and "read nothing" are different facts, and
+    the first belongs in `Coverage.missing` (I2, I7).
+    """
+    found = []
+    for name in sorted(wanted):
+        key = (*owner, name)
+        if key in values:
+            found.append(MeasurandObs(da=name, sample=to_sample(values[key], refs.get(key))))
+    return tuple(found)
 
 
 async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
@@ -196,7 +382,7 @@ async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
 
     layout: list[tuple[str, Any]] = []
     read_nodes: list[Any] = []
-    read_keys: list[tuple[str, ...]] = []
+    read_keys: list[Key] = []
     for child in await _children(subs):
         name = (await child.read_browse_name()).Name
         if not BUSBAR_RE.match(name) or await child.read_node_class() != ua.NodeClass.Object:
@@ -208,12 +394,13 @@ async def _discover_busbars(client: Client, sas: Any) -> list[BusbarObs]:
                 read_nodes.append(attribute)
                 read_keys.append((name, attribute_name))
 
-    values = dict(zip(read_keys, await _read_batch(client, read_nodes), strict=True))
+    values, refs = await _read_batch(client, read_nodes, read_keys)
     return [
         BusbarObs(
             id=name,
             name=_scalar(values.get((name, NAME_DA))) or name,
-            is_live=_sample(values.get((name, LIVE_DA)), node.nodeid.to_string()),
+            is_live=to_sample(values.get((name, LIVE_DA)), refs.get((name, LIVE_DA))),
+            measurands=_measurands(values, refs, (name,), wanted_das(BUSBAR_MEASURANDS)),
             source_ref=node.nodeid.to_string(),
         )
         for name, node in layout

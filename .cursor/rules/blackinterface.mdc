@@ -23,8 +23,15 @@ Lớp vận hành AI-first thay HMI tĩnh của OneATS SCADA, cài local trên s
 7. **Release immutable**, pin theo catalog snapshot + `OADataModel.ModelVersion`.
 
 ## Stack đã chốt — không thêm gì mới nếu chưa có ADR
-Python 3.12 · uv · FastAPI+SSE · asyncua · SQLite · Pydantic AI · Nuxt static SPA.
+Python 3.12 · uv · FastAPI+SSE · asyncua · SQLite · Pydantic AI · Vite+Vue 3 + **Tailwind v4 + shadcn-vue**.
 Cấm: MongoDB, Postgres, Docker, Redis, Node runtime ở production.
+
+## Frontend UI — bắt buộc shadcn + Tailwind
+- **Đã cài** Tailwind v4 (`@tailwindcss/vite`, token trong `frontend/src/styles.css`) và shadcn-vue (`components.json`).
+- Chrome (Button, Card, Input, Table, Tabs, …) → **`@/ui/*`**, không tự viết styled HTML trong `features/`.
+- Thiếu component → `npx shadcn-vue@latest add …` trước khi code pane mới.
+- Màu/spacing → token Tailwind (`bg-card`, `text-muted-foreground`); cấm hex trong `features/` (`check.py` gác).
+- `frontend/DESIGN.md` = theme spec; chi tiết: `frontend/README.md`, `docs/20-ui/tokens.md`.
 
 ## Ranh giới lớp
 `domain/` (L4, không import lớp khác) ← `integration/` (L5, độc quyền NodeId)

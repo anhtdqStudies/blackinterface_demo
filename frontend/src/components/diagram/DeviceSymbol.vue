@@ -1,0 +1,147 @@
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { DeviceLive, Symbol_ } from '@/api/client'
+import { isDegraded, stateColor } from './state'
+
+/**
+ * Symbols follow OneATS Grid Designer so operators do not have to relearn:
+ * breaker = filled square, disconnector = filled diamond, earth switch = small
+ * diamond over a ground hatch. Colour is the position (red closed, green open),
+ * and the shape is filled in both states — an open device is not an empty one.
+ *
+ * Quality that is not GOOD draws the outline dashed, so degraded data is
+ * visible without reading the panel.
+ *
+ * `live` is the position as of the latest push; `symbol` carries the one the
+ * drawing was laid out with. The drawing is geometry and is refetched rarely,
+ * so `live` wins whenever it is there — falling back keeps the symbol readable
+ * in the moment before the first document arrives, never after it.
+ */
+const props = defineProps<{ symbol: Symbol_; live?: DeviceLive; selected: boolean }>()
+defineEmits<{ select: [deviceId: string] }>()
+
+const state = computed(() => props.live?.state ?? props.symbol.state)
+const quality = computed(() => props.live?.quality ?? props.symbol.quality)
+const color = computed(() => stateColor(state.value))
+const dash = computed(() => (isDegraded(quality.value) ? '3 2' : undefined))
+const isEarth = computed(() => props.symbol.role === 'earth_switch')
+const isBreaker = computed(() => props.symbol.role === 'breaker')
+
+const half = computed(() => (isEarth.value ? 6 : 10))
+const diamond = computed(() => {
+  const { x, y } = props.symbol
+  const h = half.value
+  return `${x},${y - h} ${x + h},${y} ${x},${y + h} ${x - h},${y}`
+})
+
+/** Ground hatch: three bars of decreasing width beyond an earth switch.
+ *  Wider and further from the diamond than before — the hatch is the ONLY
+ *  thing separating "dao tiếp địa" from "dao cách ly", so it must be readable
+ *  at station zoom, not just bay zoom. */
+const groundBars = [11, 7, 3]
+const hatchGap = 6
+const hatchStep = 4
+
+/** In a mirrored band the ground points up, so earth is still away from the bay. */
+const dir = computed(() => (props.symbol.flipped ? -1 : 1))
+
+// Labels sit right of centre-mounted devices, and opposite the hatch for earth
+// switches so two of them on the same node do not overlap.
+const labelAnchor = computed(() => (props.symbol.role === 'earth_switch' ? 'middle' : 'start'))
+const labelX = computed(() => (isEarth.value ? props.symbol.x : props.symbol.x + 15))
+const labelY = computed(() =>
+  isEarth.value ? props.symbol.y - dir.value * 14 : props.symbol.y + 4,
+)
+</script>
+
+<template>
+  <g
+    class="sym"
+    :class="{ selected }"
+    @pointerdown.stop
+    @click.stop="$emit('select', symbol.device_id)"
+  >
+    <!-- Masks the conductor behind the symbol. -->
+    <rect
+      :x="symbol.x - 13"
+      :y="symbol.y - 13"
+      width="26"
+      height="26"
+      fill="var(--bg)"
+      stroke="none"
+    />
+
+    <rect
+      v-if="isBreaker"
+      :x="symbol.x - 11"
+      :y="symbol.y - 11"
+      width="22"
+      height="22"
+      :fill="color"
+      :stroke="color"
+      stroke-width="2"
+      :stroke-dasharray="dash"
+    />
+
+    <template v-else>
+      <polygon
+        :points="diamond"
+        :fill="color"
+        :stroke="color"
+        stroke-width="2"
+        :stroke-dasharray="dash"
+      />
+      <template v-if="isEarth">
+        <line
+          :x1="symbol.x"
+          :y1="symbol.y + dir * half"
+          :x2="symbol.x"
+          :y2="symbol.y + dir * (half + hatchGap)"
+          :stroke="color"
+          stroke-width="2"
+        />
+        <line
+          v-for="(w, i) in groundBars"
+          :key="i"
+          :x1="symbol.x - w"
+          :y1="symbol.y + dir * (half + hatchGap + i * hatchStep)"
+          :x2="symbol.x + w"
+          :y2="symbol.y + dir * (half + hatchGap + i * hatchStep)"
+          :stroke="color"
+          stroke-width="2"
+        />
+      </template>
+    </template>
+
+    <text :x="labelX" :y="labelY" :text-anchor="labelAnchor">{{ symbol.label }}</text>
+
+    <rect
+      class="hit"
+      :x="symbol.x - 15"
+      :y="symbol.y - 15"
+      width="30"
+      height="30"
+      rx="4"
+      fill="transparent"
+    />
+  </g>
+</template>
+
+<style scoped>
+.sym {
+  cursor: pointer;
+}
+.sym:hover .hit {
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.sym.selected .hit {
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+text {
+  font: 10px var(--font-sans);
+  fill: var(--dim);
+  letter-spacing: 0.02em;
+}
+</style>

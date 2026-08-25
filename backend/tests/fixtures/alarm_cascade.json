@@ -1,0 +1,105 @@
+{
+  "_source": "DEMO_SAS v654 via opc.tcp://127.0.0.1:48050, subscribe_events(Server, evtypes=[OAAlarmType])",
+  "_measured": "2026-08-13T05:04:16Z",
+  "_how": "An operator opened CB 231 (D01.XCBR1) on the simulator while a filtered A&C subscription was running. These are the events that followed, in arrival order.",
+  "_why_it_matters": "One breaker opening produced seven voltage alarms across four bays and three busbars in 87 ms. This is the case domain/incident.py exists to collapse into a single incident, and the measurement behind the 200 ms default window.",
+  "_reproduce": "subscribe with evtypes=[ns=2;i=1101] on the Server object, then toggle a breaker",
+  "events": [
+    {
+      "source_name": "D01.XCBR1.PosSt",
+      "source_node": "D01.XCBR1",
+      "event_type": "ns=2;i=1203",
+      "condition_name": "Discrete Alarm",
+      "message": "CB 231 STATUS",
+      "severity": 200,
+      "value": "1 (OPENED)",
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.727860+00:00"
+    },
+    {
+      "source_name": "E01.MMXU1.Vlin",
+      "source_node": "E01.MMXU1",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLTAGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.736395+00:00"
+    },
+    {
+      "source_name": "D01.MMXU1.Vlin",
+      "source_node": "D01.MMXU1",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLTAGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.747500+00:00"
+    },
+    {
+      "source_name": "Subs.BB11.PPVmax",
+      "source_node": "Subs.BB11",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLATGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.751009+00:00"
+    },
+    {
+      "source_name": "Subs.BB12.PPVmax",
+      "source_node": "Subs.BB12",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLATGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.754019+00:00"
+    },
+    {
+      "source_name": "Subs.BB19.PPVmax",
+      "source_node": "Subs.BB19",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLATGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.757584+00:00"
+    },
+    {
+      "source_name": "E02.MMXU1.Vlin",
+      "source_node": "E02.MMXU1",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLTAGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.780839+00:00"
+    },
+    {
+      "source_name": "E04.MMXU1.Vlin",
+      "source_node": "E04.MMXU1",
+      "event_type": "ns=2;i=1205",
+      "condition_name": "Limit Alarm",
+      "message": "ABNORMAL VOLTAGE",
+      "severity": 650,
+      "value": 0.0,
+      "active_state": "Active",
+      "retain": true,
+      "time": "2026-08-13T05:04:16.814093+00:00"
+    }
+  ]
+}
